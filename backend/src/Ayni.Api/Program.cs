@@ -92,6 +92,7 @@ builder.Services.AddSingleton<IBlockchainGatewayService, BlockchainGatewayServic
 // 5. Python Agent Runner (Zero HTTP Endpoints - Programmatic Process Execution)
 builder.Services.AddSingleton<IPythonAgentRunner, PythonAgentRunnerService>();
 builder.Services.AddSingleton<IVerifyProductEngine, VerifyProductEngine>();
+builder.Services.AddScoped<IKycService, DiditKycService>();
 
 // 6. Real-time - SignalR
 builder.Services.AddSignalR();
@@ -178,7 +179,39 @@ if (app.Environment.IsDevelopment())
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AyniDbContext>();
+
+        // Safe baseline check for pre-existing Docker PostgreSQL schemas:
+        // If tables were created prior to EF migrations, record initial migrations in __EFMigrationsHistory
+        // so Migrate() seamlessly executes pending incremental migrations without "relation already exists" errors.
+        var conn = db.Database.GetDbConnection();
+        conn.Open();
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                    ""MigrationId"" character varying(150) NOT NULL,
+                    ""ProductVersion"" character varying(32) NOT NULL,
+                    CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
+                );
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ProductListings') THEN
+                        IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913050100_InitialCreate') THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260913050100_InitialCreate', '9.0.2');
+                        END IF;
+                        IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913053056_UserRoleEnum') THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260913053056_UserRoleEnum', '9.0.2');
+                        END IF;
+                    END IF;
+                END $$;
+            ";
+            cmd.ExecuteNonQuery();
+        }
+
         db.Database.Migrate();
+        app.Logger.LogInformation("PostgreSQL database migrations applied successfully.");
     }
     catch (Exception ex)
     {

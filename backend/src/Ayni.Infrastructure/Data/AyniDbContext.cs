@@ -84,6 +84,12 @@ public class AyniDbContext : DbContext
                 .HasConversion<string>()
                 .HasMaxLength(20)
                 .IsRequired();
+            entity.Property(e => e.KycStatus)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+            entity.Property(e => e.KycSessionId).HasMaxLength(100);
+            entity.Property(e => e.IsKycVerified).IsRequired();
         });
 
         // ChatMessage configuration

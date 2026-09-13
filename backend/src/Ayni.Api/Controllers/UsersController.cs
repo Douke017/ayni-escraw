@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ayni.Core.DTOs;
 using Ayni.Core.Entities;
+using Ayni.Core.Interfaces;
 using Ayni.Infrastructure.Data;
 
 namespace Ayni.Api.Controllers;
@@ -12,11 +16,19 @@ public class UsersController : ControllerBase
 {
     private readonly AyniDbContext _dbContext;
     private readonly IConfiguration _configuration;
+    private readonly IKycService _kycService;
+    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(AyniDbContext dbContext, IConfiguration configuration)
+    public UsersController(
+        AyniDbContext dbContext,
+        IConfiguration configuration,
+        IKycService kycService,
+        ILogger<UsersController> logger)
     {
         _dbContext = dbContext;
         _configuration = configuration;
+        _kycService = kycService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -35,6 +47,130 @@ public class UsersController : ControllerBase
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var callerAddress = GetCallerAddress();
+        if (string.IsNullOrEmpty(callerAddress))
+        {
+            return Unauthorized(new { error = "Valid authentication token with wallet address claim is required" });
+        }
+
+        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.WalletAddress == callerAddress);
+        if (user == null)
+        {
+            return NotFound(new { error = $"User with wallet {callerAddress} not found" });
+        }
+
+        return Ok(ToResponse(user));
+    }
+
+    [Authorize]
+    [HttpPost("me/switch-role")]
+    public async Task<IActionResult> SwitchActiveRole([FromBody] SwitchRoleRequestDto request)
+    {
+        var callerAddress = GetCallerAddress();
+        if (string.IsNullOrEmpty(callerAddress))
+        {
+            return Unauthorized(new { error = "Authentication required" });
+        }
+
+        if (!TryParseRole(request.Role, out var targetRole, out var error))
+        {
+            return BadRequest(new { error });
+        }
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.WalletAddress == callerAddress);
+        if (user == null)
+        {
+            return NotFound(new { error = "User record not found" });
+        }
+
+        if (targetRole == UserRole.Seller && !user.CanSell)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "Cannot switch to Seller role: Identity verification (KYC) must be completed first.",
+                isKycVerified = user.IsKycVerified,
+                kycStatus = user.KycStatus.ToString()
+            });
+        }
+
+        if (targetRole == UserRole.Arbitrator && !IsConfiguredArbitrator(callerAddress))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "Arbitrator role is reserved for the designated arbitrator wallet."
+            });
+        }
+
+        user.Role = targetRole;
+        await _dbContext.SaveChangesAsync();
+
+        _logger.LogInformation("User {Wallet} switched active role to {Role}", callerAddress, targetRole);
+
+        return Ok(ToResponse(user));
+    }
+
+    [Authorize]
+    [HttpPost("kyc/initiate")]
+    public async Task<IActionResult> InitiateKyc()
+    {
+        var callerAddress = GetCallerAddress();
+        if (string.IsNullOrEmpty(callerAddress))
+        {
+            return Unauthorized(new { error = "Authentication required" });
+        }
+
+        var result = await _kycService.InitiateSessionAsync(callerAddress);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet("kyc/status")]
+    public async Task<IActionResult> GetKycStatus()
+    {
+        var callerAddress = GetCallerAddress();
+        if (string.IsNullOrEmpty(callerAddress))
+        {
+            return Unauthorized(new { error = "Authentication required" });
+        }
+
+        var result = await _kycService.GetStatusAsync(callerAddress);
+        return Ok(result);
+    }
+
+    [HttpPost("kyc/complete")]
+    public async Task<IActionResult> CompleteKyc([FromBody] CompleteKycRequest? request)
+    {
+        var callerAddress = GetCallerAddress();
+        var targetAddress = !string.IsNullOrWhiteSpace(request?.WalletAddress)
+            ? request.WalletAddress.ToLowerInvariant()
+            : callerAddress;
+
+        if (string.IsNullOrWhiteSpace(targetAddress))
+        {
+            return BadRequest(new { error = "Wallet address is required to complete KYC" });
+        }
+
+        if (!TryNormalizeWallet(targetAddress, out var normalizedAddress, out var error))
+        {
+            return BadRequest(new { error });
+        }
+
+        // If caller is authenticated as another non-arbitrator user, disallow spoofing
+        if (!string.IsNullOrEmpty(callerAddress) &&
+            callerAddress != normalizedAddress &&
+            !IsConfiguredArbitrator(callerAddress))
+        {
+            return Forbid();
+        }
+
+        var result = await _kycService.CompleteVerificationAsync(normalizedAddress, request?.VerificationId);
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
@@ -117,6 +253,12 @@ public class UsersController : ControllerBase
             return NotFound(new { error = $"User with ID {id} not found" });
         }
 
+        var caller = GetCallerAddress();
+        if (!string.IsNullOrEmpty(caller) && caller != user.WalletAddress && !IsConfiguredArbitrator(caller))
+        {
+            return Forbid();
+        }
+
         if (!string.IsNullOrWhiteSpace(request.Role))
         {
             if (!TryParseRole(request.Role, out var role, out var error))
@@ -155,6 +297,12 @@ public class UsersController : ControllerBase
             return BadRequest(new { error });
         }
 
+        var caller = GetCallerAddress();
+        if (!string.IsNullOrEmpty(caller) && caller != normalizedAddress && !IsConfiguredArbitrator(caller))
+        {
+            return Forbid();
+        }
+
         if (!CanAssignRole(normalizedAddress, role, out error))
         {
             return BadRequest(new { error });
@@ -181,6 +329,12 @@ public class UsersController : ControllerBase
             return NotFound(new { error = $"User with ID {id} not found" });
         }
 
+        var caller = GetCallerAddress();
+        if (!string.IsNullOrEmpty(caller) && caller != user.WalletAddress && !IsConfiguredArbitrator(caller))
+        {
+            return Forbid();
+        }
+
         _dbContext.Users.Remove(user);
         await _dbContext.SaveChangesAsync();
 
@@ -189,15 +343,39 @@ public class UsersController : ControllerBase
 
     private static UserResponse ToResponse(User user)
     {
+        var available = new List<string> { "Buyer" };
+        if (user.CanSell)
+        {
+            available.Add("Seller");
+        }
+        if (user.Role == UserRole.Arbitrator)
+        {
+            available.Add("Arbitrator");
+        }
+
         return new UserResponse
         {
             Id = user.Id,
             WalletAddress = user.WalletAddress,
             Role = user.Role.ToString(),
+            IsKycVerified = user.IsKycVerified,
+            KycStatus = user.KycStatus.ToString(),
+            CanBuy = user.CanBuy,
+            CanSell = user.CanSell,
+            AvailableRoles = available.Distinct().ToList(),
             CurrentNonce = user.CurrentNonce,
             CreatedAtUtc = user.CreatedAtUtc,
             LastLoginAtUtc = user.LastLoginAtUtc
         };
+    }
+
+    private string? GetCallerAddress()
+    {
+        var addr = User.FindFirst("address")?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst(ClaimTypes.Name)?.Value;
+
+        return !string.IsNullOrWhiteSpace(addr) ? addr.ToLowerInvariant() : null;
     }
 
     private UserRole ResolveDefaultRole(string normalizedAddress)
@@ -262,6 +440,12 @@ public class UsersController : ControllerBase
     }
 }
 
+public class CompleteKycRequest
+{
+    public string? WalletAddress { get; set; }
+    public string? VerificationId { get; set; }
+}
+
 public class CreateUserRequest
 {
     public string WalletAddress { get; set; } = string.Empty;
@@ -285,6 +469,11 @@ public class UserResponse
     public Guid Id { get; set; }
     public string WalletAddress { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public bool IsKycVerified { get; set; }
+    public string KycStatus { get; set; } = string.Empty;
+    public bool CanBuy { get; set; }
+    public bool CanSell { get; set; }
+    public List<string> AvailableRoles { get; set; } = new();
     public string CurrentNonce { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? LastLoginAtUtc { get; set; }

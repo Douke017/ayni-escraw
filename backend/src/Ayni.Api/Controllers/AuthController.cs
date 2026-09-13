@@ -123,7 +123,11 @@ public class AuthController : ControllerBase
             {
                 id = user.Id,
                 address = user.WalletAddress,
-                role = user.Role.ToString()
+                role = user.Role.ToString(),
+                isKycVerified = user.IsKycVerified,
+                kycStatus = user.KycStatus.ToString(),
+                canBuy = user.CanBuy,
+                canSell = user.CanSell
             }
         });
     }
@@ -138,13 +142,20 @@ public class AuthController : ControllerBase
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.WalletAddress),
             new Claim("address", user.WalletAddress),
+            new Claim(ClaimTypes.NameIdentifier, user.WalletAddress),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("isKycVerified", user.IsKycVerified.ToString().ToLowerInvariant()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        if (user.CanSell && user.Role != UserRole.Seller)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Seller"));
+        }
 
         var token = new JwtSecurityToken(
             issuer: issuer,

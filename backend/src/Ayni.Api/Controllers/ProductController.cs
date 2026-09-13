@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ayni.Core.DTOs;
@@ -89,6 +91,43 @@ public class ProductController : ControllerBase
         return Ok(listing);
     }
 
+    [HttpGet("seller/{sellerAddress}")]
+    public async Task<IActionResult> GetListingsBySeller(string sellerAddress)
+    {
+        if (string.IsNullOrWhiteSpace(sellerAddress) || !sellerAddress.StartsWith("0x") || sellerAddress.Length != 42)
+        {
+            return BadRequest(new { error = "Invalid Ethereum wallet address format" });
+        }
+
+        var normalizedSeller = sellerAddress.ToLowerInvariant();
+        var listings = await _dbContext.ProductListings
+            .AsNoTracking()
+            .Where(l => l.SellerAddress == normalizedSeller)
+            .OrderByDescending(l => l.CreatedAtUtc)
+            .ToListAsync();
+
+        return Ok(listings);
+    }
+
+    [Authorize]
+    [HttpGet("my-listings")]
+    public async Task<IActionResult> GetMyListings()
+    {
+        var caller = GetCallerAddress();
+        if (string.IsNullOrEmpty(caller))
+        {
+            return Unauthorized(new { error = "Valid authentication token with wallet address claim is required" });
+        }
+
+        var listings = await _dbContext.ProductListings
+            .AsNoTracking()
+            .Where(l => l.SellerAddress == caller)
+            .OrderByDescending(l => l.CreatedAtUtc)
+            .ToListAsync();
+
+        return Ok(listings);
+    }
+
     [HttpPost("challenge")]
     public async Task<IActionResult> RequestProofOfListingChallenge([FromBody] ChallengeRequest request)
     {
@@ -151,9 +190,15 @@ public class ProductController : ControllerBase
         if (validation != null) return validation;
 
         var seller = request.SellerAddress.ToLowerInvariant();
+        var caller = GetCallerAddress();
+        if (!string.IsNullOrEmpty(caller) && caller != seller && !IsConfiguredArbitrator(caller))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Cannot create listings on behalf of another wallet." });
+        }
+
         if (!await IsSellerAsync(seller))
             return StatusCode(StatusCodes.Status403Forbidden,
-                new { error = "Only sellers can create product listings" });
+                new { error = "Only sellers with completed KYC can create product listings" });
 
         var extensions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -192,9 +237,15 @@ public class ProductController : ControllerBase
         }
 
         var normalizedSeller = request.SellerAddress.ToLowerInvariant();
+        var caller = GetCallerAddress();
+        if (!string.IsNullOrEmpty(caller) && caller != normalizedSeller && !IsConfiguredArbitrator(caller))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Cannot create listings on behalf of another wallet." });
+        }
+
         if (!await IsSellerAsync(normalizedSeller))
         {
-            return Forbid("Only users with Seller role can create product listings.");
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only users with active Seller capabilities (KYC verified) can create product listings." });
         }
 
         var verification = await VerifyProductAsync(request);
@@ -238,20 +289,29 @@ public class ProductController : ControllerBase
             return NotFound(new { error = $"Listing with ID {id} not found" });
         }
 
-        if (string.IsNullOrWhiteSpace(request.SellerAddress))
+        var caller = GetCallerAddress();
+        var targetSeller = !string.IsNullOrWhiteSpace(request.SellerAddress)
+            ? request.SellerAddress.ToLowerInvariant()
+            : caller;
+
+        if (string.IsNullOrWhiteSpace(targetSeller))
         {
             return BadRequest(new { error = "Seller address is required" });
         }
 
-        var normalizedSeller = request.SellerAddress.ToLowerInvariant();
-        if (listing.SellerAddress != normalizedSeller)
+        if (!string.IsNullOrEmpty(caller) && caller != listing.SellerAddress && !IsConfiguredArbitrator(caller))
         {
-            return Forbid("Only the seller that owns this listing can update it.");
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the seller that owns this listing or an arbitrator can update it." });
         }
 
-        if (!await IsSellerAsync(normalizedSeller))
+        if (string.IsNullOrEmpty(caller) && listing.SellerAddress != targetSeller)
         {
-            return Forbid("Only users with Seller role can update product listings.");
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the seller that owns this listing can update it." });
+        }
+
+        if (!await IsSellerAsync(listing.SellerAddress))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only users with active Seller capabilities can update product listings." });
         }
 
         var merged = new CreateListingRequest
@@ -307,28 +367,37 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteListing(Guid id, [FromQuery] string sellerAddress)
+    public async Task<IActionResult> DeleteListing(Guid id, [FromQuery] string? sellerAddress = null)
     {
-        if (string.IsNullOrWhiteSpace(sellerAddress))
-        {
-            return BadRequest(new { error = "Seller address is required" });
-        }
-
-        var normalizedSeller = sellerAddress.ToLowerInvariant();
         var listing = await _dbContext.ProductListings.FirstOrDefaultAsync(l => l.Id == id);
         if (listing == null)
         {
             return NotFound(new { error = $"Listing with ID {id} not found" });
         }
 
-        if (listing.SellerAddress != normalizedSeller)
+        var caller = GetCallerAddress();
+        var targetSeller = !string.IsNullOrWhiteSpace(sellerAddress)
+            ? sellerAddress.ToLowerInvariant()
+            : caller;
+
+        if (string.IsNullOrWhiteSpace(targetSeller))
         {
-            return Forbid("Only the seller that owns this listing can delete it.");
+            return BadRequest(new { error = "Seller address is required" });
         }
 
-        if (!await IsSellerAsync(normalizedSeller))
+        if (!string.IsNullOrEmpty(caller) && caller != listing.SellerAddress && !IsConfiguredArbitrator(caller))
         {
-            return Forbid("Only users with Seller role can delete product listings.");
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the seller that owns this listing or an arbitrator can delete it." });
+        }
+
+        if (string.IsNullOrEmpty(caller) && listing.SellerAddress != targetSeller)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the seller that owns this listing can delete it." });
+        }
+
+        if (!await IsSellerAsync(listing.SellerAddress))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only users with active Seller capabilities can delete product listings." });
         }
 
         _dbContext.ProductListings.Remove(listing);
@@ -341,7 +410,25 @@ public class ProductController : ControllerBase
     {
         return await _dbContext.Users.AnyAsync(u =>
             u.WalletAddress == normalizedAddress &&
-            (u.Role == UserRole.Seller || u.Role == UserRole.Arbitrator));
+            (u.IsKycVerified || u.Role == UserRole.Seller || u.Role == UserRole.Arbitrator));
+    }
+
+    private string? GetCallerAddress()
+    {
+        var addr = User.FindFirst("address")?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst(ClaimTypes.Name)?.Value;
+
+        return !string.IsNullOrWhiteSpace(addr) ? addr.ToLowerInvariant() : null;
+    }
+
+    private bool IsConfiguredArbitrator(string? normalizedAddress)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedAddress)) return false;
+        var arbitratorAddress = Environment.GetEnvironmentVariable("ARBITRATOR_ADDRESS")
+            ?? _configuration["Web3:ArbitratorAddress"];
+        return !string.IsNullOrWhiteSpace(arbitratorAddress)
+            && normalizedAddress == arbitratorAddress.ToLowerInvariant();
     }
 
     private async Task<ProductVerificationResultDto> VerifyProductAsync(CreateListingRequest request)

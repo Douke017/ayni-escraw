@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Ayni.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ayni.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AyniDbContext))]
-    partial class AyniDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260913070000_AddKycAndUserCapabilities")]
+    partial class AddKycAndUserCapabilities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,8 +71,6 @@ namespace Ayni.Infrastructure.Data.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
 
                     b.ToTable("ChatBonds");
                 });
@@ -208,7 +209,7 @@ namespace Ayni.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.PrimitiveCollection<List<string>>("ImageUrls")
+                    b.Property<string>("ImageUrls")
                         .IsRequired()
                         .HasColumnType("jsonb");
 
@@ -231,11 +232,6 @@ namespace Ayni.Infrastructure.Data.Migrations
                     b.Property<string>("TechnicalAttributesJson")
                         .IsRequired()
                         .HasColumnType("jsonb");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -262,12 +258,12 @@ namespace Ayni.Infrastructure.Data.Migrations
                     b.Property<Guid>("ListingId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("MintedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("MintTxHash")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("MintedAtUtc")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OwnerAddress")
                         .IsRequired()
