@@ -167,7 +167,10 @@ export class Web3Service {
     }
   }
 
+  private isWatchAssetInProgress = false;
   public async addUsdtToMetaMask(): Promise<boolean> {
+    if (this.isWatchAssetInProgress) return false;
+    this.isWatchAssetInProgress = true;
     try {
       const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown }) => Promise<unknown> } }).ethereum;
       if (!ethereum) return false;
@@ -187,14 +190,19 @@ export class Web3Service {
     } catch (err) {
       console.error('Failed to add token to MetaMask', err);
       return false;
+    } finally {
+      this.isWatchAssetInProgress = false;
     }
   }
 
+  private isFaucetInProgress = false;
   public async requestFaucet(amount: number = 1000): Promise<string | null> {
+    if (this.isFaucetInProgress) return null;
     const addr = this.account();
     const usdtContract = environment.contracts.usdt;
     if (!addr || !usdtContract) return null;
 
+    this.isFaucetInProgress = true;
     try {
       const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
       if (!ethereum) throw new Error('Billetera Web3 no disponible');
@@ -219,6 +227,8 @@ export class Web3Service {
     } catch (err) {
       console.error('Faucet request failed:', err);
       throw err;
+    } finally {
+      this.isFaucetInProgress = false;
     }
   }
 

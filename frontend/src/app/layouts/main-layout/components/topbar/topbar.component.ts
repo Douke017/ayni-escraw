@@ -61,6 +61,8 @@ export class TopbarComponent {
     }
   }
 
+  public readonly isClaimingFaucet = signal<boolean>(false);
+
   public onDisconnect(): void {
     this.authService.disconnect();
     this.closeDropdown();
@@ -72,13 +74,18 @@ export class TopbarComponent {
   }
 
   public async onRequestFaucet(): Promise<void> {
+    if (this.isClaimingFaucet()) return;
+    this.isClaimingFaucet.set(true);
+    this.closeDropdown();
+
     try {
       await this.web3Service.requestFaucet(1000);
       alert('¡Solicitud de Faucet enviada! En unos segundos tendrás 1,000 USDT adicionales.');
     } catch (err) {
       alert('No se pudo completar el reclamo del faucet.');
+    } finally {
+      this.isClaimingFaucet.set(false);
     }
-    this.closeDropdown();
   }
 
   public async onRefreshBalance(): Promise<void> {

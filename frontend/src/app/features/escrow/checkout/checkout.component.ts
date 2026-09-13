@@ -59,6 +59,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   public async onDepositWithPermit2(): Promise<void> {
+    if (this.isSubmitting()) return;
     if (!this.authService.isAuthenticated()) {
       await this.authService.connectAndAuthenticate();
       if (!this.authService.isAuthenticated()) return;
