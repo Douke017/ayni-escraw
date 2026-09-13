@@ -7,7 +7,7 @@ import {AyniAgentRegistry} from "../src/AyniAgentRegistry.sol";
 import {AyniEscrow} from "../src/AyniEscrow.sol";
 import {AyniSubscriptionManager} from "../src/AyniSubscriptionManager.sol";
 import {AyniChatBond} from "../src/AyniChatBond.sol";
-import {AyniTestUSDT} from "../src/test/AyniTestUSDT.sol";
+import {AyniTestUSDT} from "../src/AyniTestUSDT.sol";
 
 contract DeployAyniSuiteScript is Script {
     struct DeploymentAddresses {
@@ -40,14 +40,16 @@ contract DeployAyniSuiteScript is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // 0. Resolve USDT: use configured address or deploy AyniTestUSDT for testnet
+        // 0. Automatically Deploy AyniTestUSDT for HSK Testnet
         if (configuredUsdt != address(0)) {
             addrs.usdtToken = configuredUsdt;
-            console2.log("Using existing USDT token at:", addrs.usdtToken);
+            console2.log("Using explicitly specified USDT token at:", addrs.usdtToken);
         } else {
             AyniTestUSDT testUsdt = new AyniTestUSDT(addrs.deployer);
             addrs.usdtToken = address(testUsdt);
-            console2.log("Deployed new AyniTestUSDT at:", addrs.usdtToken);
+            console2.log(">>> Automatically deployed AyniTestUSDT at:", addrs.usdtToken);
+            console2.log(">>> Minted 1,000,000 USDT (6 decimals) to deployer:", addrs.deployer);
+            console2.log(">>> Faucet available via: testUsdt.faucet(recipient, amount)");
         }
 
         // 1. Deploy AyniProductPassport ERC-721
