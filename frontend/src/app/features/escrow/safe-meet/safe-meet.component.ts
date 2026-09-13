@@ -104,13 +104,13 @@ export class SafeMeetComponent implements OnInit, OnDestroy {
       const res = await this.escrowService.validateSafeMeetQr(this.orderId(), secret, buyer!);
       if (res.success) {
         this.handoffConfirmed.set(true);
-        this.validationMessage.set('✓ ¡Código verificado en Redis! Entrega física confirmada en HSK.');
+        this.validationMessage.set('¡Código verificado en Redis! Entrega física confirmada en HSK.');
       } else {
-        this.validationMessage.set('⚠️ Código inválido o expirado. Solicita al vendedor generar un nuevo QR.');
+        this.validationMessage.set('Código inválido o expirado. Solicita al vendedor generar un nuevo QR.');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error en la verificación del código.';
-      this.validationMessage.set(`⚠️ ${msg}`);
+      this.validationMessage.set(msg);
     } finally {
       this.isValidating.set(false);
     }

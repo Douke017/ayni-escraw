@@ -64,7 +64,7 @@
               <span class="font-mono text-[11px] sm:text-xs truncate">
                 {{ (web3Service.account() || authService.walletAddress() || '') | truncateAddress }}
               </span>
-              <span class="text-[9px] opacity-60 shrink-0">▼</span>
+              <svg class="w-3 h-3 opacity-60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </button>
 
             @if (isDropdownOpen()) {
@@ -75,12 +75,12 @@
                   <span class="text-xs font-bold text-ayni-gold block mt-1">Saldo: {{ web3Service.usdtBalance() | usdt }}</span>
                 </div>
                 <a routerLink="/escrow" class="px-3 py-2 text-xs font-semibold text-ayni-canvas hover:bg-white/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="closeDropdown()">
-                  <span>📦</span>
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                   <span>Mis Transacciones Escrow</span>
                 </a>
                 <div class="h-px bg-ayni-gold/20 my-1"></div>
                 <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onDisconnect()">
-                  <span>🚪</span>
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
                   <span>Desconectar</span>
                 </button>
               </div>
@@ -121,26 +121,28 @@
           <span class="text-xl font-black text-ayni-canvas">AYNI</span>
           <span class="text-[9px] bg-ayni-terracotta text-white font-extrabold px-1.5 py-0.5 rounded tracking-widest uppercase">MARKETPLACE</span>
         </div>
-        <button type="button" class="w-9 h-9 rounded-full flex items-center justify-center text-ayni-canvas hover:bg-white/10 font-bold text-lg cursor-pointer" (click)="closeMenu()">✕</button>
+        <button type="button" class="w-9 h-9 rounded-full flex items-center justify-center text-ayni-canvas hover:bg-white/10 cursor-pointer" (click)="closeMenu()">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
       <ayni-aguayo-ribbon size="xs" />
 
       <nav class="flex flex-col p-4 gap-1.5 text-sm font-semibold text-ayni-canvas/90 flex-1 overflow-y-auto">
         <a routerLink="/" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">🏠</span>
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span>Inicio</span>
         </a>
         <a routerLink="/catalog" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">📦</span>
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
           <span>Explorar Catálogo</span>
         </a>
         <a routerLink="/listings/new" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">➕</span>
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           <span>Publicar con Proof of Listing</span>
         </a>
         @if (web3Service.isConnected() || authService.isAuthenticated()) {
           <a routerLink="/escrow" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-            <span class="text-lg">🤝</span>
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Mis Órdenes Escrow</span>
           </a>
         }

@@ -2,7 +2,7 @@
 <div class="flex flex-col py-6 sm:py-12 pb-24 bg-ayni-canvas text-ayni-espresso w-full max-w-full overflow-x-hidden">
   <div class="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
     <header class="text-center mb-6 sm:mb-10">
-      <span class="text-[10px] sm:text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Uniswap Permit2 • EIP-712</span>
+      <span class="text-[10px] sm:text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Uniswap Permit2 · EIP-712</span>
       <h1 class="text-xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight mb-2 font-serif break-words">Depósito en Escrow No-Custodial</h1>
       <p class="text-xs sm:text-sm md:text-base text-ayni-muted max-w-xl mx-auto leading-relaxed">
         Tus fondos permanecerán asegurados en el contrato inteligente <code class="text-xs bg-ayni-espresso/10 px-1 py-0.5 rounded text-ayni-espresso font-semibold font-mono break-all">AyniEscrow</code> en HSK Chain. El vendedor no recibirá el dinero hasta que confirmes la entrega física o inspección.
@@ -12,7 +12,11 @@
     @if (isSuccess()) {
       <div class="max-w-xl mx-auto">
         <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-8 shadow-xl text-center flex flex-col items-center gap-4">
-          <span class="text-4xl sm:text-5xl select-none">🎉</span>
+          <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          </div>
           <h2 class="text-lg sm:text-2xl font-extrabold text-ayni-espresso font-serif">¡Depósito Permit2 Confirmado en HSK Chain!</h2>
           <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed">
             Los fondos fueron bloqueados exitosamente en el Smart Contract. Ahora puedes coordinar la entrega física con el código Safe Meet de 60 segundos o programar una videollamada de verificación.
@@ -20,7 +24,10 @@
 
           <div class="flex flex-col sm:flex-row gap-3 w-full justify-center mt-2">
             <ayni-button variant="primary" size="lg" (clicked)="goToSafeMeet()" [fullWidth]="true">
-              <span>Continuar a Safe Meet QR ⏱️</span>
+              <span class="flex items-center justify-center gap-1.5">
+                <span>Continuar a Safe Meet QR</span>
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </span>
             </ayni-button>
             <ayni-button variant="secondary" size="md" routerLink="/escrow" [fullWidth]="true">
               <span>Ver Mis Transacciones</span>
@@ -30,7 +37,11 @@
       </div>
     } @else if (!listing()) {
       <div class="flex flex-col items-center justify-center text-center py-16 gap-4 text-ayni-muted">
-        <span class="text-4xl">⚠️</span>
+        <svg class="w-12 h-12 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
         <p class="text-sm sm:text-base">No se ha seleccionado ningún dispositivo para el depósito.</p>
         <ayni-button variant="primary" size="md" routerLink="/catalog">Ir al Catálogo</ayni-button>
       </div>
@@ -42,10 +53,14 @@
             <h3 class="text-base sm:text-lg font-bold text-ayni-espresso mb-3 sm:mb-4 font-serif">Resumen del Hardware</h3>
             
             <div class="flex items-center gap-3 pb-3 sm:pb-4 border-b border-ayni-espresso/10 mb-3 sm:mb-4">
-              <span class="text-3xl sm:text-4xl bg-ayni-canvas-muted p-2 rounded-xl select-none shrink-0">💻</span>
+              <div class="p-2.5 bg-ayni-canvas-muted rounded-xl text-ayni-espresso shrink-0">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>
+                </svg>
+              </div>
               <div class="min-w-0 flex-1">
                 <h4 class="text-sm sm:text-base font-bold text-ayni-espresso truncate">{{ listing()!.title }}</h4>
-                <span class="text-xs font-semibold text-ayni-accent-brown">{{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10</span>
+                <span class="text-xs font-semibold text-ayni-accent-brown">{{ listing()!.category }} · Condición {{ listing()!.declaredCondition }}/10</span>
               </div>
             </div>
 
@@ -73,7 +88,9 @@
           <!-- Permit2 Explanation Box -->
           <div class="bg-ayni-card border border-ayni-gold/35 rounded-2xl p-4 sm:p-5 shadow-sm">
             <div class="flex items-center gap-2 text-sm sm:text-base font-bold text-ayni-espresso mb-2">
-              <span class="text-base text-ayni-gold shrink-0">⚡</span>
+              <svg class="w-4 h-4 text-ayni-gold shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
               <span>¿Cómo funciona Uniswap Permit2?</span>
             </div>
             <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
@@ -102,19 +119,6 @@
               </div>
             </div>
 
-            <!-- Faucet Callout if 0 balance -->
-            <div class="flex items-center justify-between p-2.5 bg-ayni-canvas rounded-xl mb-4 text-xs gap-2">
-              <span class="text-ayni-muted">¿Necesitas saldo de prueba?</span>
-              <button 
-                type="button" 
-                class="font-bold text-ayni-terracotta hover:underline shrink-0 cursor-pointer"
-                (click)="onClaimFaucet()"
-                [disabled]="isClaimingFaucet()"
-              >
-                {{ isClaimingFaucet() ? 'Reclamando...' : 'Reclamar +1,000 USDT' }}
-              </button>
-            </div>
-
             <!-- Action Button -->
             <ayni-button 
               variant="primary" 
@@ -123,7 +127,7 @@
               [loading]="isSubmitting()"
               (clicked)="onDepositWithPermit2()"
             >
-              <span class="font-extrabold text-xs sm:text-sm md:text-base text-center leading-tight">Firmar y Bloquear Fondos en Escrow ⚡</span>
+              <span class="font-extrabold text-xs sm:text-sm md:text-base text-center leading-tight">Firmar y Bloquear Fondos en Escrow</span>
             </ayni-button>
 
             <!-- Legal / Escrow Disclaimer -->

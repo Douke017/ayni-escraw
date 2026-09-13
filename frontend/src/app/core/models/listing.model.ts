@@ -17,9 +17,9 @@ export enum ValidationVerdict {
 export type HardwareCategory = 'SMARTPHONE' | 'LAPTOP' | 'COMPONENT';
 
 export const HARDWARE_CATEGORIES: { key: HardwareCategory; label: string; icon: string }[] = [
-  { key: 'SMARTPHONE', label: 'Smartphones & Tablets', icon: '📱' },
-  { key: 'LAPTOP', label: 'Laptops & Computadoras', icon: '💻' },
-  { key: 'COMPONENT', label: 'Componentes & GPUs', icon: '⚡' },
+  { key: 'SMARTPHONE', label: 'Smartphones & Tablets', icon: 'smartphone' },
+  { key: 'LAPTOP', label: 'Laptops & Computadoras', icon: 'laptop' },
+  { key: 'COMPONENT', label: 'Componentes & GPUs', icon: 'zap' },
 ];
 
 export interface ProductListing {

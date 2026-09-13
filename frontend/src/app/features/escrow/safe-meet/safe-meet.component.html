@@ -12,7 +12,11 @@
     @if (handoffConfirmed()) {
       <div class="max-w-xl mx-auto">
         <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-6 sm:p-8 shadow-xl text-center flex flex-col items-center gap-4">
-          <span class="text-5xl select-none">🤝</span>
+          <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          </div>
           <h2 class="text-xl sm:text-2xl font-extrabold text-ayni-espresso font-serif">¡Entrega de Hardware Confirmada!</h2>
           <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed">
             El comprador escaneó con éxito el código efímero. El Smart Contract ha registrado la entrega física y comenzó la ventana de inspección de hardware de 24 horas.
@@ -40,7 +44,10 @@
           [class]="activeMode() === 'seller' ? 'bg-ayni-terracotta text-white shadow-sm' : 'text-ayni-espresso hover:bg-ayni-canvas'"
           (click)="setMode('seller')"
         >
-          <span>📱 Soy Vendedor (Mostrar QR)</span>
+          <span class="flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            <span>Soy Vendedor (Mostrar QR)</span>
+          </span>
         </button>
         <button 
           type="button" 
@@ -48,7 +55,10 @@
           [class]="activeMode() === 'buyer' ? 'bg-ayni-terracotta text-white shadow-sm' : 'text-ayni-espresso hover:bg-ayni-canvas'"
           (click)="setMode('buyer')"
         >
-          <span>📷 Soy Comprador (Escanear / Validar)</span>
+          <span class="flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <span>Soy Comprador (Escanear / Validar)</span>
+          </span>
         </button>
       </div>
 
@@ -93,11 +103,14 @@
 
               <div class="flex flex-col sm:flex-row gap-3 pt-2">
                 <ayni-button variant="secondary" size="sm" (clicked)="generateNewQr()" [fullWidth]="true">
-                  <span>Regenerar QR Manualmente 🔄</span>
+                  <span class="flex items-center justify-center gap-1.5">
+                    <span>Regenerar QR Manualmente</span>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                  </span>
                 </ayni-button>
 
                 <ayni-button variant="outline" size="sm" (clicked)="simulateBuyerScan()" [fullWidth]="true">
-                  <span>⚡ Simular Escaneo del Comprador</span>
+                  <span>Simular Escaneo del Comprador</span>
                 </ayni-button>
               </div>
             </div>
@@ -144,7 +157,7 @@
               </div>
 
               <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 flex items-start gap-3 text-xs leading-relaxed">
-                <span class="text-lg shrink-0">⚠️</span>
+                <svg class="w-5 h-5 text-amber-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <div>
                   <strong class="block text-amber-950 font-bold mb-0.5">Regla de oro de Ayni:</strong>
                   <span>No valides el código hasta haber tenido el dispositivo en tus manos y comprobar que enciende y coincide con las especificaciones acordadas.</span>

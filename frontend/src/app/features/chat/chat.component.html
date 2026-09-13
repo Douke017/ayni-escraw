@@ -2,13 +2,13 @@
   <div class="chat-page__container">
     <header class="chat-page__header">
       <div class="chat-page__header-left">
-        <span class="chat-page__pre">Canal Seguro P2P • SignalR & Smart Contracts</span>
+        <span class="chat-page__pre">Canal Seguro P2P · SignalR & Smart Contracts</span>
         @if (listing()) {
           <h1 class="chat-page__title">{{ listing()!.title }}</h1>
           <div class="chat-page__header-meta">
             <ayni-badge variant="funded" size="sm">{{ listing()!.priceUsdt | usdt }}</ayni-badge>
             <span class="chat-page__channel-tag">Vendedor: {{ listing()!.sellerAddress | truncateAddress }}</span>
-            <span class="chat-page__channel-tag">• ID: {{ orderId() | truncateAddress }}</span>
+            <span class="chat-page__channel-tag">· ID: {{ orderId() | truncateAddress }}</span>
           </div>
         } @else {
           <h1 class="chat-page__title">Chat de Negociación Directa</h1>
@@ -34,7 +34,9 @@
             <ayni-card sideBarColor="var(--aguayo-gold)" padding="md">
               <div class="chat-page__deposit-card">
                 <div class="chat-page__deposit-header">
-                  <span class="chat-page__deposit-icon">🛡️</span>
+                  <div class="w-10 h-10 rounded-xl bg-ayni-gold/10 flex items-center justify-center text-ayni-gold shrink-0">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                  </div>
                   <div>
                     <h3 class="chat-page__deposit-title">Bono de Intención Anti-Spam Requerido: 0.30 USDT</h3>
                     <p class="chat-page__deposit-sub">
@@ -45,11 +47,11 @@
 
                 <div class="chat-page__deposit-perks">
                   <div class="chat-page__perk-item">
-                    <span class="chat-page__perk-check">✓</span>
+                    <svg class="w-4 h-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                     <span><strong>100% Reembolsable:</strong> Devuelto en su totalidad a tu wallet al completar 2 respuestas mutuas con el vendedor.</span>
                   </div>
                   <div class="chat-page__perk-item">
-                    <span class="chat-page__perk-check">✓</span>
+                    <svg class="w-4 h-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                     <span><strong>Anti-Sybil & Bots:</strong> Garantiza que los vendedores solo reciban ofertas serias de personas reales.</span>
                   </div>
                 </div>
@@ -61,7 +63,10 @@
                     [loading]="isDepositingBond()"
                     (clicked)="onDepositBond()"
                   >
-                    <span>🔒 Depositar 0.30 USDT y Desbloquear Chat</span>
+                    <span class="flex items-center justify-center gap-1.5">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span>Depositar 0.30 USDT y Desbloquear Chat</span>
+                    </span>
                   </ayni-button>
                 </div>
               </div>
@@ -74,7 +79,7 @@
               <div class="chat-page__bond-card">
                 <div class="chat-page__bond-info">
                   <div class="chat-page__bond-header">
-                    <span class="chat-page__bond-icon">🛡️</span>
+                    <svg class="w-4 h-4 text-ayni-gold shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
                     <strong>Intent Bond Activo (AyniChatBond.sol): 0.30 USDT</strong>
                   </div>
                   <p class="chat-page__bond-sub">
@@ -99,7 +104,7 @@
 
                   @if (bondService.isRefundEligible()) {
                     <div class="chat-page__refund-claim">
-                      <ayni-badge variant="pass" size="sm">✓ Reembolso 100% (0.30 USDT) Habilitado</ayni-badge>
+                      <ayni-badge variant="pass" size="sm">Reembolso 100% (0.30 USDT) Habilitado</ayni-badge>
                       <ayni-button 
                         variant="primary" 
                         size="sm" 
@@ -121,7 +126,9 @@
           <div class="chat-page__messages-list">
             @if (!isBondSatisfied() && currentChatMessages().length === 0) {
               <div class="chat-page__empty-lock">
-                <span class="chat-page__empty-icon">🔒</span>
+                <div class="w-12 h-12 rounded-full bg-ayni-gold/10 flex items-center justify-center text-ayni-gold mb-2">
+                  <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
                 <h4 class="chat-page__empty-title">Canal bloqueado temporalmente</h4>
                 <p class="chat-page__empty-desc">
                   Deposita el Bono de Intención de 0.30 USDT para iniciar la conversación protegida por Smart Contract.
@@ -137,7 +144,10 @@
               >
                 <div class="chat-page__msg-header">
                   @if (msg.isAiAgent) {
-                    <span class="chat-page__msg-sender">🤖 Ayni Tech Agent (#42)</span>
+                    <span class="chat-page__msg-sender flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5 text-ayni-terracotta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                      <span>Ayni Tech Agent (#42)</span>
+                    </span>
                   } @else {
                     <span class="chat-page__msg-sender">{{ msg.senderAddress | truncateAddress }}</span>
                   }
@@ -155,15 +165,17 @@
             <input 
               type="text" 
               class="chat-page__text-input" 
-              [placeholder]="isBondSatisfied() ? 'Escribe tu mensaje para coordinar la entrega o negociar...' : '🔒 Deposita el bono de 0.30 USDT arriba para habilitar el chat...'"
+              [placeholder]="isBondSatisfied() ? 'Escribe tu mensaje para coordinar la entrega o negociar...' : 'Deposita el bono de 0.30 USDT arriba para habilitar el chat...'"
               [disabled]="!isBondSatisfied()"
               [ngModel]="messageInput()"
               (ngModelChange)="messageInput.set($event)"
               name="chatMessage"
             />
             <ayni-button variant="primary" size="md" type="submit" [disabled]="!isBondSatisfied() || !messageInput().trim()">
-              <span>Enviar</span>
-              <span aria-hidden="true">➤</span>
+              <span class="flex items-center gap-1">
+                <span>Enviar</span>
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </span>
             </ayni-button>
           </form>
         </div>
@@ -174,7 +186,9 @@
         <ayni-card sideBarColor="var(--aguayo-burgundy)" padding="md">
           <div class="chat-page__ai-panel">
             <div class="chat-page__ai-header">
-              <span class="chat-page__ai-avatar">🤖</span>
+              <div class="w-8 h-8 rounded-lg bg-ayni-terracotta/15 flex items-center justify-center text-ayni-terracotta shrink-0">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+              </div>
               <div>
                 <h3 class="chat-page__ai-title">Asistente Ayni IA</h3>
                 <span class="chat-page__ai-status">Auditando conversación</span>
@@ -221,7 +235,7 @@
 
             <div class="chat-page__ai-footer">
               <ayni-button variant="secondary" size="sm" [fullWidth]="true" routerLink="/escrow/checkout">
-                <span>Ir al Depósito Escrow ⚡</span>
+                <span>Ir al Depósito Escrow</span>
               </ayni-button>
             </div>
           </div>

@@ -231,7 +231,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         orderId: id,
         senderAddress: '0x0000000000000000000000000000000000000042',
         encryptedPayload:
-          '🛡️ [Ayni Guard] Bono de Intención de 0.30 USDT depositado con éxito en AyniChatBond.sol. El reembolso total (100%) estará disponible automáticamente tras 2 respuestas mutuas.',
+          '[Ayni Guard] Bono de Intención de 0.30 USDT depositado con éxito en AyniChatBond.sol. El reembolso total (100%) estará disponible automáticamente tras 2 respuestas mutuas.',
         timestamp: Date.now(),
       });
 
