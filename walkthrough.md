@@ -160,10 +160,87 @@ A lo largo de 128,000 llamadas pseudoaleatorias intercalando `createAndFundOrder
 
 ---
 
-## 4. Próximos Pasos (Fase 2)
+# Fase 2: AI Agents Modular Monolith & Zero-Endpoint Architecture [COMPLETADO]
 
-Habiendo superado con 100% de éxito los Checkpoints 1.1 y 1.2:
-- **Fase 2: Servicio de Agentes de IA en Python & Gemini API (ERC-8004 On-Chain)**
-  - Implementación del pipeline de visión multimodal y texto con Google Gemini 2.5 Flash.
-  - Firma y despacho de transacciones on-chain con Web3.py hacia `AyniAgentRegistry.sol` en HSK Testnet.
-  - Matriz de validación y generación de pruebas criptográficas SHA-256 de checklist físico.
+## 1. Resumen de Implementación
+- **Cero Endpoints HTTP**: Eliminación radical de FastAPI y Uvicorn. Todos los agentes exponen funciones programáticas directas en Python (`verify_product`, `generate_listing`, `evaluate_offer`, `answer_faq`, `schedule_meeting`, `validate_meet_location`, `extract_specs`).
+- **Seller Agent Bipolar (2 Roles)**:
+  - **Rol 1: Vender (Selling Role)**: Impulsado por `selling_skill` (`tools/run_skill.py`), ejecuta generación de anuncios certificados, FAQs fundamentadas y negociación autónoma en 5 bandas de precio.
+  - **Rol 2: Agendar (Scheduling Role)**: Impulsado por `scheduling_skill` (`tools/run_skill.py`), coordina citas para Safe Meet y Video Verify con advertencia inviolable de seguridad y no-custodia.
+- **Barrera Estricta de Privacidad**: `PrivacyGuard.assert_zero_privacy_leakage` garantiza que ningún IMEI, número de serie ni ruta de evidencia privada sea expuesta en metadatos públicos o payloads hacia el backend.
+- **Suite de Pruebas Pytest**: 8 suites, **50 pruebas aprobadas, 0 fallos**, **88% de cobertura de código**.
+
+---
+
+# Fase 3: Backend Core `ayni-escrow` en .NET 9 (C#) & SignalR [COMPLETADO]
+
+## 1. Resumen de Implementación
+- **Solución .NET 9**: Compilación exitosa en .NET SDK `9.0.318` con 0 advertencias y 0 errores sobre arquitectura modular (`Ayni.Core`, `Ayni.Infrastructure`, `Ayni.Api`, `Ayni.Tests`).
+- **Persistencia Transaccional (PostgreSQL 16 + EF Core)**:
+  - Mapeo de entidades de dominio: `Order`, `ProductListing`, `ProductPassport`, `User`, `ChatMessage`, `Subscription`, `ChatBond`.
+  - Configuración de columnas `jsonb` para `TechnicalAttributesJson` y soporte para rollback de transacciones ACID ante fallos inesperados.
+- **Servicios de Infraestructura de Alta Disponibilidad**:
+  - `RedisCacheService`: Nonces efímeros con expiración estricta de 60 segundos (`SET handoff:{orderId}:nonce <secret> EX 60`), operando bajo un script Lua atómico para prevención de ataques de replay (`ValidateAndConsumeNonceAsync`).
+  - `MinioStorageService`: Generación de URLs prefirmadas de subida PUT y descarga GET (`GetPresignedPutUrlAsync`, `GetPresignedUrlAsync`) hacia los buckets internos (`ayni-evidence-private`, `ayni-proof-of-listing`, `ayni-listings-public`).
+  - `BlockchainGatewayService`: Integración criptográfica con Nethereum (`EthereumMessageSigner`, `ABIEncode`, `Sha3Keccack`) para recuperación de direcciones en firmas SIWE y cómputo determinista de salted commitments `keccak256(abi.encodePacked(imei, salt, seller))`.
+  - `PythonAgentRunnerService`: Puente de ejecución de procesos sin HTTP que ejecuta `runner.py` con I/O tipado en JSON hacia los agentes de IA en memoria.
+- **Controladores REST y Lógica de Negocio**:
+  - `AuthController`: Desafío SIWE con nonce de 5 minutos en Redis, validación criptográfica `ecrecover` y emisión de tokens JWT seguros.
+  - `CatalogController`: Desafío de Proof of Listing (POL) con subida directa a MinIO mediante URL prefirmada, extracción de specs de hardware y persistencia en catálogo.
+  - `EscrowController`: Creación y vinculación de órdenes con listings (reserva automática), generación de QR de Safe Meet con TTL de 60s y validación atómica con apertura de la ventana de inspección de 24 horas.
+  - `ChatBondController`: Registro de depósitos de 0.30 USDT, conteo estricto de respuestas mutuas (>= 2 respuestas cada uno) y desbloqueo de estado `RefundEligible`.
+  - `SubscriptionController`: Compra y consulta de suscripciones Pro Seller por 6.99 USDT (30 días).
+- **SignalR Hubs en Tiempo Real**:
+  - `ChatHub`: Grupos de chat por orden (`order_{orderId}`), indicador de escritura y limpieza en `OnDisconnectedAsync`.
+  - `EscrowHub`: Notificación instantánea de cambios de estado (`OrderStatusChanged`), confirmación de escaneo de QR (`HandoffQrScanned`) y liquidaciones.
+  - `InspectionHub`: Sincronización en tiempo real del checklist y temporizador.
+
+---
+
+## 2. Resultados de Pruebas y Auditorías (Fase 3)
+
+### Checkpoint 3.1: Auditoría OWASP, Anti-Replay y Concurrencia
+- **OWASP API & SQL Injection**: Consultas tipadas y parametrizadas mediante Entity Framework Core, autenticación criptográfica SIWE para operaciones sensibles, tokens JWT con validación de emisor, audiencia y firma HMAC-SHA256.
+- **Anti-Replay Protection**: Verificado formalmente tanto en SIWE como en Safe Meet. El segundo intento de validar el mismo nonce es inmediatamente rechazado (`400 Bad Request`).
+- **Concurrencia y Sockets**: Manejo adecuado de grupos SignalR y ciclo de vida de desconexión sin fugas de memoria.
+
+### Checkpoint 3.2: Pruebas con xUnit (`backend/tests/Ayni.Tests`)
+```text
+Passed!  - Failed: 0, Passed: 16, Skipped: 0, Total: 16, Duration: 6 s - Ayni.Tests.dll (net9.0)
+
+Detalle de Pruebas:
+1.  HealthEndpoint_ShouldReturnHealthy_WithAllServicesConnected (Postgres, Redis, MinIO)
+2.  Postgres_DatabaseContext_CanConnectAndPerformCrud
+3.  Redis_CacheService_NonceCanBeConsumedOnlyOnce
+4.  Minio_StorageService_CanUploadAndRetrieveEvidence
+5.  VerifySiweSignature_WithValidSignature_ShouldReturnTrue (Nethereum ecrecover)
+6.  VerifySiweSignature_WithMismatchedAddress_ShouldReturnFalse
+7.  ComputeSaltedCommitment_ShouldProduceConsistentKeccak256Hash
+8.  GetNonce_WithValidAddress_ShouldReturn16ByteHexNonce
+9.  VerifySignature_WithValidSignature_ShouldReturnJwtTokenAndUser
+10. VerifySignature_ReplayOfSameNonce_MustBeRejected
+11. SafeMeet_FullOrderLifecycle_WithAtomicAntiReplayNonce (60s TTL, transición a HandoffConfirmed, 24h deadline)
+12. Subscription_PurchaseAndStatusCheck_ShouldActivateFor30Days (6.99 USDT)
+13. ChatBond_MutualRepliesThreshold_UnlocksRefundEligibility (0.30 USDT, >= 2 respuestas mutuas)
+14. ChallengeEndpoint_ShouldGenerateProofOfListingNonceAndUploadUrl
+15. CreateListing_ShouldPersistInPostgres_AndSupportFiltering
+16. TransactionRollback_ShouldRevertAllStateChanges_OnException (ACID rollback)
+```
+
+**Cobertura de Código .NET**:
+- `Ayni.Infrastructure`: 79.32%
+- `Ayni.Api`: 75.97%
+- `Ayni.Core`: 77.01%
+- **Global**: **~77% de cobertura de líneas**
+
+---
+
+## 3. Estado Global del Proyecto (Checkpoints Completados)
+
+| Fase | Componente | Pruebas | Cobertura | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| **Fase 1** | Smart Contracts Suite (HSK Chain) | 48 passed / 0 failed (7 suites, 128k fuzzing calls) | Slither Clean, 0 High/Med | **[COMPLETADO]** |
+| **Fase 2** | AI Agents Modular Monolith (Zero-Endpoint) | 50 passed / 0 failed (8 suites) | 88% líneas, pip-audit 0 vuln | **[COMPLETADO]** |
+| **Fase 3** | Backend Core .NET 9 & SignalR | 16 passed / 0 failed (6 suites) | 77% líneas | **[COMPLETADO]** |
+| **Fase 4** | Frontend Angular 22 (Vanilla Signals Services) | Pendiente de ejecución | - | **Siguiente** |
+

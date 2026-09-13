@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 using Minio;
 using Minio.DataModel.Args;
 using Ayni.Core.Interfaces;
@@ -50,5 +51,15 @@ public class MinioStorageService : IStorageService
             .WithExpiry(expirySeconds);
 
         return await _minioClient.PresignedGetObjectAsync(args);
+    }
+
+    public async Task<string> GetPresignedPutUrlAsync(string bucketName, string objectName, int expirySeconds = 300)
+    {
+        var args = new PresignedPutObjectArgs()
+            .WithBucket(bucketName)
+            .WithObject(objectName)
+            .WithExpiry(expirySeconds);
+
+        return await _minioClient.PresignedPutObjectAsync(args);
     }
 }

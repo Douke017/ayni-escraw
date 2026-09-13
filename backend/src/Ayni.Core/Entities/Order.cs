@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 namespace Ayni.Core.Entities;
 
 public enum OrderStatus
@@ -15,6 +16,7 @@ public class Order
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string OnChainOrderId { get; set; } = string.Empty;
+    public Guid? ListingId { get; set; }
     public string BuyerAddress { get; set; } = string.Empty;
     public string SellerAddress { get; set; } = string.Empty;
     public string ArbitratorAddress { get; set; } = string.Empty;
@@ -25,4 +27,7 @@ public class Order
     public DateTime? HandoffConfirmedAtUtc { get; set; }
     public DateTime? InspectionDeadlineUtc { get; set; }
     public string? SafeMeetQrNonce { get; set; }
+    public string? SettlementTxHash { get; set; }
+    public bool IsDisputed { get; set; } = false;
+    public string? DisputeReason { get; set; }
 }

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 using System.Text.Json;
 using StackExchange.Redis;
 using Ayni.Core.Interfaces;
@@ -19,6 +20,12 @@ public class RedisCacheService : ICacheService
     {
         var serialized = JsonSerializer.Serialize(value);
         await _db.StringSetAsync(key, serialized, expiry ?? TimeSpan.FromSeconds(60));
+    }
+
+    public async Task SetNonceAsync(string nonceKey, string value, TimeSpan expiry)
+    {
+        var serialized = JsonSerializer.Serialize(value);
+        await _db.StringSetAsync(nonceKey, serialized, expiry);
     }
 
     public async Task<T?> GetAsync<T>(string key)
