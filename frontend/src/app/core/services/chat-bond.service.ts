@@ -2,7 +2,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ChatBondStatusResponse } from '../models/chat.model';
+import { ChatBondStatusResponse, ChatMessage } from '../models/chat.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -63,10 +63,33 @@ export class ChatBondService {
     }
   }
 
-  public async depositBond(orderId: string, amountUsdt: number = 0.3): Promise<boolean> {
+  public async fetchMessages(orderId: string): Promise<ChatMessage[]> {
+    try {
+      const list = await firstValueFrom(
+        this.http.get<ChatMessage[]>(`${this.apiUrl}/chatbond/${orderId}/messages`)
+      );
+      return list || [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async depositBond(params: {
+    orderId: string;
+    buyerAddress: string;
+    sellerAddress: string;
+    amountUsdt?: number;
+    depositTxHash?: string;
+  }): Promise<boolean> {
     try {
       await firstValueFrom(
-        this.http.post(`${this.apiUrl}/chatbond/${orderId}/deposit`, { amountUsdt })
+        this.http.post(`${this.apiUrl}/chatbond/deposit`, {
+          orderId: params.orderId,
+          buyerAddress: params.buyerAddress,
+          sellerAddress: params.sellerAddress,
+          depositAmountUsdt: params.amountUsdt || 0.3,
+          depositTxHash: params.depositTxHash,
+        })
       );
       this.error.set(null);
       return true;

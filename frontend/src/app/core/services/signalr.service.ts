@@ -62,6 +62,29 @@ export class SignalRService {
       (orderId: string, senderAddress: string, encryptedPayload: string, timestamp: number) => {
         const newMsg: ChatMessageDto = { orderId, senderAddress, encryptedPayload, timestamp };
         this.messages.update((msgs) => [...msgs, newMsg]);
+
+        const incomingChatMsg: ChatMessage = {
+          id: 'msg_' + (timestamp || Date.now()) + '_' + Math.random().toString(36).substring(2, 6),
+          orderId,
+          senderAddress,
+          messageText: encryptedPayload,
+          sentAtUtc: new Date(timestamp ? timestamp : Date.now()).toISOString(),
+          isAiAgent:
+            senderAddress.toLowerCase().includes('agent') ||
+            senderAddress.toLowerCase().includes('bot') ||
+            senderAddress === '0x0000000000000000000000000000000000000042',
+        };
+
+        this.chatMessages.update((msgs) => {
+          const isDup = msgs.some(
+            (m) =>
+              m.orderId === orderId &&
+              m.senderAddress.toLowerCase() === senderAddress.toLowerCase() &&
+              m.messageText === encryptedPayload &&
+              Math.abs((m.sentAtUtc ? new Date(m.sentAtUtc).getTime() : 0) - (timestamp || Date.now())) < 4000
+          );
+          return isDup ? msgs : [...msgs, incomingChatMsg];
+        });
       }
     );
 
@@ -204,5 +227,12 @@ export class SignalRService {
 
   public addSimulatedMessage(msg: ChatMessageDto): void {
     this.messages.update((msgs) => [...msgs, msg]);
+  }
+
+  public setChatHistory(orderId: string, history: ChatMessage[]): void {
+    this.chatMessages.update((msgs) => {
+      const remaining = msgs.filter((m) => m.orderId !== orderId);
+      return [...remaining, ...history];
+    });
   }
 }

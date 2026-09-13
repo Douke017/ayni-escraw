@@ -1,123 +1,166 @@
-<!-- SPDX-License-Identifier: MIT -->
-<div class="flex flex-col py-6 sm:py-10 pb-24 bg-ayni-canvas text-ayni-espresso">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8 pb-4 border-b border-ayni-espresso/10">
-      <div>
-        <span class="text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Inspección Remota de Hardware</span>
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-ayni-espresso tracking-tight font-serif">Video Verify • 100ms Live Session</h1>
-        <span class="text-xs text-ayni-muted font-mono">Orden: #{{ orderId() }}</span>
+<div class="video-verify">
+  <div class="video-verify__container">
+    <header class="video-verify__header">
+      <div class="video-verify__header-left">
+        <span class="video-verify__pre">Inspección Remota de Hardware</span>
+        <h1 class="video-verify__title">Video Verify • 100ms Live Session</h1>
+        <span class="video-verify__order-tag">Orden: #{{ orderId() }}</span>
       </div>
-      <div>
+      <div class="video-verify__header-right">
         <ayni-badge variant="hsk" size="md" [pulse]="true">
           Sincronizado vía SignalR
         </ayni-badge>
       </div>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="video-verify__grid">
       <!-- Main Video Screen Area -->
-      <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
-        <div class="relative bg-zinc-950 rounded-2xl overflow-hidden shadow-xl aspect-video sm:aspect-[16/10] flex items-center justify-center text-white">
-          <div class="absolute top-3.5 left-3.5 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-red-400 border border-red-500/30">
-            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            <span>EN VIVO (100ms WebRTC)</span>
-          </div>
+      <div class="video-verify__video-pane">
+        @if (isCallActive()) {
+          <div class="video-verify__video-feed">
+            <div class="video-verify__overlay-badge">
+              <span class="video-verify__live-dot"></span>
+              <span>EN VIVO (100ms WebRTC)</span>
+            </div>
 
-          <!-- Mock Video Stream Screen -->
-          <div class="flex flex-col items-center justify-center text-center gap-2 p-4">
-            <span class="text-5xl sm:text-6xl select-none">📹</span>
-            <span class="text-sm sm:text-base font-bold text-white">Feed del Hardware del Vendedor</span>
-            <span class="text-xs text-zinc-400">Mostrando número de serie y test táctil en vivo</span>
-          </div>
+            <!-- Mock Video Stream Screen -->
+            <div class="video-verify__mock-stream">
+              <span class="video-verify__stream-icon">📹</span>
+              <span class="video-verify__stream-text">Feed del Hardware del Vendedor</span>
+              <span class="video-verify__stream-sub">Mostrando número de serie y test táctil en vivo</span>
+              @if (mediaError()) {
+                <span class="video-verify__media-notice">{{ mediaError() }}</span>
+              }
+            </div>
 
-          <!-- Floating PiP (Self view) -->
-          <div class="absolute bottom-16 right-4 w-24 sm:w-32 aspect-video bg-zinc-900 border border-white/20 rounded-xl overflow-hidden flex flex-col items-center justify-center text-zinc-300 shadow-lg">
-            <span class="text-lg">👤</span>
-            <span class="text-[9px] font-semibold text-zinc-400">Tú (Comprador)</span>
-          </div>
+            <!-- Floating PiP (Self view with real camera feed) -->
+            <div class="video-verify__pip">
+              @if (mediaPermissionGranted()) {
+                <video #localVideo autoplay playsinline muted class="video-verify__pip-video"></video>
+                <span class="video-verify__pip-badge">Tú (En vivo)</span>
+              } @else {
+                <span class="video-verify__pip-icon">👤</span>
+                <span class="video-verify__pip-label">Tú (Comprador)</span>
+              }
+            </div>
 
-          <!-- Video Control Bar -->
-          <div class="absolute bottom-3 inset-x-0 flex items-center justify-center gap-3">
-            <button 
-              type="button" 
-              class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all cursor-pointer backdrop-blur-md"
-              [class]="isAudioMuted() ? 'bg-red-600 text-white' : 'bg-white/20 text-white hover:bg-white/30'"
-              (click)="toggleAudio()"
-            >
-              {{ isAudioMuted() ? '🔇' : '🎙️' }}
-            </button>
-            <button 
-              type="button" 
-              class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all cursor-pointer backdrop-blur-md"
-              [class]="isVideoMuted() ? 'bg-red-600 text-white' : 'bg-white/20 text-white hover:bg-white/30'"
-              (click)="toggleVideo()"
-            >
-              {{ isVideoMuted() ? '🚫' : '📹' }}
-            </button>
-            <button 
-              type="button" 
-              class="px-4 h-10 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-all cursor-pointer shadow-lg"
-              (click)="isCallActive.set(false)"
-            >
-              📞 Finalizar
-            </button>
+            <!-- Video Control Bar -->
+            <div class="video-verify__controls">
+              <button 
+                type="button" 
+                class="video-verify__ctrl-btn"
+                [class.video-verify__ctrl-btn--active]="isAudioMuted()"
+                (click)="toggleAudio()"
+                [title]="isAudioMuted() ? 'Activar Micrófono' : 'Silenciar Micrófono'"
+              >
+                {{ isAudioMuted() ? '🔇' : '🎙️' }}
+              </button>
+              <button 
+                type="button" 
+                class="video-verify__ctrl-btn"
+                [class.video-verify__ctrl-btn--active]="isVideoMuted()"
+                (click)="toggleVideo()"
+                [title]="isVideoMuted() ? 'Activar Cámara' : 'Apagar Cámara'"
+              >
+                {{ isVideoMuted() ? '🚫' : '📹' }}
+              </button>
+              <button 
+                type="button" 
+                class="video-verify__ctrl-btn video-verify__ctrl-btn--danger"
+                (click)="endCall()"
+                title="Finalizar Llamada"
+              >
+                📞 Finalizar
+              </button>
+            </div>
           </div>
-        </div>
+        } @else {
+          <!-- Call Ended State -->
+          <div class="video-verify__ended-pane">
+            <div class="video-verify__ended-card">
+              <div class="video-verify__ended-icon">✅</div>
+              <h2 class="video-verify__ended-title">Inspección de Video Finalizada</h2>
+              <p class="video-verify__ended-desc">
+                La llamada de verificación remota de hardware ha finalizado. Verifica los puntos del checklist y procede a Aprobar y Liberar Fondos o reportar una inconsistencia.
+              </p>
+              <div class="video-verify__ended-actions">
+                <ayni-button variant="secondary" size="md" (clicked)="restartCall()">
+                  <span>📹 Reiniciar Llamada</span>
+                </ayni-button>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
       <!-- Live Checklist & Settlement Sidebar -->
-      <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
-        <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 shadow-md flex flex-col gap-4">
-          <div class="flex items-center justify-between pb-3 border-b border-ayni-espresso/10">
-            <h3 class="text-sm sm:text-base font-bold text-ayni-espresso font-serif">Checklist de Integridad Física</h3>
-            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-ayni-olive/15 text-ayni-olive border border-ayni-olive/30">
-              {{ checkedCount() }}/{{ checklist().length }} Verificados
-            </span>
-          </div>
+      <div class="video-verify__checklist-pane">
+        <ayni-card sideBarColor="var(--aguayo-indigo)" padding="md">
+          <div class="video-verify__checklist-wrap">
+            <div class="video-verify__cl-header">
+              <h3 class="video-verify__cl-title">Checklist de Integridad Física</h3>
+              <span class="video-verify__cl-count">
+                {{ checkedCount() }}/{{ checklist().length }} Verificados
+              </span>
+            </div>
 
-          <div class="flex flex-col gap-2.5">
-            @for (item of checklist(); track item.id) {
-              <label class="flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none"
-                     [class]="item.checked ? 'bg-ayni-olive/5 border-ayni-olive/30' : 'bg-ayni-canvas border-ayni-espresso/10 hover:border-ayni-espresso/25'">
-                <input 
-                  type="checkbox" 
-                  class="mt-0.5 rounded text-ayni-terracotta focus:ring-ayni-terracotta cursor-pointer"
-                  [checked]="item.checked" 
-                  (change)="toggleCheck(item)"
-                />
-                <div class="flex flex-col min-w-0">
-                  <span class="text-xs sm:text-sm font-bold text-ayni-espresso leading-snug"
-                        [class.line-through]="item.checked">{{ item.label }}</span>
-                  <span class="text-[11px] text-ayni-muted leading-tight mt-0.5">{{ item.description }}</span>
-                </div>
-              </label>
-            }
-          </div>
+            <div class="video-verify__items">
+              @for (item of checklist(); track item.id) {
+                <label class="video-verify__item" [class.video-verify__item--checked]="item.checked">
+                  <input 
+                    type="checkbox" 
+                    class="video-verify__checkbox"
+                    [checked]="item.checked" 
+                    (change)="toggleCheck(item)"
+                  />
+                  <div class="video-verify__item-text">
+                    <span class="video-verify__item-label">{{ item.label }}</span>
+                    <span class="video-verify__item-desc">{{ item.description }}</span>
+                  </div>
+                </label>
+              }
+            </div>
 
-          <div class="pt-3 border-t border-ayni-espresso/10 flex flex-col gap-2.5">
-            <span class="text-xs uppercase font-bold text-ayni-muted tracking-wider">Dictamen del Comprador</span>
-            <div class="flex flex-col gap-2">
-              <ayni-button 
-                variant="primary" 
-                size="md" 
-                [fullWidth]="true"
-                [disabled]="!allChecked()"
-                (clicked)="onReleaseFunds()"
-              >
-                <span>Aprobar y Liberar Fondos ✓</span>
-              </ayni-button>
+            <div class="video-verify__settle-box">
+              <span class="video-verify__settle-label">Dictamen del Comprador</span>
+              <div class="video-verify__settle-actions">
+                <ayni-button 
+                  variant="primary" 
+                  size="md" 
+                  [fullWidth]="true"
+                  [disabled]="!allChecked() || isReleasing()"
+                  (clicked)="onReleaseFunds()"
+                >
+                  <span>{{ isReleasing() ? 'Liberando en HSK Chain...' : 'Aprobar y Liberar Fondos ✓' }}</span>
+                </ayni-button>
 
-              <ayni-button 
-                variant="danger" 
-                size="sm" 
-                [fullWidth]="true"
-                (clicked)="onRaiseDispute()"
-              >
-                <span>Reportar Falla / Iniciar Disputa 2/3</span>
-              </ayni-button>
+                @if (settlementTxHash()) {
+                  <div class="video-verify__settle-success">
+                    <span class="video-verify__settle-tx-badge">✓ Liquidación On-Chain Exitosa</span>
+                    <a 
+                      [href]="'https://testnet-explorer.hskchain.net/tx/' + settlementTxHash()" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      class="video-verify__settle-link"
+                    >
+                      Ver transacción en HSK Explorer ↗
+                    </a>
+                  </div>
+                }
+
+                <ayni-button 
+                  variant="danger" 
+                  size="sm" 
+                  [fullWidth]="true"
+                  [disabled]="isReleasing()"
+                  (clicked)="onRaiseDispute()"
+                >
+                  <span>Reportar Falla / Iniciar Disputa 2/3</span>
+                </ayni-button>
+              </div>
             </div>
           </div>
-        </div>
+        </ayni-card>
       </div>
     </div>
   </div>

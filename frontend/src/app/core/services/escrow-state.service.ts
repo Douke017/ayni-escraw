@@ -76,19 +76,23 @@ export class EscrowStateService {
     buyerAddress: string,
     sellerAddress: string,
     amountUsdt: number,
-    passportTokenId: number = 42
+    passportTokenId: number = 4,
+    onChainOrderId?: string
   ): Promise<EscrowOrder> {
     this.isProcessing.set(true);
     this.error.set(null);
 
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         listingId,
         buyerAddress,
         sellerAddress,
         amountUsdt,
         passportTokenId,
       };
+      if (onChainOrderId) {
+        payload['onChainOrderId'] = onChainOrderId;
+      }
 
       const order = await firstValueFrom(
         this.http.post<EscrowOrder>(`${this.apiUrl}/escrow/orders`, payload)
@@ -101,6 +105,21 @@ export class EscrowStateService {
       throw err;
     } finally {
       this.isProcessing.set(false);
+    }
+  }
+
+  public async fetchOrderById(id: string): Promise<EscrowOrder | null> {
+    try {
+      const order = await firstValueFrom(
+        this.http.get<EscrowOrder>(`${this.apiUrl}/escrow/orders/${id}`)
+      );
+      if (order) {
+        this.currentOrder.set(order);
+      }
+      return order;
+    } catch (err) {
+      console.error('[Ayni Escrow] Failed to fetch order by id:', err);
+      return null;
     }
   }
 
@@ -143,7 +162,7 @@ export class EscrowStateService {
     }
   }
 
-  public async depositPermit2(orderId: string, amountUsdt: number, permitSignature: string): Promise<boolean> {
+  public async depositPermit2(orderId: string, amountUsdt: number, permitSignature: string, txHash?: string): Promise<boolean> {
     this.isProcessing.set(true);
     this.error.set(null);
     try {
@@ -151,6 +170,7 @@ export class EscrowStateService {
         this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/deposit-permit2`, {
           amountUsdt,
           permitSignature,
+          txHash: txHash || '',
         })
       );
       this.updateStatus(OrderStatus.Funded);

@@ -1,161 +1,231 @@
-<!-- SPDX-License-Identifier: MIT -->
-<div class="flex flex-col py-6 sm:py-8 pb-24 bg-ayni-canvas text-ayni-espresso min-h-[calc(100vh-140px)]">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col flex-1">
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-ayni-espresso/10">
-      <div>
-        <span class="text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Canal Seguro P2P • SignalR</span>
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-ayni-espresso tracking-tight font-serif">Chat de Negociación Directa</h1>
-        <span class="text-xs text-ayni-muted font-mono">Canal: #{{ orderId() }}</span>
+<div class="chat-page">
+  <div class="chat-page__container">
+    <header class="chat-page__header">
+      <div class="chat-page__header-left">
+        <span class="chat-page__pre">Canal Seguro P2P • SignalR & Smart Contracts</span>
+        @if (listing()) {
+          <h1 class="chat-page__title">{{ listing()!.title }}</h1>
+          <div class="chat-page__header-meta">
+            <ayni-badge variant="funded" size="sm">{{ listing()!.priceUsdt | usdt }}</ayni-badge>
+            <span class="chat-page__channel-tag">Vendedor: {{ listing()!.sellerAddress | truncateAddress }}</span>
+            <span class="chat-page__channel-tag">• ID: {{ orderId() | truncateAddress }}</span>
+          </div>
+        } @else {
+          <h1 class="chat-page__title">Chat de Negociación Directa</h1>
+          <span class="chat-page__channel-tag">Canal: #{{ orderId() || 'Seleccione una publicación' }}</span>
+        }
       </div>
-      <div>
+      <div class="chat-page__header-right">
+        @if (isSeller()) {
+          <ayni-badge variant="neutral" size="sm">Modo Vendedor</ayni-badge>
+        }
         <ayni-badge variant="pass" size="sm" [pulse]="true">
           SignalR Conectado
         </ayni-badge>
       </div>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+    <div class="chat-page__grid">
       <!-- Main Chat Area -->
-      <main class="lg:col-span-8 flex flex-col gap-4 flex-1">
-        <!-- Anti-Spam Intent Bond Status Banner -->
-        <div class="bg-ayni-card border border-ayni-gold/30 rounded-2xl p-4 sm:p-5 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-ayni-espresso">
-                <span class="text-base text-ayni-gold">🛡️</span>
-                <span>Intent Bond Anti-Spam (AyniChatBond.sol): 0.30 USDT</span>
-              </div>
-              <p class="text-xs text-ayni-muted">
-                El depósito se desbloquea para reembolso total tras 2 respuestas mutuas serias.
-              </p>
-            </div>
+      <main class="chat-page__main">
+        <!-- Anti-Spam Intent Bond Deposit Card (when not yet deposited) -->
+        @if (!isBondSatisfied()) {
+          <div class="chat-page__deposit-banner">
+            <ayni-card sideBarColor="var(--aguayo-gold)" padding="md">
+              <div class="chat-page__deposit-card">
+                <div class="chat-page__deposit-header">
+                  <span class="chat-page__deposit-icon">🛡️</span>
+                  <div>
+                    <h3 class="chat-page__deposit-title">Bono de Intención Anti-Spam Requerido: 0.30 USDT</h3>
+                    <p class="chat-page__deposit-sub">
+                      Para habilitar el chat directo con el vendedor, Ayni protege el protocolo mediante un micro-depósito de <strong>0.30 USDT</strong> en el smart contract <code>AyniChatBond.sol</code>.
+                    </p>
+                  </div>
+                </div>
 
-            <!-- Replies Progress -->
-            <div class="flex flex-col gap-1.5 sm:w-56 shrink-0">
-              <div class="flex items-center justify-between text-[11px] text-ayni-muted">
-                <span>Tú: <strong>{{ bondService.buyerRepliesCount() }}/2</strong></span>
-                <span>Vendedor: <strong>{{ bondService.sellerRepliesCount() }}/2</strong></span>
-              </div>
-              <div class="w-full h-2 bg-ayni-canvas rounded-full overflow-hidden border border-ayni-espresso/10">
-                <div class="h-full bg-gradient-to-r from-ayni-terracotta to-ayni-gold transition-all duration-300" [style.width.%]="bondService.progressPercentage()"></div>
-              </div>
-              @if (bondService.isRefundEligible()) {
-                <div class="flex items-center justify-between gap-2 mt-1">
-                  <span class="text-[10px] text-emerald-700 font-bold">✓ 100% Reembolsable</span>
+                <div class="chat-page__deposit-perks">
+                  <div class="chat-page__perk-item">
+                    <span class="chat-page__perk-check">✓</span>
+                    <span><strong>100% Reembolsable:</strong> Devuelto en su totalidad a tu wallet al completar 2 respuestas mutuas con el vendedor.</span>
+                  </div>
+                  <div class="chat-page__perk-item">
+                    <span class="chat-page__perk-check">✓</span>
+                    <span><strong>Anti-Sybil & Bots:</strong> Garantiza que los vendedores solo reciban ofertas serias de personas reales.</span>
+                  </div>
+                </div>
+
+                <div class="chat-page__deposit-action">
                   <ayni-button 
                     variant="primary" 
-                    size="sm" 
-                    [loading]="isClaimingRefund()"
-                    (clicked)="onClaimRefund()"
+                    size="md" 
+                    [loading]="isDepositingBond()"
+                    (clicked)="onDepositBond()"
                   >
-                    Devolver
+                    <span>🔒 Depositar 0.30 USDT y Desbloquear Chat</span>
                   </ayni-button>
                 </div>
-              }
-            </div>
+              </div>
+            </ayni-card>
           </div>
-        </div>
-
-        <!-- Messages Box -->
-        <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl shadow-sm flex flex-col h-[480px]">
-          <!-- Messages List -->
-          <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-3.5">
-            @for (msg of currentChatMessages(); track msg.id) {
-              <div class="flex flex-col max-w-[85%] sm:max-w-[75%]"
-                   [class]="msg.senderAddress === authService.walletAddress() ? 'self-end items-end' : 'self-start items-start'">
-                <div class="flex items-center gap-2 mb-1 text-[11px] text-ayni-muted px-1">
-                  @if (msg.isAiAgent) {
-                    <span class="font-bold text-ayni-terracotta">🤖 Ayni Tech Agent (#42)</span>
-                  } @else {
-                    <span class="font-mono">{{ msg.senderAddress | truncateAddress }}</span>
-                  }
-                  <span>{{ msg.sentAtUtc | date:'HH:mm' }}</span>
+        } @else {
+          <!-- Anti-Spam Intent Bond Progress Banner (when deposited) -->
+          <div class="chat-page__bond-banner">
+            <ayni-card sideBarColor="var(--aguayo-gold)" padding="sm">
+              <div class="chat-page__bond-card">
+                <div class="chat-page__bond-info">
+                  <div class="chat-page__bond-header">
+                    <span class="chat-page__bond-icon">🛡️</span>
+                    <strong>Intent Bond Activo (AyniChatBond.sol): 0.30 USDT</strong>
+                  </div>
+                  <p class="chat-page__bond-sub">
+                    El depósito se desbloquea para reembolso total tras 2 respuestas mutuas serias.
+                  </p>
                 </div>
-                <div class="p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed"
-                     [class]="{
-                       'bg-ayni-terracotta text-white rounded-tr-none shadow-sm': msg.senderAddress === authService.walletAddress(),
-                       'bg-ayni-canvas text-ayni-espresso rounded-tl-none border border-ayni-espresso/10': msg.senderAddress !== authService.walletAddress() && !msg.isAiAgent,
-                       'bg-ayni-gold/15 text-ayni-espresso border border-ayni-gold/30 rounded-tl-none': msg.isAiAgent
-                     }">
-                  <p class="m-0 break-words">{{ msg.messageText }}</p>
+
+                <!-- Replies Progress -->
+                <div class="chat-page__bond-progress-box">
+                  <div class="chat-page__bond-counters">
+                    <span class="chat-page__counter-item">
+                      Comprador: <strong>{{ bondService.buyerRepliesCount() }}/2</strong>
+                    </span>
+                    <span class="chat-page__counter-item">
+                      Vendedor: <strong>{{ bondService.sellerRepliesCount() }}/2</strong>
+                    </span>
+                  </div>
+
+                  <div class="chat-page__pbar">
+                    <div class="chat-page__pbar-fill" [style.width.%]="bondService.progressPercentage()"></div>
+                  </div>
+
+                  @if (bondService.isRefundEligible()) {
+                    <div class="chat-page__refund-claim">
+                      <ayni-badge variant="pass" size="sm">✓ Reembolso 100% (0.30 USDT) Habilitado</ayni-badge>
+                      <ayni-button 
+                        variant="primary" 
+                        size="sm" 
+                        [loading]="isClaimingRefund()"
+                        (clicked)="onClaimRefund()"
+                      >
+                        Solicitar Devolución
+                      </ayni-button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </ayni-card>
+          </div>
+        }
+
+        <!-- Messages Container -->
+        <div class="chat-page__messages-box">
+          <div class="chat-page__messages-list">
+            @if (!isBondSatisfied() && currentChatMessages().length === 0) {
+              <div class="chat-page__empty-lock">
+                <span class="chat-page__empty-icon">🔒</span>
+                <h4 class="chat-page__empty-title">Canal bloqueado temporalmente</h4>
+                <p class="chat-page__empty-desc">
+                  Deposita el Bono de Intención de 0.30 USDT para iniciar la conversación protegida por Smart Contract.
+                </p>
+              </div>
+            }
+
+            @for (msg of currentChatMessages(); track msg.id) {
+              <div 
+                class="chat-page__msg" 
+                [class.chat-page__msg--mine]="msg.senderAddress.toLowerCase() === (authService.walletAddress() || web3Service.account())?.toLowerCase()"
+                [class.chat-page__msg--ai]="msg.isAiAgent"
+              >
+                <div class="chat-page__msg-header">
+                  @if (msg.isAiAgent) {
+                    <span class="chat-page__msg-sender">🤖 Ayni Tech Agent (#42)</span>
+                  } @else {
+                    <span class="chat-page__msg-sender">{{ msg.senderAddress | truncateAddress }}</span>
+                  }
+                  <span class="chat-page__msg-time">{{ msg.sentAtUtc | date:'HH:mm' }}</span>
+                </div>
+                <div class="chat-page__msg-bubble">
+                  <p class="chat-page__msg-text">{{ msg.messageText }}</p>
                 </div>
               </div>
             }
           </div>
 
           <!-- Message Input Form -->
-          <form class="p-3 bg-ayni-canvas border-t border-ayni-espresso/10 flex items-center gap-2 rounded-b-2xl" (ngSubmit)="onSendMessage()">
+          <form class="chat-page__input-bar" (ngSubmit)="onSendMessage()">
             <input 
               type="text" 
-              class="flex-1 bg-ayni-card border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso placeholder:text-ayni-muted/70 focus:outline-none focus:border-ayni-terracotta"
-              placeholder="Escribe tu mensaje para coordinar o negociar..."
+              class="chat-page__text-input" 
+              [placeholder]="isBondSatisfied() ? 'Escribe tu mensaje para coordinar la entrega o negociar...' : '🔒 Deposita el bono de 0.30 USDT arriba para habilitar el chat...'"
+              [disabled]="!isBondSatisfied()"
               [ngModel]="messageInput()"
               (ngModelChange)="messageInput.set($event)"
               name="chatMessage"
             />
-            <ayni-button variant="primary" size="md" type="submit">
+            <ayni-button variant="primary" size="md" type="submit" [disabled]="!isBondSatisfied() || !messageInput().trim()">
               <span>Enviar</span>
-              <span aria-hidden="true" class="ml-1">➤</span>
+              <span aria-hidden="true">➤</span>
             </ayni-button>
           </form>
         </div>
       </main>
 
       <!-- AI Negotiation Assistant & Quick Offers -->
-      <aside class="lg:col-span-4 flex flex-col gap-4">
-        <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-ayni-espresso/10">
-            <span class="text-3xl select-none">🤖</span>
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-ayni-espresso font-serif">Asistente Ayni IA</h3>
-              <span class="text-xs text-ayni-olive font-semibold">Auditando conversación</span>
+      <aside class="chat-page__sidebar">
+        <ayni-card sideBarColor="var(--aguayo-burgundy)" padding="md">
+          <div class="chat-page__ai-panel">
+            <div class="chat-page__ai-header">
+              <span class="chat-page__ai-avatar">🤖</span>
+              <div>
+                <h3 class="chat-page__ai-title">Asistente Ayni IA</h3>
+                <span class="chat-page__ai-status">Auditando conversación</span>
+              </div>
+            </div>
+
+            <div class="chat-page__ai-card">
+              <span class="chat-page__ai-card-title">Dictamen del Hardware</span>
+              <p class="chat-page__ai-card-desc">
+                iPhone 15 Pro Max: Especificaciones certificadas con PASS en ERC-8004. Salted IMEI commitment registrado en el contrato de pasaporte.
+              </p>
+              <div class="chat-page__ai-specs">
+                <span class="chat-page__spec-pill">Batería: 92% Real</span>
+                <span class="chat-page__spec-pill">OLED: Sin marcas</span>
+                <span class="chat-page__spec-pill">iCloud: Libre</span>
+              </div>
+            </div>
+
+            <!-- Quick Suggestion Buttons -->
+            <div class="chat-page__suggestions">
+              <span class="chat-page__sugg-label">Sugerencias de Negociación:</span>
+              <button 
+                type="button" 
+                class="chat-page__sugg-btn"
+                (click)="applyQuickSuggestion('¿El dispositivo aún tiene garantía oficial del fabricante?')"
+              >
+                "¿Aún tiene garantía oficial?"
+              </button>
+              <button 
+                type="button" 
+                class="chat-page__sugg-btn"
+                (click)="applyQuickSuggestion('Te ofrezco 480 USDT con Safe Meet inmediato en estación central.')"
+              >
+                "Te ofrezco 480 USDT con Safe Meet"
+              </button>
+              <button 
+                type="button" 
+                class="chat-page__sugg-btn"
+                (click)="applyQuickSuggestion('¿Podemos hacer una llamada corta por Video Verify para revisar la pantalla?')"
+              >
+                "¿Podemos hacer Video Verify?"
+              </button>
+            </div>
+
+            <div class="chat-page__ai-footer">
+              <ayni-button variant="secondary" size="sm" [fullWidth]="true" routerLink="/escrow/checkout">
+                <span>Ir al Depósito Escrow ⚡</span>
+              </ayni-button>
             </div>
           </div>
-
-          <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-2">
-            <span class="text-xs font-bold text-ayni-espresso">Dictamen del Hardware</span>
-            <p class="text-xs text-ayni-muted leading-relaxed">
-              iPhone 15 Pro Max: Especificaciones certificadas con PASS en ERC-8004. Salted IMEI commitment registrado en el contrato de pasaporte.
-            </p>
-            <div class="flex flex-wrap gap-1.5 mt-1">
-              <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-card border border-ayni-espresso/10 text-ayni-espresso font-semibold">Batería: 92% Real</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-card border border-ayni-espresso/10 text-ayni-espresso font-semibold">OLED: Sin marcas</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-card border border-ayni-espresso/10 text-ayni-espresso font-semibold">iCloud: Libre</span>
-            </div>
-          </div>
-
-          <!-- Quick Suggestion Buttons -->
-          <div class="flex flex-col gap-2">
-            <span class="text-xs font-bold text-ayni-muted uppercase tracking-wider">Sugerencias de Negociación:</span>
-            <button 
-              type="button" 
-              class="w-full text-left p-2.5 rounded-xl text-xs bg-ayni-canvas hover:bg-ayni-terracotta/10 border border-ayni-espresso/10 hover:border-ayni-terracotta/30 text-ayni-espresso transition-colors cursor-pointer"
-              (click)="applyQuickSuggestion('¿El dispositivo aún tiene garantía oficial del fabricante?')"
-            >
-              "¿Aún tiene garantía oficial?"
-            </button>
-            <button 
-              type="button" 
-              class="w-full text-left p-2.5 rounded-xl text-xs bg-ayni-canvas hover:bg-ayni-terracotta/10 border border-ayni-espresso/10 hover:border-ayni-terracotta/30 text-ayni-espresso transition-colors cursor-pointer"
-              (click)="applyQuickSuggestion('Te ofrezco 480 USDT con Safe Meet inmediato en estación central.')"
-            >
-              "Te ofrezco 480 USDT con Safe Meet"
-            </button>
-            <button 
-              type="button" 
-              class="w-full text-left p-2.5 rounded-xl text-xs bg-ayni-canvas hover:bg-ayni-terracotta/10 border border-ayni-espresso/10 hover:border-ayni-terracotta/30 text-ayni-espresso transition-colors cursor-pointer"
-              (click)="applyQuickSuggestion('¿Podemos hacer una llamada corta por Video Verify para revisar la pantalla?')"
-            >
-              "¿Podemos hacer Video Verify?"
-            </button>
-          </div>
-
-          <div class="pt-2 border-t border-ayni-espresso/10">
-            <ayni-button variant="secondary" size="sm" [fullWidth]="true" routerLink="/escrow/checkout">
-              <span>Ir al Depósito Escrow ⚡</span>
-            </ayni-button>
-          </div>
-        </div>
+        </ayni-card>
       </aside>
     </div>
   </div>

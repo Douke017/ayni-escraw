@@ -22,6 +22,28 @@ public class ChatBondController : ControllerBase
     [HttpPost("deposit")]
     public async Task<IActionResult> RecordBondDeposit([FromBody] BondDepositRequest request)
     {
+        // Fallback: resolve seller / buyer addresses from listing or order if not explicitly supplied
+        if (string.IsNullOrWhiteSpace(request.SellerAddress) || string.IsNullOrWhiteSpace(request.BuyerAddress))
+        {
+            var listing = await _dbContext.ProductListings.FirstOrDefaultAsync(l => l.Id == request.OrderId);
+            if (listing != null)
+            {
+                if (string.IsNullOrWhiteSpace(request.SellerAddress))
+                    request.SellerAddress = listing.SellerAddress;
+            }
+            else
+            {
+                var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderId);
+                if (order != null)
+                {
+                    if (string.IsNullOrWhiteSpace(request.SellerAddress))
+                        request.SellerAddress = order.SellerAddress;
+                    if (string.IsNullOrWhiteSpace(request.BuyerAddress))
+                        request.BuyerAddress = order.BuyerAddress;
+                }
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(request.BuyerAddress) || string.IsNullOrWhiteSpace(request.SellerAddress))
         {
             return BadRequest(new { error = "Buyer and seller addresses are required" });
@@ -34,7 +56,7 @@ public class ChatBondController : ControllerBase
         if (existingBond != null)
         {
             existingBond.DepositTxHash = request.DepositTxHash;
-            existingBond.DepositAmountUsdt = request.DepositAmountUsdt;
+            existingBond.DepositAmountUsdt = request.DepositAmountUsdt > 0 ? request.DepositAmountUsdt : 0.30m;
             existingBond.Status = ChatBondStatus.Active;
             await _dbContext.SaveChangesAsync();
             return Ok(existingBond);
@@ -45,7 +67,7 @@ public class ChatBondController : ControllerBase
             OrderId = request.OrderId,
             BuyerAddress = normalizedBuyer,
             SellerAddress = normalizedSeller,
-            DepositAmountUsdt = request.DepositAmountUsdt,
+            DepositAmountUsdt = request.DepositAmountUsdt > 0 ? request.DepositAmountUsdt : 0.30m,
             DepositTxHash = request.DepositTxHash,
             Status = ChatBondStatus.Active,
             BuyerReplies = 0,
@@ -57,7 +79,45 @@ public class ChatBondController : ControllerBase
         _dbContext.ChatBonds.Add(bond);
         await _dbContext.SaveChangesAsync();
 
+        _logger.LogInformation("Chat bond activated for Order {OrderId}. Buyer: {Buyer}, Seller: {Seller}", 
+            request.OrderId, normalizedBuyer, normalizedSeller);
+
         return Ok(bond);
+    }
+
+    [HttpPost("{orderId:guid}/deposit")]
+    public async Task<IActionResult> RecordBondDepositByRoute(Guid orderId, [FromBody] BondDepositRouteRequest? request)
+    {
+        var depositReq = new BondDepositRequest
+        {
+            OrderId = orderId,
+            BuyerAddress = request?.BuyerAddress ?? string.Empty,
+            SellerAddress = request?.SellerAddress ?? string.Empty,
+            DepositAmountUsdt = (request?.AmountUsdt ?? 0) > 0 ? request!.AmountUsdt : 0.30m,
+            DepositTxHash = request?.DepositTxHash
+        };
+
+        return await RecordBondDeposit(depositReq);
+    }
+
+    [HttpGet("{orderId:guid}/messages")]
+    public async Task<IActionResult> GetMessages(Guid orderId)
+    {
+        var messages = await _dbContext.ChatMessages
+            .Where(m => m.OrderId == orderId)
+            .OrderBy(m => m.TimestampUtc)
+            .Select(m => new
+            {
+                id = m.Id.ToString(),
+                orderId = m.OrderId.ToString(),
+                senderAddress = m.SenderAddress,
+                messageText = m.EncryptedPayload,
+                sentAtUtc = m.TimestampUtc,
+                isAiAgent = false
+            })
+            .ToListAsync();
+
+        return Ok(messages);
     }
 
     [HttpGet("{orderId:guid}/status")]
@@ -166,6 +226,14 @@ public class BondDepositRequest
     public string BuyerAddress { get; set; } = string.Empty;
     public string SellerAddress { get; set; } = string.Empty;
     public decimal DepositAmountUsdt { get; set; } = 0.30m;
+    public string? DepositTxHash { get; set; }
+}
+
+public class BondDepositRouteRequest
+{
+    public string? BuyerAddress { get; set; }
+    public string? SellerAddress { get; set; }
+    public decimal AmountUsdt { get; set; } = 0.30m;
     public string? DepositTxHash { get; set; }
 }
 
