@@ -1,0 +1,103 @@
+.Hackathon Tracks
+EAG Global Hackathon Tracks are designed to support both user-facing Ethereum applications and the open-source components that make them possible.
+
+This year’s tracks focus on five core areas: AI x Ethereum & Agent Economy, Local AI, Private AI & User-Owned Data, Smart Devices, Open Hardware & Privacy Hardware, Application Middleware & Open-Source Tooling, and Real-World Ethereum Applications.
+
+1. AI x Ethereum & Agent Economy
+
+Build AI-powered Ethereum applications and agent-native economic systems.
+
+This track focuses on AI agents, agent wallets, agent payments, agent-to-agent coordination, AI-driven onchain execution, natural language smart contract interaction, AI-generated content provenance, and Ethereum-native AI applications.
+
+We especially welcome projects exploring agent payment middleware, autonomous service payments, agent identity, agent reputation, permissioned agent wallets, and safe spending policies for AI agents.
+
+2. Local AI, Private AI & User-Owned Data
+
+Build privacy-first AI applications where users can own, control, and selectively share their data.
+
+This track focuses on local AI models, private AI assistants, personal AI nodes, private memory, personal data vaults, user-owned datasets, privacy-preserving inference, selective disclosure, private credentials, and AI systems that can operate without exposing sensitive user data to centralized platforms.
+
+Projects may combine Ethereum with ZK, TEE, FHE, MPC, encrypted storage, local-first software, zkTLS / web proofs, or other privacy-preserving data access mechanisms.
+
+3. Smart Devices, Open Hardware & Privacy Hardware
+
+Explore how Ethereum connects with the physical world through smart devices, open hardware, sensors, robotics, and secure hardware.
+
+This track focuses on open-source hardware, crypto-integrated devices, device identity, hardware wallets, secure elements, physical-world attestation, privacy-preserving sensors, TEE-enabled devices, local AI hardware, and smart devices that can sign, verify, pay, coordinate, or protect user data.
+
+We are especially interested in privacy hardware and AI hardware that bring Ethereum into real-world environments such as homes, cities, campuses, events, factories, and personal devices.
+
+4. Application Middleware & Open-Source Tooling
+
+Build the open-source tools and middleware that help Ethereum applications become easier to build, deploy, and use.
+
+This track supports agent payment SDKs, wallet tooling, account abstraction, smart account UX, session keys, gas abstraction, intent-based UX, privacy SDKs, hardware integration middleware, developer APIs, application security tools, monitoring tools, and application evaluation frameworks.
+
+The goal is not only to build individual apps, but also to build reusable components that enable many Ethereum applications to grow.
+
+5. AI-Native Creator Economy & Digital Rights
+
+Build new tools, protocols, and applications for creation, ownership, attribution, distribution, and value sharing in the age of AI.
+
+This track explores how Ethereum can support creators, audiences, AI models, agents, and creative communities across the full lifecycle of digital content—including articles, images, music, video, games, virtual characters, and intellectual property.
+
+Focus areas may include:
+
+AI-assisted and human–AI collaborative creation
+Content provenance, authenticity, and attribution
+Creator identity and verifiable contribution records
+Rights registration and programmable licensing
+IP licensing, transfer, remixing, and derivative works
+Automated royalty distribution and multi-party revenue sharing
+Creator payments, subscriptions, memberships, and community ownership
+Onchain media, publishing, and content marketplaces
+Consent and compensation mechanisms for training data
+Detection and verification of manipulated or synthetic media
+Open-source tools for creators and creative communities
+Projects should go beyond simply putting content onchain. We especially welcome solutions that create fairer, more transparent, and more sustainable relationships between creators, collaborators, platforms, AI systems, and audiences.
+
+6. Real-World Ethereum Applications
+
+Build Ethereum-native applications for real users, communities, and local ecosystems.
+
+This track focuses on stablecoin payments, PayFi, community coordination, education tools, public goods funding, membership systems, contribution records, reputation systems, event and city coordination, local commerce, information markets, and applications for emerging regions.
+
+Projects should demonstrate clear user needs, real-world relevance, and the potential to grow beyond the hackathon into sustainable applications, open-source tools, or broader ecosystem infrastructure.
+
+Cross-Track Focus Areas
+
+Across all tracks, EAG especially encourages projects that explore:
+
+Open-source components and reusable developer tools
+Privacy, security, and user agency by design
+Local AI and user-owned data
+Agent payments and machine-to-machine coordination
+Hardware-based trust, identity, and privacy
+Creator ownership, content provenance, programmable licensing, and sustainable value sharing
+Real-world use cases in emerging and underrepresented regions
+Long-term potential to grow beyond the hackathon into sustainable applications, open-source tools, or broader ecosystem infrastructure
+HSK Chain Tracks
+
+​AI Agents
+​AI × Web3
+​DeFi
+​Stablecoins
+​Payment
+​RWA
+​Blockchain Infrastructure
+HSK Chain Tracks Requirement
+
+Built on HSK Chain
+Deployed on HSK Chain Mainnet *
+Integrate HSK Chain technology
+Include a GitHub repository
+Provide a working demo
+Participate in the project review or Demo Day
+*If time is limited, you are welcome to deploy on the testnet. Testnet Faucet: https://hskchain.net/faucet
+
+
+HSK Chain Tracks Judging Criteria
+
+Feasibility and potential for real-world implementation
+Ability to address meaningful user or market problems
+Technical and product innovation

@@ -1,0 +1,52 @@
+@startuml c4_level2_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Container Diagram - Ayni Trust Marketplace
+
+Person(buyer, "Comprador", "Usuario P2P que busca productos, asiste a Video Verify, deposita en escrow y recibe el producto.")
+Person(seller, "Vendedor", "Comerciante verificado que publica productos con prueba de posesión, atiende inspección remota y entrega presencialmente.")
+Person(arbitrator, "Árbitro", "Entidad neutral que audita evidencia y cofirma resoluciones multifirma 2-de-3 ante disputas.")
+
+System_Boundary(ayni_boundary, "Ayni Trust Marketplace System") {
+    Container(spa, "Single Page App / PWA", "Angular 18 (TypeScript, Vanilla Signals, @microsoft/signalr)", "Interfaz web y móvil para usuarios. Gestiona autenticación con Wallet (SIWE), escaneo de QR y comunicación en tiempo real con SignalR.")
+    
+    Container(backend, "Ayni-Escrow Core Backend", "ASP.NET Core 8 / 9 (C#, SignalR Hubs, EF Core)", "Backend principal del sistema. Expone APIs REST, gestiona sesiones de SignalR para chat y escrow, orquesta citas de Safe Meet y valida firmas de wallet.")
+    
+    Container(agent_service, "AI Agent Service", "Python 3.11 (FastAPI, Web3.py, LangChain/Agno)", "Servicio autónomo de agentes. Ejecuta RAG in-context para catálogo, validación de claims y atestación directa con los registros ERC-8004.")
+    
+    ContainerDb(postgres, "Relational Database", "PostgreSQL 16 + JSONB", "Persistencia transaccional ACID: usuarios, publicaciones con especificaciones técnicas (JSONB), órdenes de escrow y registros de auditoría.")
+    
+    ContainerDb(redis, "Cache & State Store", "Redis 7 / Valkey", "Gestión de rate limiting, almacenamiento de nonces de QR de entrega (60s TTL) y backplane para SignalR.")
+    
+    ContainerDb(minio, "Encrypted Object Storage", "MinIO (S3-Compatible)", "Almacenamiento interno de objetos para fotos de Proof of Listing, evidencia de empaque y checklists de inspección cifrados con AES-256-GCM.")
+    
+    Container(smart_contracts, "Smart Contracts Suite", "Solidity 0.8.24 (HSK Chain)", "Protocolo descentralizado: AyniEscrow (no custodial con Permit2), AyniProductPassport (ERC-721 con salted commitments) y AyniAgentRegistry (ERC-8004).")
+}
+
+System_Ext(hsk_chain, "HSK Chain RPC Node", "Red EVM L2")
+System_Ext(live_video_100ms, "100ms Live Video Cloud", "Infraestructura WebRTC")
+System_Ext(llm_provider, "LLM Provider API", "Gemini API / Claude API")
+
+Rel(buyer, spa, "Interactúa con la interfaz web y firma con su wallet", "HTTPS")
+Rel(seller, spa, "Gestiona catálogo, atiende Video Verify y genera QR de entrega", "HTTPS")
+Rel(arbitrator, spa, "Audita y cofirma disputas 2-de-3", "HTTPS")
+
+Rel(spa, backend, "Consultas y mutaciones de catálogo y órdenes", "HTTPS REST (JSON)")
+Rel(spa, backend, "Chat, negociación y estado de órdenes en tiempo real", "SignalR (WebSockets)")
+Rel(spa, live_video_100ms, "Transmisión de audio y video en tiempo real", "WebRTC")
+
+Rel(backend, postgres, "Lectura y escritura transaccional con EF Core", "TCP Wire Protocol")
+Rel(backend, redis, "Rate limits, nonces efímeros y estado de SignalR", "RESP3")
+Rel(backend, minio, "Sube y descarga evidencias cifradas con URLs prefirmadas", "S3 API (MinIO Client)")
+Rel(backend, agent_service, "Solicita extracción de especificaciones y validación de claims", "HTTPS REST (JSON)")
+Rel(backend, live_video_100ms, "Crea salas efímeras y emite tokens JWT de acceso", "HTTPS REST")
+Rel(backend, smart_contracts, "Consulta estados de escrow y despacha transacciones administrativas", "JSON-RPC (Nethereum)")
+
+Rel(agent_service, llm_provider, "Inferencia de lenguaje para análisis de publicaciones", "HTTPS REST")
+Rel(agent_service, smart_contracts, "Atesta validaciones y consulta reputación ERC-8004", "JSON-RPC (Web3.py)")
+
+Rel(smart_contracts, hsk_chain, "Ejecuta bytecode inmutable en ledger descentralizado", "EVM Engine")
+
+@enduml

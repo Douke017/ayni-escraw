@@ -1,0 +1,26 @@
+@startuml c4_level1_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram - Ayni Trust Marketplace (Ayni-Scrow)
+
+Person(buyer, "Comprador (Buyer)", "Usuario que explora catálogo tecnológico, asiste a Video Verify, bloquea fondos en escrow y recibe el producto en Safe Meet.")
+Person(seller, "Vendedor (Seller)", "Comerciante verificado que posee el equipo físico, acuña Product Passports, negocia bajo políticas y asiste al Safe Meet.")
+Person(arbitrator, "Árbitro (Arbitrator)", "Entidad neutral que audita evidencia criptográfica de disputas y cofirma resoluciones bajo esquema multifirma 2-de-3.")
+
+System(ayni_system, "Ayni Trust Marketplace", "Plataforma de comercio P2P verificable con backend en ASP.NET Core, SignalR, almacenamiento interno MinIO, pasaportes digitales ERC-721 y agentes autónomos registrados en ERC-8004 sobre HSK Chain.")
+
+System_Ext(hsk_chain, "HSK Chain (EVM L2 / Testnet)", "Blockchain donde residen los Smart Contracts de Escrow, Product Passport ERC-721 y ERC-8004 Registries.")
+System_Ext(live_video_100ms, "100ms Live Video Infrastructure", "Plataforma WebRTC para videollamadas efímeras pre-compra con checklist dinámico (Ayni Video Verify).")
+System_Ext(llm_provider, "LLM Inference Provider (Gemini / Claude)", "Modelos fundacionales para estructuración de especificaciones técnicas y asistencia de negociación.")
+
+Rel(buyer, ayni_system, "Explora catálogo, agenda inspección, financia escrow y confirma entrega con QR", "HTTPS / WSS")
+Rel(seller, ayni_system, "Publica equipo físico, asiste a Video Verify, acepta ofertas y muestra QR de handoff", "HTTPS / WSS")
+Rel(arbitrator, ayni_system, "Audita paquetes de evidencia cifrada y cofirma la resolución de disputas", "HTTPS")
+
+Rel(ayni_system, hsk_chain, "Despliega e interactúa con Escrow, ProductPassports y Registros ERC-8004", "JSON-RPC / Viem / Nethereum")
+Rel(ayni_system, live_video_100ms, "Crea salas temporales, emite tokens de sesión y audita asistencia", "HTTPS REST / Webhooks")
+Rel(ayni_system, llm_provider, "Envía prompts estructurados para validación y generación de claims", "HTTPS REST")
+
+@enduml

@@ -1,0 +1,66 @@
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+.vs/
+*.user
+*.suo
+*.csproj.user
+*.fsproj.user
+*.vbproj.user
+*.nupkg
+*.snupkg
+packages/
+
+# Angular / Node.js
+node_modules/
+dist/
+.angular/
+out-tsc/
+coverage/
+*.tsbuildinfo
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+.pnp.*
+*.tgz
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+
+# AI agents and skills
+.agents/
+.agent/
+.ai/
+.claude/
+.cursor/
+.gemini/
+.codex/
+.copilot/
+.continue/
+.windsurf/
+.roo/
+.clinerules/
+.cursorignore
+AGENTS.local.md
+CLAUDE.local.md
+skills/**/.cache/
+skills/**/node_modules/
+skills/**/__pycache__/
+skills/**/*.pyc
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~

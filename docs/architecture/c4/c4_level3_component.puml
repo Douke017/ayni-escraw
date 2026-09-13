@@ -1,0 +1,69 @@
+@startuml c4_level3_component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram - Ayni-Escrow Backend (ASP.NET Core & SignalR)
+
+Container_Boundary(backend_boundary, "Ayni-Escrow Backend (ASP.NET Core)") {
+    Component(auth_ctrl, "Auth Controller", "ASP.NET Core Controller", "Autenticación de usuarios vía firmas EIP-712 (SIWE) usando Nethereum; emite JWT.")
+    Component(catalog_ctrl, "Catalog Controller", "ASP.NET Core Controller", "Gestión de publicaciones, generación de desafíos de Proof of Listing y commitments salados.")
+    Component(escrow_ctrl, "Escrow Controller", "ASP.NET Core Controller", "Creación de órdenes, validación de QR de entrega (Safe Meet) y gestión de disputas.")
+    Component(video_ctrl, "Video Controller", "ASP.NET Core Controller", "Integración con 100ms; emisión de tokens de sesión para inspección remota.")
+    
+    Component(chat_hub, "ChatHub (SignalR)", "SignalR Hub", "Canal bidireccional para chat entre comprador y vendedor y negociación de ofertas.")
+    Component(escrow_hub, "EscrowHub (SignalR)", "SignalR Hub", "Difusión en tiempo real de estados de orden (FUNDED, HANDOFF, SETTLED) y refresco de QR.")
+    Component(inspection_hub, "InspectionHub (SignalR)", "SignalR Hub", "Sincronización en tiempo real del checklist de inspección durante la videollamada.")
+    
+    Component(escrow_svc, "Escrow Service", "C# Service", "Lógica de negocio de escrow: máquina de estados, timelocks de 24h y orquestación de liquidación.")
+    Component(catalog_svc, "Catalog Service", "C# Service", "Validación de esquemas de atributos JSONB y cálculo de productCommitment.")
+    Component(minio_svc, "MinIO Storage Service", "MinIO C# SDK", "Gestión de buckets internos, carga de fotos de Proof of Listing y generación de URLs prefirmadas.")
+    Component(video_svc, "100ms Video Service", "C# Service", "Cliente HTTP para la API de 100ms: creación de salas y generación de tokens de participante.")
+    Component(agent_client, "Agent Integration Client", "C# HttpClient", "Cliente HTTP para comunicarse con el servicio de Agentes en Python.")
+    Component(blockchain_svc, "Blockchain Gateway Service", "Nethereum RPC Client", "Consulta de eventos y envío de transacciones a los contratos en HSK Chain.")
+    
+    Component(ef_context, "AyniDbContext", "Entity Framework Core 8/9", "Mapeo objeto-relacional sobre PostgreSQL con soporte para columnas JSONB.")
+    Component(redis_svc, "Redis Cache & State Service", "StackExchange.Redis", "Almacenamiento de nonces de entrega (60s TTL) y control de rate limits.")
+}
+
+Container(spa, "Angular SPA", "Frontend")
+Container(python_agent, "Python Agent Service", "FastAPI / LangChain")
+ContainerDb(postgres, "PostgreSQL 16", "Database")
+ContainerDb(redis, "Redis 7", "Cache")
+ContainerDb(minio, "MinIO Object Storage", "Internal S3 Storage")
+System_Ext(live_video_100ms, "100ms Cloud", "External WebRTC")
+System_Ext(hsk_chain, "HSK Chain RPC", "Blockchain")
+
+Rel(spa, auth_ctrl, "Login SIWE", "HTTPS REST")
+Rel(spa, catalog_ctrl, "Publicaciones", "HTTPS REST")
+Rel(spa, escrow_ctrl, "Órdenes y entrega", "HTTPS REST")
+Rel(spa, video_ctrl, "Solicitud de salas", "HTTPS REST")
+
+Rel(spa, chat_hub, "Mensajes y ofertas", "SignalR (WSS)")
+Rel(spa, escrow_hub, "Suscripción a órdenes", "SignalR (WSS)")
+Rel(spa, inspection_hub, "Checklist interactivo", "SignalR (WSS)")
+
+Rel(auth_ctrl, ef_context, "Verifica y guarda usuario")
+Rel(catalog_ctrl, catalog_svc, "Delega")
+Rel(escrow_ctrl, escrow_svc, "Delega")
+Rel(video_ctrl, video_svc, "Delega")
+
+Rel(catalog_svc, minio_svc, "Persiste fotos y evidencia cifrada")
+Rel(minio_svc, minio, "Comandos S3 / Chunks", "HTTP S3")
+
+Rel(catalog_svc, agent_client, "Solicita extracción y validación de claims")
+Rel(agent_client, python_agent, "Petición HTTP interna", "JSON")
+
+Rel(escrow_svc, escrow_hub, "Notifica cambios de estado a clientes")
+Rel(chat_hub, escrow_svc, "Vincula bono conversacional a orden")
+Rel(video_svc, live_video_100ms, "Crea salas y tokens", "HTTPS REST")
+Rel(escrow_svc, blockchain_svc, "Verifica depósitos y liquidación")
+Rel(blockchain_svc, hsk_chain, "Llamadas RPC", "JSON-RPC")
+
+Rel(escrow_svc, redis_svc, "Genera y valida nonce QR efímero (60s TTL)")
+Rel(escrow_svc, ef_context, "Operaciones ACID de órdenes")
+Rel(catalog_svc, ef_context, "Persistencia de publicaciones")
+Rel(ef_context, postgres, "SQL / TCP")
+Rel(redis_svc, redis, "Comandos RESP3")
+
+@enduml
