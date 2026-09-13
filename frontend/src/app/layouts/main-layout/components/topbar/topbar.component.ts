@@ -4,11 +4,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Web3Service } from '../../../../core/services/web3.service';
 import { KycService } from '../../../../core/services/kyc.service';
+import { UserModeService } from '../../../../core/services/user-mode.service';
 import { TruncateAddressPipe } from '../../../../shared/pipes/truncate-address.pipe';
 import { UsdtPipe } from '../../../../shared/pipes/usdt.pipe';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { AguayoRibbonComponent } from '../../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
+import { KycBridgeModalComponent } from '../../../../shared/components/kyc-bridge-modal/kyc-bridge-modal.component';
 
 @Component({
   selector: 'ayni-topbar',
@@ -21,6 +23,7 @@ import { AguayoRibbonComponent } from '../../../../shared/components/aguayo-ribb
     BadgeComponent,
     ButtonComponent,
     AguayoRibbonComponent,
+    KycBridgeModalComponent,
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
@@ -30,6 +33,7 @@ export class TopbarComponent implements OnInit {
   protected readonly authService = inject(AuthService);
   protected readonly web3Service = inject(Web3Service);
   protected readonly kycService = inject(KycService);
+  protected readonly userModeService = inject(UserModeService);
 
   public readonly isMenuOpen = signal<boolean>(false);
   public readonly isDropdownOpen = signal<boolean>(false);

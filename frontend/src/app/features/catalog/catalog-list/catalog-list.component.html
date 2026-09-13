@@ -180,7 +180,7 @@
                 </div>
 
                 <h3 class="text-sm sm:text-base font-bold text-ayni-espresso leading-snug truncate">{{ item.title }}</h3>
-                <p class="text-xs text-ayni-muted line-clamp-2 min-h-[2.25rem] leading-relaxed">{{ item.description }}</p>
+                <p class="text-xs text-ayni-muted line-clamp-2 min-h-[2.25rem] leading-relaxed">{{ item.description | stripMarkdown }}</p>
 
                 <div class="flex flex-wrap gap-1.5 my-1">
                   <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-canvas text-ayni-espresso font-semibold border border-ayni-espresso/10 flex items-center gap-1">

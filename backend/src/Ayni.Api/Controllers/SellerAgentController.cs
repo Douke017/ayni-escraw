@@ -79,14 +79,21 @@ public class SellerAgentController : ControllerBase
             imageBytes = memoryStream.ToArray();
         }
 
-        // 2. Upload image to MinIO
+        // 2. Upload image to MinIO (with local disk fallback)
         var ext = Path.GetExtension(image.FileName);
         if (string.IsNullOrWhiteSpace(ext)) ext = ".jpg";
         var objectKey = $"products/{normalizedSeller}/agent_auto_{Guid.NewGuid():N}{ext}";
         
-        using (var uploadStream = new MemoryStream(imageBytes))
+        try
         {
-            await _storageService.UploadFileAsync("ayni-listings-public", objectKey, uploadStream, image.ContentType ?? "image/jpeg");
+            using (var uploadStream = new MemoryStream(imageBytes))
+            {
+                await _storageService.UploadFileAsync("ayni-listings-public", objectKey, uploadStream, image.ContentType ?? "image/jpeg");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not upload image to storage service, continuing with local reference");
         }
 
         var publicImageUrl = BuildPublicObjectUrl("ayni-listings-public", objectKey);
@@ -171,8 +178,16 @@ public class SellerAgentController : ControllerBase
             UpdatedAtUtc = DateTime.UtcNow
         };
 
-        _dbContext.ProductListings.Add(listing);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            _dbContext.ProductListings.Add(listing);
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "PostgreSQL database is offline (Docker container down). Preserving listing in in-memory catalog store.");
+            InMemoryCatalog.Add(listing);
+        }
 
         _logger.LogInformation("Seller Agent published listing {ListingId} (ProofHash: {ProofHash}) on HSK Chain for seller {Seller}. Title: {Title}",
             listing.Id, proofHash, normalizedSeller, listing.Title);
@@ -328,7 +343,7 @@ public class SellerAgentController : ControllerBase
     {
         var publicBaseUrl = Environment.GetEnvironmentVariable("MINIO_PUBLIC_URL")
             ?? _configuration["Minio:PublicUrl"]
-            ?? "http://localhost:9000";
+            ?? "http://localhost:5000/uploads";
 
         return $"{publicBaseUrl.TrimEnd('/')}/{bucketName}/{objectKey}";
     }

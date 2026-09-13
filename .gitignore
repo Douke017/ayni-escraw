@@ -75,3 +75,6 @@ contracts/out/
 contracts/cache/
 contracts/broadcast/
 
+# Uploads
+backend/src/Ayni.Api/wwwroot/uploads/
+

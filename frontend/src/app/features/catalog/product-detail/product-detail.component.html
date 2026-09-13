@@ -112,9 +112,9 @@
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight leading-tight font-serif">
               {{ listing()!.title }}
             </h1>
-            <p class="text-sm sm:text-base leading-relaxed text-ayni-muted">
-              {{ listing()!.description }}
-            </p>
+            <div class="mt-2 text-ayni-muted">
+              <ayni-markdown [content]="listing()!.description"></ayni-markdown>
+            </div>
           </section>
 
           <!-- Technical Specs Matrix -->
@@ -338,6 +338,125 @@
               </div>
             </div>
           </section>
+
+          <!-- Seller Reputation & Verified Reviews Section (Opción A) -->
+          <section id="seller-reviews" class="flex flex-col gap-4 scroll-mt-28">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-bold text-ayni-espresso font-serif">
+                  Reputación y Reseñas del Vendedor
+                </h2>
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-ayni-gold/20 text-ayni-espresso border border-ayni-gold/40">
+                  {{ reputationSummary().totalReviews }} Reseñas
+                </span>
+              </div>
+              <span class="text-xs font-semibold text-emerald-800 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                <span>Solo Compras Verificadas por Escrow</span>
+              </span>
+            </div>
+
+            <!-- Reputation Overview Card -->
+            <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-5">
+              <!-- Top Score Summary Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 pb-5 border-b border-ayni-espresso/10 items-center">
+                <!-- Average Rating Big Pill -->
+                <div class="sm:col-span-4 flex flex-col items-center sm:items-start justify-center gap-1">
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-4xl sm:text-5xl font-extrabold text-ayni-espresso font-serif leading-none">
+                      {{ reputationSummary().averageRating }}
+                    </span>
+                    <span class="text-sm font-bold text-ayni-muted">/ 5.0</span>
+                  </div>
+                  <!-- Stars -->
+                  <div class="flex items-center gap-1 text-amber-500 my-0.5">
+                    <svg class="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg class="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg class="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg class="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg class="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                  <span class="text-xs text-ayni-muted font-medium">Basado en {{ reputationSummary().totalReviews }} ventas en AyniEscrow</span>
+                </div>
+
+                <!-- Trust Metrics (Hardware, Safe Meet, Communication) -->
+                <div class="sm:col-span-8 grid grid-cols-3 gap-2 sm:gap-3">
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10 flex flex-col items-center text-center">
+                    <span class="text-[10px] sm:text-xs text-ayni-muted font-semibold uppercase tracking-wider">Hardware Fiel</span>
+                    <span class="text-base sm:text-lg font-extrabold text-emerald-800">{{ reputationSummary().hardwareAccuracyPct }}%</span>
+                    <span class="text-[10px] text-emerald-700/80 font-medium">Sin fallas</span>
+                  </div>
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10 flex flex-col items-center text-center">
+                    <span class="text-[10px] sm:text-xs text-ayni-muted font-semibold uppercase tracking-wider">Safe Meet QR</span>
+                    <span class="text-base sm:text-lg font-extrabold text-emerald-800">{{ reputationSummary().safeMeetPunctualityPct }}%</span>
+                    <span class="text-[10px] text-emerald-700/80 font-medium">Puntual</span>
+                  </div>
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10 flex flex-col items-center text-center">
+                    <span class="text-[10px] sm:text-xs text-ayni-muted font-semibold uppercase tracking-wider">Trato y Chat</span>
+                    <span class="text-base sm:text-lg font-extrabold text-emerald-800">{{ reputationSummary().communicationPct }}%</span>
+                    <span class="text-[10px] text-emerald-700/80 font-medium">Rápido</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews Feed -->
+              <div class="flex flex-col gap-3">
+                <span class="text-xs font-bold text-ayni-espresso uppercase tracking-wider">Últimas Evaluaciones de Compradores:</span>
+                
+                @for (rev of sellerReviews(); track rev.id) {
+                  <div class="bg-ayni-canvas/50 border border-ayni-espresso/10 rounded-xl p-4 flex flex-col gap-2.5 transition-all hover:bg-ayni-canvas/70">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-ayni-terracotta/15 text-ayni-terracotta flex items-center justify-center font-bold text-xs border border-ayni-terracotta/25">
+                          0x
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-mono text-xs font-bold text-ayni-espresso">{{ rev.buyerAddress | truncateAddress }}</span>
+                          <span class="text-[10px] text-ayni-muted">{{ rev.createdAt }} · {{ rev.productTitle }}</span>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <svg class="w-3 h-3 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                          <span>Compra Verificada</span>
+                        </span>
+                        <div class="flex items-center gap-0.5 text-amber-500">
+                          @for (star of [1,2,3,4,5]; track star) {
+                            <svg class="w-3.5 h-3.5 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-ayni-espresso/85 leading-relaxed bg-white/60 p-3 rounded-lg border border-ayni-espresso/5">
+                      "{{ rev.comment }}"
+                    </p>
+
+                    @if (rev.onChainTxHash) {
+                      <div class="flex items-center justify-between text-[10px] text-ayni-muted font-mono pt-1">
+                        <span>Escrow Settlement Tx: {{ rev.onChainTxHash | truncateAddress }}</span>
+                        <span class="text-emerald-700 font-sans font-bold">Fondos liberados por Safe Meet</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Button to open full modal -->
+              <div class="pt-2 flex justify-center">
+                <button 
+                  type="button" 
+                  (click)="toggleReviewsModal()"
+                  class="text-xs font-bold text-ayni-terracotta hover:text-ayni-terracotta-hover flex items-center gap-1.5 py-2 px-4 rounded-xl border border-ayni-terracotta/30 hover:bg-ayni-terracotta/10 transition-colors cursor-pointer"
+                >
+                  <span>Ver todas las {{ reputationSummary().totalReviews }} reseñas y calificaciones</span>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+            </div>
+          </section>
+
         </div>
 
         <!-- Right Column / Sidebar: Purchase CTA & Trust (Cols 8-12 or 9-12) -->
@@ -404,13 +523,51 @@
               </div>
             </div>
 
-            <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-1.5">
-              <span class="text-[10px] uppercase font-semibold text-ayni-muted tracking-wider">Vendedor Verificado</span>
+            <!-- Upgraded Seller Trust Card (Sidebar) -->
+            <div class="bg-ayni-canvas border border-ayni-espresso/15 rounded-xl p-4 flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
-                <span class="font-mono text-xs sm:text-sm font-bold text-ayni-espresso">
-                  {{ listing()!.sellerAddress | truncateAddress }}
+                <span class="text-[10px] uppercase font-bold text-ayni-muted tracking-wider">Vendedor Verificado</span>
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  <span>KYC Aprobado</span>
                 </span>
-                <ayni-badge variant="neutral" size="sm">Score: 98/100</ayni-badge>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-ayni-espresso text-ayni-gold flex items-center justify-center font-bold text-sm border border-ayni-gold/40 shadow-xs shrink-0">
+                  0x
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-1">
+                    <span class="font-mono text-xs font-bold text-ayni-espresso truncate">
+                      {{ listing()!.sellerAddress | truncateAddress }}
+                    </span>
+                    <button type="button" (click)="copyToClipboard(listing()!.sellerAddress)" class="text-ayni-muted hover:text-ayni-terracotta" title="Copiar dirección">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-1 text-xs">
+                    <div class="flex items-center text-amber-500">
+                      <svg class="w-3.5 h-3.5 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <span class="font-extrabold text-ayni-espresso">{{ reputationSummary().averageRating }}</span>
+                    <span class="text-[11px] text-ayni-muted">({{ reputationSummary().totalReviews }} ventas)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-ayni-espresso/10 flex items-center justify-between text-[11px]">
+                <span class="text-emerald-800 font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>100% Sin disputas</span>
+                </span>
+                <button 
+                  type="button" 
+                  (click)="scrollToReviews()" 
+                  class="font-bold text-ayni-terracotta hover:underline cursor-pointer"
+                >
+                  Ver reseñas ↓
+                </button>
               </div>
             </div>
           </div>
@@ -520,6 +677,67 @@
                 <span>↗</span>
               </a>
               <ayni-button variant="primary" size="sm" (clicked)="toggleAuditModal()">
+                <span>Cerrar</span>
+              </ayni-button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Seller Reviews Modal -->
+      @if (isReviewsModalOpen()) {
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fadeIn" (click)="toggleReviewsModal()">
+          <div 
+            class="bg-ayni-card border-2 border-ayni-gold/70 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-4 text-ayni-espresso max-h-[90vh] overflow-y-auto"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="flex items-center justify-between pb-3 border-b border-ayni-espresso/10">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-ayni-espresso text-ayni-gold flex items-center justify-center font-bold text-sm shrink-0">
+                  0x
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-ayni-espresso">Historial Completo de Reseñas del Vendedor</h3>
+                  <span class="text-xs text-ayni-muted font-mono">{{ listing()!.sellerAddress | truncateAddress }} · {{ reputationSummary().totalReviews }} ventas confirmadas</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                class="w-8 h-8 rounded-full hover:bg-black/10 flex items-center justify-center text-ayni-espresso cursor-pointer" 
+                (click)="toggleReviewsModal()"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Modal Content Feed -->
+            <div class="flex flex-col gap-3 text-xs">
+              @for (rev of sellerReviews(); track rev.id) {
+                <div class="bg-ayni-canvas/70 border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono font-bold text-ayni-espresso">{{ rev.buyerAddress | truncateAddress }}</span>
+                      <span class="text-ayni-muted">• {{ rev.createdAt }}</span>
+                    </div>
+                    <div class="flex items-center gap-0.5 text-amber-500">
+                      @for (s of [1,2,3,4,5]; track s) {
+                        <svg class="w-3 h-3 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      }
+                    </div>
+                  </div>
+                  <p class="text-ayni-espresso/90 leading-relaxed bg-white/70 p-2.5 rounded-lg border border-ayni-espresso/5">
+                    "{{ rev.comment }}"
+                  </p>
+                  <div class="flex items-center justify-between text-[10px] text-ayni-muted font-mono">
+                    <span>Producto: {{ rev.productTitle }}</span>
+                    <span class="text-emerald-700 font-sans font-semibold">Verificado en HSK Chain</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-ayni-espresso/10">
+              <ayni-button variant="primary" size="sm" (clicked)="toggleReviewsModal()">
                 <span>Cerrar</span>
               </ayni-button>
             </div>

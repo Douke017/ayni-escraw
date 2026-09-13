@@ -11,6 +11,7 @@ import { TruncateAddressPipe } from '../../shared/pipes/truncate-address.pipe';
 import { AguayoRibbonComponent } from '../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 import { AguayoPatternComponent } from '../../shared/components/aguayo-pattern/aguayo-pattern.component';
 import { AguayoSideBarComponent } from '../../shared/components/aguayo-side-bar/aguayo-side-bar.component';
+import { StripMarkdownPipe } from '../../shared/pipes/strip-markdown.pipe';
 
 @Component({
   selector: 'ayni-home',
@@ -23,6 +24,7 @@ import { AguayoSideBarComponent } from '../../shared/components/aguayo-side-bar/
     TruncateAddressPipe,
     AguayoRibbonComponent,
     AguayoPatternComponent,
+    StripMarkdownPipe,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

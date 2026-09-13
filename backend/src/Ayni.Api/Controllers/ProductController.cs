@@ -74,10 +74,19 @@ public class ProductController : ControllerBase
             query = query.Where(l => l.Title.ToLower().Contains(searchLower) || l.Description.ToLower().Contains(searchLower));
         }
 
-        var listings = await query
-            .OrderByDescending(l => l.CreatedAtUtc)
-            .Take(50)
-            .ToListAsync();
+        List<ProductListing> listings;
+        try
+        {
+            listings = await query
+                .OrderByDescending(l => l.CreatedAtUtc)
+                .Take(50)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "PostgreSQL database offline. Serving listings from in-memory fallback store.");
+            listings = InMemoryCatalog.GetAll(category, minPrice, maxPrice, search);
+        }
 
         return Ok(listings);
     }
@@ -85,13 +94,26 @@ public class ProductController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetListingById(Guid id)
     {
-        var listing = await _dbContext.ProductListings.FirstOrDefaultAsync(l => l.Id == id);
-        if (listing == null)
+        try
         {
-            return NotFound(new { error = $"Listing with ID {id} not found" });
+            var listing = await _dbContext.ProductListings.FirstOrDefaultAsync(l => l.Id == id);
+            if (listing != null)
+            {
+                return Ok(listing);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "PostgreSQL database offline. Looking up in in-memory fallback store.");
         }
 
-        return Ok(listing);
+        var inMemListing = InMemoryCatalog.GetById(id);
+        if (inMemListing != null)
+        {
+            return Ok(inMemListing);
+        }
+
+        return NotFound(new { error = $"Listing with ID {id} not found" });
     }
 
     [HttpGet("seller/{sellerAddress}")]

@@ -12,6 +12,7 @@ import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
 
 import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
+import { StripMarkdownPipe } from '../../../shared/pipes/strip-markdown.pipe';
 
 @Component({
   selector: 'ayni-catalog-list',
@@ -24,6 +25,7 @@ import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/
     UsdtPipe,
     TruncateAddressPipe,
     AguayoRibbonComponent,
+    StripMarkdownPipe,
   ],
   templateUrl: './catalog-list.component.html',
   styleUrl: './catalog-list.component.scss',

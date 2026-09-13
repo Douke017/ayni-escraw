@@ -222,6 +222,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AyniFrontendPolicy");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

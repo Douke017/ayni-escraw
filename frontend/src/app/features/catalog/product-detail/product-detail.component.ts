@@ -11,6 +11,9 @@ import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
 
 import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
+import { MarkdownComponent } from '../../../shared/components/markdown/markdown.component';
+import { ReviewsService } from '../../../core/services/reviews.service';
+import { SellerReview, SellerReputationSummary } from '../../../core/models/review.model';
 
 @Component({
   selector: 'ayni-product-detail',
@@ -24,6 +27,7 @@ import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/
     UsdtPipe,
     TruncateAddressPipe,
     AguayoRibbonComponent,
+    MarkdownComponent,
   ],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss',
@@ -33,12 +37,24 @@ export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly catalogService = inject(CatalogService);
+  protected readonly reviewsService = inject(ReviewsService);
 
   public readonly listingId = signal<string>('');
   public readonly listing = signal<ProductListing | null>(null);
   public readonly isLoading = signal<boolean>(true);
   public readonly isCopied = signal<boolean>(false);
   public readonly selectedImageIndex = signal<number>(0);
+  public readonly isReviewsModalOpen = signal<boolean>(false);
+
+  public readonly sellerReviews = computed<SellerReview[]>(() => {
+    const addr = this.listing()?.sellerAddress;
+    return this.reviewsService.getReviewsForSeller(addr || '0x6582dcd2587c6094c0fb3ce986035b1a4157d59a');
+  });
+
+  public readonly reputationSummary = computed<SellerReputationSummary>(() => {
+    const addr = this.listing()?.sellerAddress || '0x6582dcd2587c6094c0fb3ce986035b1a4157d59a';
+    return this.reviewsService.getReputationSummary(addr);
+  });
 
   public readonly activeImageUrl = computed<string | null>(() => {
     const item = this.listing();
@@ -150,5 +166,16 @@ export class ProductDetailComponent implements OnInit {
   public startChat(): void {
     const id = this.listingId();
     this.router.navigate(['/chat'], { queryParams: { listingId: id } });
+  }
+
+  public toggleReviewsModal(): void {
+    this.isReviewsModalOpen.update((v) => !v);
+  }
+
+  public scrollToReviews(): void {
+    const el = document.getElementById('seller-reviews');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

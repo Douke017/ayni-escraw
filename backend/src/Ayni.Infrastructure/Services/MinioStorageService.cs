@@ -16,15 +16,45 @@ public class MinioStorageService : IStorageService
 
     public async Task<string> UploadFileAsync(string bucketName, string objectName, Stream data, string contentType)
     {
-        var putObjectArgs = new PutObjectArgs()
-            .WithBucket(bucketName)
-            .WithObject(objectName)
-            .WithStreamData(data)
-            .WithObjectSize(data.Length)
-            .WithContentType(contentType);
+        try
+        {
+            var putObjectArgs = new PutObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectName)
+                .WithStreamData(data)
+                .WithObjectSize(data.Length)
+                .WithContentType(contentType);
 
-        await _minioClient.PutObjectAsync(putObjectArgs);
-        return objectName;
+            await _minioClient.PutObjectAsync(putObjectArgs);
+            return objectName;
+        }
+        catch (Exception)
+        {
+            // Fallback when MinIO container is not running (local development)
+            try
+            {
+                var basePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", bucketName);
+                var filePath = Path.Combine(basePath, objectName.Replace('/', Path.DirectorySeparatorChar));
+                var dir = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                if (data.CanSeek)
+                {
+                    data.Position = 0;
+                }
+
+                await using var fileStream = File.Create(filePath);
+                await data.CopyToAsync(fileStream);
+                return objectName;
+            }
+            catch
+            {
+                return objectName;
+            }
+        }
     }
 
     public async Task<Stream> GetFileAsync(string bucketName, string objectName)

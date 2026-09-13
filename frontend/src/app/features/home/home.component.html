@@ -216,7 +216,7 @@
                 <div class="p-4 sm:p-5 flex flex-col flex-1 gap-2">
                   <span class="text-[10px] sm:text-[11px] uppercase font-bold text-ayni-accent-brown tracking-wider">{{ item.category }} · Ayni Verificado</span>
                   <h3 class="text-sm sm:text-base font-bold text-ayni-espresso leading-snug truncate">{{ item.title }}</h3>
-                  <p class="text-xs text-ayni-muted line-clamp-2 min-h-[2.25rem] leading-relaxed">{{ item.description }}</p>
+                  <p class="text-xs text-ayni-muted line-clamp-2 min-h-[2.25rem] leading-relaxed">{{ item.description | stripMarkdown }}</p>
 
                   <div class="flex flex-wrap gap-1.5 my-1">
                     <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-canvas text-ayni-espresso font-semibold border border-ayni-espresso/10">Condición: {{ item.declaredCondition }}/10</span>

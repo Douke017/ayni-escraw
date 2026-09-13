@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserModeService } from '../../../../core/services/user-mode.service';
 
 @Component({
   selector: 'ayni-bottom-nav',
@@ -13,4 +13,6 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class BottomNavComponent {
   protected readonly authService = inject(AuthService);
+  protected readonly userModeService = inject(UserModeService);
 }
+
