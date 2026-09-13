@@ -7,7 +7,7 @@ export const environment = {
   chainId: 133,
   chainName: 'HSK Testnet',
   rpcUrl: 'https://testnet.hsk.xyz',
-  blockExplorerUrl: 'https://explorer.testnet.hsk.xyz',
+  blockExplorerUrl: 'https://testnet-explorer.hskchain.net',
   contracts: {
     usdt: '0x69F391d998e9AbA14Cc9FA702be9Cf7b1D03d7f0',
     permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
