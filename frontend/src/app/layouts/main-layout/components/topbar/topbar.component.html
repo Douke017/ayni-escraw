@@ -69,7 +69,7 @@
               [class.text-ayni-canvas]="kycService.activeRole() !== 'Seller'"
               class="px-2.5 py-0.5 rounded-full transition cursor-pointer flex items-center gap-1">
               <span>Soy Vendedor</span>
-              <span class="text-[9px] text-emerald-400">✓</span>
+              <svg class="w-3 h-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </button>
           </div>
         } @else {
@@ -78,7 +78,7 @@
             class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 bg-ayni-terracotta/30 hover:bg-ayni-terracotta/50 text-white border border-ayni-terracotta/60 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
             (click)="onVerifyKyc()" 
             title="Completa tu verificación con Didit para vender productos">
-            <span>🛡️</span>
+            <svg class="w-3.5 h-3.5 text-ayni-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
             <span>Verificar para Vender (KYC)</span>
           </button>
         }
@@ -117,9 +117,15 @@
                   <div class="flex items-center justify-between mb-1">
                     <span class="text-[10px] uppercase font-bold text-ayni-gold block">Rol: {{ kycService.activeRole() }}</span>
                     @if (kycService.isApproved()) {
-                      <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40">✓ KYC Verificado</span>
+                      <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40 inline-flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        <span>KYC Verificado</span>
+                      </span>
                     } @else if (kycService.isPending()) {
-                      <span class="text-[9px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.5 rounded border border-amber-500/40">⏳ En Revisión</span>
+                      <span class="text-[9px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.5 rounded border border-amber-500/40 inline-flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>En Revisión</span>
+                      </span>
                     } @else {
                       <span class="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-1.5 py-0.5 rounded border border-rose-500/40">Sin Verificar</span>
                     }
@@ -152,7 +158,7 @@
                       type="button"
                       (click)="onVerifyKyc(); closeDropdown()"
                       class="w-full mt-2 px-3 py-1.5 bg-ayni-terracotta hover:bg-ayni-terracotta/90 text-white rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md">
-                      <span>🛡️</span>
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
                       <span>Verificar Identidad con Didit</span>
                     </button>
                   }
@@ -175,7 +181,7 @@
       } @else {
         <ayni-button 
           variant="primary" 
-          size="sm"
+          size="sm" 
           [loading]="isConnecting()"
           (clicked)="onConnect()"
         >
@@ -199,8 +205,8 @@
 
   <!-- Mobile Drawer Menu (Sliding Overlay) -->
   @if (isMenuOpen()) {
-    <div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] transition-opacity" (click)="closeMenu()"></div>
-    <div class="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-ayni-espresso border-l border-ayni-gold/30 shadow-2xl z-[101] flex flex-col text-ayni-canvas">
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] transition-opacity" (click)="closeMenu()"></div>
+    <div class="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-ayni-espresso border-l border-ayni-gold/30 shadow-2xl z-[1000] flex flex-col text-ayni-canvas pb-20 md:pb-0">
       <div class="p-4 flex items-center justify-between border-b border-ayni-gold/20">
         <div class="flex items-center gap-2">
           <span class="text-xl font-black text-ayni-canvas">AYNI</span>
@@ -226,7 +232,7 @@
           <span>Publicar con Proof of Listing</span>
         </a>
         <a routerLink="/agents" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">🤖</span>
+          <svg class="w-5 h-5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
           <div class="flex items-center gap-2">
             <span>Agentes IA</span>
             <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40">ERC-8004</span>

@@ -1,6 +1,12 @@
 /* SPDX-License-Identifier: MIT */
 @use 'mixins' as *;
 
+:host {
+  display: block;
+  position: relative;
+  z-index: 60;
+}
+
 .topbar {
   position: sticky;
   top: 0;
