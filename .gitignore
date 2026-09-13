@@ -64,3 +64,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Foundry
+contracts/out/
+contracts/cache/
