@@ -28,6 +28,8 @@ export interface ProductListing {
   title: string;
   description: string;
   category: string;
+  brand?: string;
+  model?: string;
   priceUsdt: number;
   declaredCondition: number;
   proofHash: string;
@@ -38,6 +40,8 @@ export interface ProductListing {
   attestationRequestHash?: string;
   attestationVerdict?: ValidationVerdict;
   validatorAgentId?: number;
+  attestationSummary?: string;
+  attestationConfidenceScore?: number;
   createdAtUtc: string;
   updatedAtUtc?: string;
 }
@@ -54,6 +58,8 @@ export interface CreateListingPayload {
   title: string;
   description: string;
   category: string;
+  brand?: string;
+  model?: string;
   priceUsdt: number;
   declaredCondition: number;
   proofHash: string;
@@ -62,3 +68,24 @@ export interface CreateListingPayload {
   hardwareIdentifier?: string;
   checklist?: Record<string, unknown>;
 }
+
+export interface AiAuditStep {
+  stepKey: string;
+  name: string;
+  status: 'PASS' | 'WARN' | 'FAIL';
+  detail: string;
+}
+
+export interface AiAuditResponse {
+  verdict: number;
+  verdictLabel: 'PASS' | 'WARN' | 'FAIL';
+  confidenceScore: number;
+  extractedBrand: string;
+  extractedModel: string;
+  detectedSpecs: Record<string, unknown>;
+  steps: AiAuditStep[];
+  summary: string;
+  requestHash: string;
+  validatorAgentId: number;
+}
+

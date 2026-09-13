@@ -57,10 +57,14 @@ public class AyniDbContext : DbContext
                     v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>())
                 .HasColumnType("jsonb")
                 .Metadata.SetValueComparer(imageUrlsComparer);
+            entity.Property(e => e.Brand).HasMaxLength(100);
+            entity.Property(e => e.Model).HasMaxLength(100);
+            entity.Property(e => e.AttestationSummary).HasMaxLength(2000);
             entity.Property(e => e.TechnicalAttributesJson).HasColumnType("jsonb");
             entity.HasIndex(e => e.SellerAddress);
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.Brand);
         });
 
         // ProductPassport configuration

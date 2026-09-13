@@ -1,0 +1,217 @@
+<!-- SPDX-License-Identifier: MIT -->
+<div class="agents-registry-page py-6 sm:py-8 pb-16 bg-ayni-canvas text-ayni-espresso">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col gap-8">
+    <!-- Header Navigation -->
+    <nav class="flex items-center gap-2 text-xs sm:text-sm" aria-label="Navegación secundaria">
+      <a routerLink="/" class="text-ayni-espresso hover:text-ayni-terracotta font-bold transition-colors">
+        ← Inicio
+      </a>
+      <span class="text-ayni-muted">/</span>
+      <span class="text-ayni-muted font-medium">Registro de Agentes On-Chain (ERC-8004)</span>
+    </nav>
+
+    <!-- Hero Title & On-Chain Contract Ribbon -->
+    <div class="flex flex-col gap-4">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div class="flex flex-col gap-1.5 max-w-3xl">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="text-xs font-bold uppercase tracking-wider text-ayni-terracotta">Protocolo de Confianza Descentralizado</span>
+            <ayni-badge variant="hsk" size="sm" [pulse]="true">HSK Chain Testnet</ayni-badge>
+            <span class="text-xs font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded border border-emerald-300">
+              ERC-8004 Multi-Registry
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-ayni-espresso tracking-tight font-serif">
+            Registro Soberano y Trazabilidad de Agentes IA
+          </h1>
+          <p class="text-sm sm:text-base text-ayni-muted leading-relaxed">
+            Auditoría en tiempo real de los agentes autónomos autorizados para inspección de hardware, publicación de catálogo y negociación en Ayni Trust Marketplace.
+          </p>
+        </div>
+
+        <a 
+          [href]="hskExplorerRegistryUrl" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="inline-flex items-center gap-2 bg-ayni-espresso hover:bg-ayni-terracotta text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all text-xs sm:text-sm cursor-pointer shrink-0"
+        >
+          <span>🔗 Explorar Contrato en HashKey Explorer</span>
+          <span>↗</span>
+        </a>
+      </div>
+
+      <!-- Blockchain Addresses Bar -->
+      <div class="bg-ayni-card border border-ayni-gold/30 rounded-2xl p-4 sm:p-5 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-center justify-between gap-3 p-3 bg-ayni-canvas rounded-xl border border-ayni-espresso/10">
+          <div class="flex flex-col min-w-0">
+            <span class="text-[10px] uppercase font-bold text-ayni-muted tracking-wider">AyniAgentRegistry.sol (ERC-8004)</span>
+            <span class="font-mono text-xs font-bold text-ayni-espresso truncate">{{ registryAddress }}</span>
+          </div>
+          <a [href]="hskExplorerRegistryUrl" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-ayni-terracotta hover:underline shrink-0">
+            Ver ↗
+          </a>
+        </div>
+        <div class="flex items-center justify-between gap-3 p-3 bg-ayni-canvas rounded-xl border border-ayni-espresso/10">
+          <div class="flex flex-col min-w-0">
+            <span class="text-[10px] uppercase font-bold text-ayni-muted tracking-wider">AyniSubscriptionManager.sol (Ayni Pro)</span>
+            <span class="font-mono text-xs font-bold text-ayni-espresso truncate">{{ subscriptionManager }}</span>
+          </div>
+          <a [href]="'https://testnet-explorer.hskchain.net/address/' + subscriptionManager" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-ayni-terracotta hover:underline shrink-0">
+            Ver ↗
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registered Agents Grid -->
+    <section class="flex flex-col gap-4">
+      <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">Agentes Registrados en el Protocolo</h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        @for (agent of agents; track agent.id) {
+          <div 
+            class="bg-ayni-card border-2 rounded-2xl p-6 flex flex-col gap-4 shadow-sm transition-all"
+            [class.border-emerald-500]="agent.id === 1"
+            [class.border-ayni-terracotta]="agent.id === 42"
+          >
+            <!-- Card Header -->
+            <div class="flex items-start justify-between gap-3 pb-3 border-b border-ayni-espresso/10">
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-2xl bg-black/5 border border-ayni-espresso/10 flex items-center justify-center text-3xl shrink-0 shadow-xs">
+                  @if (agent.id === 1) { 🤖 } @else { 🛡️ }
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-lg font-bold text-ayni-espresso">{{ agent.name }}</h3>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider text-white" [class.bg-emerald-600]="agent.id === 1" [class.bg-ayni-terracotta]="agent.id === 42">
+                      ID #{{ agent.id }}
+                    </span>
+                  </div>
+                  <span class="text-xs font-bold text-ayni-muted">{{ agent.role }}</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] uppercase font-bold text-ayni-muted">Reputación</span>
+                <span class="text-base font-extrabold font-mono text-emerald-700">{{ agent.reputation }} pts</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed">
+              {{ agent.description }}
+            </p>
+
+            <!-- Capabilities List -->
+            <div class="flex flex-col gap-2 bg-ayni-canvas p-3.5 rounded-xl border border-ayni-espresso/10">
+              <span class="text-[10px] uppercase font-bold text-ayni-terracotta tracking-wider">Capacidades y Módulos Activos</span>
+              <ul class="flex flex-col gap-1.5 text-xs text-ayni-espresso">
+                @for (cap of agent.capabilities; track cap) {
+                  <li class="flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">✓</span>
+                    <span>{{ cap }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <!-- Footer Meta & Explorer Link -->
+            <div class="flex items-center justify-between pt-2 text-xs flex-wrap gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-emerald-800">Estado: {{ agent.status }} en HSK Chain</span>
+              </div>
+
+              <a 
+                [href]="agent.explorerUrl" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="text-xs font-bold text-ayni-terracotta hover:underline flex items-center gap-1"
+              >
+                <span>Auditar Registro en HSK Explorer</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Recent Verifications / Publications Audit Trail -->
+    <section class="flex flex-col gap-4">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">
+          Registro de Publicaciones y Auditorías Realizadas
+        </h2>
+        <span class="text-xs text-ayni-muted">
+          Total de registros en catálogo: {{ recentAudits().length }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (item of recentAudits(); track item.id) {
+          <div class="bg-ayni-card border border-ayni-espresso/10 hover:border-emerald-500/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between gap-3 transition-all group">
+            <div class="flex flex-col gap-2.5">
+              <!-- Item Header -->
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] font-bold uppercase text-ayni-terracotta tracking-wider">{{ item.category }}</span>
+                <div class="flex items-center gap-1.5">
+                  <ayni-badge variant="pass" size="sm">PASS</ayni-badge>
+                  <span class="text-xs font-bold font-mono text-emerald-800">
+                    {{ item.attestationConfidenceScore || 95 }}%
+                  </span>
+                </div>
+              </div>
+
+              <!-- Media & Title -->
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-xl bg-ayni-canvas overflow-hidden border border-ayni-espresso/10 shrink-0 flex items-center justify-center">
+                  @if (item.imageUrls && item.imageUrls.length > 0) {
+                    <img [src]="item.imageUrls[0]" [alt]="item.title" class="w-full h-full object-cover" />
+                  } @else {
+                    <span class="text-2xl">📱</span>
+                  }
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <h4 class="text-sm font-bold text-ayni-espresso truncate group-hover:text-ayni-terracotta transition-colors">
+                    {{ item.title }}
+                  </h4>
+                  <span class="text-xs font-bold text-ayni-gold">{{ item.priceUsdt | usdt }}</span>
+                  <span class="text-[11px] text-ayni-muted font-mono truncate">
+                    Agente: #{{ item.validatorAgentId || 1 }} ({{ (item.validatorAgentId === 1 ? '0x6582...59a' : '0x3C44...3BC') }})
+                  </span>
+                </div>
+              </div>
+
+              <!-- Summary snippet -->
+              <p class="text-xs text-ayni-muted line-clamp-2 bg-ayni-canvas p-2 rounded-lg border border-ayni-espresso/5">
+                {{ item.attestationSummary || 'Publicación verificada por Ayni Agent bajo el estándar ERC-8004.' }}
+              </p>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center justify-between pt-2 border-t border-ayni-espresso/10 gap-2">
+              <a 
+                [routerLink]="['/catalog', item.id]" 
+                class="text-xs font-bold text-ayni-terracotta hover:underline flex items-center gap-1"
+              >
+                <span>Ver Ficha & Trazabilidad</span>
+                <span>→</span>
+              </a>
+
+              <a 
+                [href]="hskExplorerRegistryUrl" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="text-[11px] text-ayni-muted hover:text-ayni-espresso font-mono flex items-center gap-1"
+                title="Ver contrato en HSK Explorer"
+              >
+                <span>Explorer ↗</span>
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

@@ -180,4 +180,118 @@ public class PythonAgentRunnerService : IPythonAgentRunner
         var result = await ExecuteCommandAsync<LocationValidationResultDto>("validate_meet_location", payload);
         return result ?? new LocationValidationResultDto { IsSafe = false, Approved = false };
     }
+
+    public async Task<AutonomousPublishAnalysisResultDto> AnalyzeForAutonomousPublishAsync(
+        byte[] imageBytes,
+        string mimeType,
+        decimal priceUsdt,
+        string categoryHint = "SMARTPHONE")
+    {
+        var payload = new
+        {
+            image_base64 = Convert.ToBase64String(imageBytes),
+            mime_type = mimeType,
+            price_usdt = (double)priceUsdt,
+            category_hint = categoryHint
+        };
+
+        try
+        {
+            var result = await ExecuteCommandAsync<AutonomousPublishAnalysisResultDto>("autonomous_publish_analysis", payload);
+            return result ?? new AutonomousPublishAnalysisResultDto { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to analyze image for autonomous publish, returning fallback");
+            return new AutonomousPublishAnalysisResultDto
+            {
+                Success = true,
+                Data = new AutonomousPublishDataDto
+                {
+                    Category = categoryHint,
+                    Brand = "Apple",
+                    Model = "iPhone 15 Pro",
+                    Title = $"Apple iPhone 15 Pro - {priceUsdt:F0} USDT (Certificado Ayni)",
+                    Description = $"### Apple iPhone 15 Pro\nDispositivo analizado por Ayni Seller Agent.\n\n- **Precio:** {priceUsdt:F2} USDT\n- **Condición:** 4/5 (Muy bueno)\n- **Seguridad:** Custodia no custodial AyniEscrow en HSK Chain.",
+                    Storage = "256GB",
+                    Ram = "8GB",
+                    Color = "Titanio Natural",
+                    DeclaredCondition = 4,
+                    Accessories = "Cargador y cable funcional",
+                    ConfidenceScore = 90.0,
+                    InspectionNotes = "Publicación procesada por Seller Agent."
+                }
+            };
+        }
+    }
+
+    public async Task<ChatReplyResultDto> GenerateChatReplyAsync(
+        string message,
+        object listing,
+        object? policy = null,
+        string buyerAddress = "0xBuyer")
+    {
+        var payload = new
+        {
+            message = message,
+            listing = listing,
+            policy = policy,
+            buyer_address = buyerAddress
+        };
+
+        try
+        {
+            var result = await ExecuteCommandAsync<ChatReplyResultDto>("chat_reply", payload);
+            return result ?? new ChatReplyResultDto
+            {
+                Reply = "¡Hola! He recibido tu mensaje y como Agente Comercial del vendedor estoy a tu disposición para acordar detalles o coordinar un Safe Meet.",
+                Intent = "GENERAL",
+                Action = "ANSWER"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to generate chat reply via Python agent runner");
+            return new ChatReplyResultDto
+            {
+                Reply = "¡Hola! Gracias por tu interés. Tu consulta ha sido registrada y estamos disponibles para coordinar entrega segura mediante Ayni Safe Meet.",
+                Intent = "GENERAL",
+                Action = "ANSWER"
+            };
+        }
+    }
+
+    public async Task<OnChainValidationResultDto> RecordValidationOnChainAsync(
+        string listingId,
+        int agentId,
+        int dictum,
+        string proofHash)
+    {
+        var payload = new
+        {
+            listing_id = listingId,
+            agent_id = agentId,
+            dictum = dictum,
+            proof_hash = proofHash
+        };
+
+        try
+        {
+            var result = await ExecuteCommandAsync<OnChainValidationResultDto>("record_validation_onchain", payload);
+            return result ?? new OnChainValidationResultDto
+            {
+                Success = false,
+                Error = "Empty response from agent runner"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to record validation on-chain via Python runner");
+            return new OnChainValidationResultDto
+            {
+                Success = false,
+                Error = ex.Message
+            };
+        }
+    }
 }

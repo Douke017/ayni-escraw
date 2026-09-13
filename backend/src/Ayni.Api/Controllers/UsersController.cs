@@ -117,7 +117,7 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPost("kyc/initiate")]
-    public async Task<IActionResult> InitiateKyc()
+    public async Task<IActionResult> InitiateKyc([FromBody] InitiateKycRequestDto? request = null)
     {
         var callerAddress = GetCallerAddress();
         if (string.IsNullOrEmpty(callerAddress))
@@ -125,9 +125,10 @@ public class UsersController : ControllerBase
             return Unauthorized(new { error = "Authentication required" });
         }
 
-        var result = await _kycService.InitiateSessionAsync(callerAddress);
+        var result = await _kycService.InitiateSessionAsync(callerAddress, request?.CallbackUrl);
         return Ok(result);
     }
+
 
     [Authorize]
     [HttpGet("kyc/status")]

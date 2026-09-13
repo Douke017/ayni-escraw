@@ -19,6 +19,13 @@
         @if (isSeller()) {
           <ayni-badge variant="neutral" size="sm">Modo Vendedor</ayni-badge>
         }
+        @if (isAgentEnabled()) {
+          <a [href]="hskRegistryUrl()" target="_blank" rel="noopener noreferrer" class="chat-page__agent-badge-link" title="Ver Agente Comercial #1 en HSK Chain Explorer">
+            <ayni-badge variant="hsk" size="sm">
+              🤖 Agente Comercial ERC-8004
+            </ayni-badge>
+          </a>
+        }
         <ayni-badge variant="pass" size="sm" [pulse]="true">
           SignalR Conectado
         </ayni-badge>
@@ -144,9 +151,9 @@
               >
                 <div class="chat-page__msg-header">
                   @if (msg.isAiAgent) {
-                    <span class="chat-page__msg-sender flex items-center gap-1">
+                    <span class="chat-page__msg-sender flex items-center gap-1.5 text-ayni-terracotta font-bold">
                       <svg class="w-3.5 h-3.5 text-ayni-terracotta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-                      <span>Ayni Tech Agent (#42)</span>
+                      <span>Agente Comercial Ayni Pro (ERC-8004 #1)</span>
                     </span>
                   } @else {
                     <span class="chat-page__msg-sender">{{ msg.senderAddress | truncateAddress }}</span>
@@ -155,6 +162,21 @@
                 </div>
                 <div class="chat-page__msg-bubble">
                   <p class="chat-page__msg-text">{{ msg.messageText }}</p>
+                </div>
+              </div>
+            }
+
+            @if (isAgentResponding()) {
+              <div class="chat-page__msg chat-page__msg--ai chat-page__msg--typing">
+                <div class="chat-page__msg-header">
+                  <span class="chat-page__msg-sender flex items-center gap-1.5 text-ayni-terracotta font-bold">
+                    <svg class="w-3.5 h-3.5 text-ayni-terracotta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                    <span>Agente Comercial Ayni Pro (ERC-8004 #1)</span>
+                  </span>
+                  <span class="chat-page__msg-time">Analizando oferta con Gemini 2.5 Flash...</span>
+                </div>
+                <div class="chat-page__msg-bubble chat-page__typing-dots">
+                  <span></span><span></span><span></span>
                 </div>
               </div>
             }
@@ -190,51 +212,108 @@
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
               </div>
               <div>
-                <h3 class="chat-page__ai-title">Asistente Ayni IA</h3>
-                <span class="chat-page__ai-status">Auditando conversación</span>
+                <h3 class="chat-page__ai-title">Agente Comercial Ayni Pro</h3>
+                <span class="chat-page__ai-status">ERC-8004 Agent ID #1 • En Línea</span>
+              </div>
+            </div>
+
+            <!-- Agent Blockchain Info Card -->
+            <div class="chat-page__ai-blockchain-box">
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Protocolo:</span>
+                <span class="chat-page__ai-bc-val">ERC-8004 Identity & Rep</span>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Red:</span>
+                <span class="chat-page__ai-bc-val">HSK Testnet (HashKey)</span>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Registro:</span>
+                <a [href]="hskRegistryUrl()" target="_blank" rel="noopener noreferrer" class="chat-page__hsk-link">
+                  0x7C98...4b2 ↗
+                </a>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Motor IA:</span>
+                <span class="chat-page__ai-bc-val">Gemini 2.5 Flash</span>
               </div>
             </div>
 
             <div class="chat-page__ai-card">
-              <span class="chat-page__ai-card-title">Dictamen del Hardware</span>
-              <p class="chat-page__ai-card-desc">
-                iPhone 15 Pro Max: Especificaciones certificadas con PASS en ERC-8004. Salted IMEI commitment registrado en el contrato de pasaporte.
-              </p>
-              <div class="chat-page__ai-specs">
-                <span class="chat-page__spec-pill">Batería: 92% Real</span>
-                <span class="chat-page__spec-pill">OLED: Sin marcas</span>
-                <span class="chat-page__spec-pill">iCloud: Libre</span>
-              </div>
+              <span class="chat-page__ai-card-title">Ficha Técnica Certificada</span>
+              @if (listing()) {
+                <p class="chat-page__ai-card-desc">
+                  <strong>{{ listing()!.title }}</strong><br>
+                  Condición física: {{ listing()!.declaredCondition }}/5 ⭐ • Precio base: <strong>{{ listing()!.priceUsdt | usdt }}</strong>
+                </p>
+                @if (specEntries().length > 0) {
+                  <div class="chat-page__ai-specs">
+                    @for (s of specEntries(); track s.key) {
+                      <span class="chat-page__spec-pill">{{ s.key }}: {{ s.value }}</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="chat-page__ai-specs">
+                    <span class="chat-page__spec-pill">Hardware Verificado</span>
+                    <span class="chat-page__spec-pill">Garantía Escrow HSK</span>
+                  </div>
+                }
+              } @else {
+                <p class="chat-page__ai-card-desc">
+                  Selecciona una publicación para ver la ficha certificada y negociar automáticamente con el vendedor.
+                </p>
+              }
             </div>
 
             <!-- Quick Suggestion Buttons -->
             <div class="chat-page__suggestions">
-              <span class="chat-page__sugg-label">Sugerencias de Negociación:</span>
+              <span class="chat-page__sugg-label">Acciones y Ofertas Rápidas:</span>
+              @if (listing()) {
+                <button 
+                  type="button" 
+                  class="chat-page__sugg-btn flex items-center gap-1.5"
+                  (click)="applyQuickSuggestion('Te ofrezco ' + quickOfferPrice95() + ' USDT con depósito Escrow inmediato hoy.')"
+                >
+                  <svg class="w-3.5 h-3.5 text-ayni-gold shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                  <span>Oferta seria: {{ quickOfferPrice95() }} USDT (-5%)</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="chat-page__sugg-btn flex items-center gap-1.5"
+                  (click)="applyQuickSuggestion('¿Aceptas ' + quickOfferPrice90() + ' USDT si cerramos el trato ahora por Safe Meet?')"
+                >
+                  <svg class="w-3.5 h-3.5 text-ayni-terracotta shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>Contraoferta: {{ quickOfferPrice90() }} USDT (-10%)</span>
+                </button>
+              }
               <button 
                 type="button" 
-                class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('¿El dispositivo aún tiene garantía oficial del fabricante?')"
+                class="chat-page__sugg-btn flex items-center gap-1.5"
+                (click)="applyQuickSuggestion('¿Podemos coordinar un punto de Safe Meet en una zona concurrida para probarlo?')"
               >
-                "¿Aún tiene garantía oficial?"
+                <svg class="w-3.5 h-3.5 text-ayni-olive shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Coordinar Safe Meet</span>
               </button>
               <button 
                 type="button" 
-                class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('Te ofrezco 480 USDT con Safe Meet inmediato en estación central.')"
+                class="chat-page__sugg-btn flex items-center gap-1.5"
+                (click)="applyQuickSuggestion('¿Podemos hacer una breve llamada de Video Verify para revisar el encendido y pantalla?')"
               >
-                "Te ofrezco 480 USDT con Safe Meet"
+                <svg class="w-3.5 h-3.5 text-ayni-indigo shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+                <span>Solicitar Video Verify</span>
               </button>
               <button 
                 type="button" 
-                class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('¿Podemos hacer una llamada corta por Video Verify para revisar la pantalla?')"
+                class="chat-page__sugg-btn flex items-center gap-1.5"
+                (click)="applyQuickSuggestion('¿El dispositivo incluye caja o accesorios originales? ¿Cuál es la condición de la batería?')"
               >
-                "¿Podemos hacer Video Verify?"
+                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/></svg>
+                <span>Preguntar por batería y accesorios</span>
               </button>
             </div>
 
             <div class="chat-page__ai-footer">
-              <ayni-button variant="secondary" size="sm" [fullWidth]="true" routerLink="/escrow/checkout">
+              <ayni-button variant="secondary" size="sm" [fullWidth]="true" [routerLink]="orderId() ? ['/escrow/checkout', orderId()] : ['/escrow/checkout']">
                 <span>Ir al Depósito Escrow</span>
               </ayni-button>
             </div>

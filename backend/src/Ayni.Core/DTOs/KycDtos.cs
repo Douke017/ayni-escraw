@@ -48,3 +48,20 @@ public class UserProfileResponseDto
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? LastLoginAtUtc { get; set; }
 }
+
+public class DiditWebhookResultDto
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public string? EventId { get; set; }
+    public string? SessionId { get; set; }
+    public string? Status { get; set; }
+    public string? VendorData { get; set; }
+    public bool IsDuplicate { get; set; }
+}
+
+public class InitiateKycRequestDto
+{
+    public string? CallbackUrl { get; set; }
+}
+
