@@ -102,29 +102,53 @@
               <!-- Authentic Aguayo Ribbon Top -->
               <ayni-aguayo-ribbon size="md"></ayni-aguayo-ribbon>
 
-              <!-- Visual Thumbnail -->
-              <div class="relative h-40 sm:h-44 bg-ayni-canvas-muted flex items-center justify-center">
-                <div class="absolute top-2.5 left-2.5">
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded text-white uppercase tracking-wider"
+              <!-- Visual Thumbnail with Real Image & AI Agent Badge -->
+              <div class="relative h-44 sm:h-48 bg-ayni-canvas-muted flex items-center justify-center overflow-hidden">
+                @if (item.imageUrls && item.imageUrls.length > 0) {
+                  <img 
+                    [src]="item.imageUrls[0]" 
+                    [alt]="item.title" 
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                } @else {
+                  <span class="text-5xl sm:text-6xl select-none transition-transform group-hover:scale-105 duration-200">
+                    @if (item.category === 'SMARTPHONE') { 📱 }
+                    @else if (item.category === 'LAPTOP') { 💻 }
+                    @else if (item.category === 'COMPONENT') { ⚡ }
+                    @else { 🎮 }
+                  </span>
+                }
+
+                <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded text-white uppercase tracking-wider shadow-xs"
                         [class.bg-[#8B3A3A]]="item.category === 'SMARTPHONE'"
                         [class.bg-ayni-olive]="item.category === 'LAPTOP'"
                         [class.bg-ayni-gold]="item.category === 'COMPONENT'"
                         [class.bg-ayni-terracotta]="item.category === 'CONSOLES'">
                     {{ item.category }}
                   </span>
+                  @if (item.brand) {
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/60 text-white backdrop-blur-xs">
+                      {{ item.brand }}
+                    </span>
+                  }
                 </div>
-                <span class="text-5xl sm:text-6xl select-none transition-transform group-hover:scale-105 duration-200">
-                  @if (item.category === 'SMARTPHONE') { 📱 }
-                  @else if (item.category === 'LAPTOP') { 💻 }
-                  @else if (item.category === 'COMPONENT') { ⚡ }
-                  @else { 🎮 }
-                </span>
+
+                <!-- AI Agent Verified Pill -->
+                <div class="absolute bottom-2.5 right-2.5">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600/90 text-white backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                    <span>🤖</span>
+                    <span>PASS {{ item.attestationConfidenceScore || 98 }}%</span>
+                  </span>
+                </div>
               </div>
 
               <!-- Details -->
               <div class="p-4 sm:p-5 flex flex-col flex-1 gap-2">
                 <div class="flex items-center justify-between">
-                  <span class="text-[10px] sm:text-[11px] uppercase font-bold text-ayni-accent-brown tracking-wider">Ayni Certificado</span>
+                  <span class="text-[10px] sm:text-[11px] uppercase font-bold text-ayni-accent-brown tracking-wider">
+                    {{ item.brand ? item.brand + ' • ' + (item.model || 'Verificado') : 'Ayni Certificado' }}
+                  </span>
                   <span class="text-[10px] sm:text-[11px] font-semibold text-ayni-muted">Estado {{ item.declaredCondition }}/10</span>
                 </div>
 

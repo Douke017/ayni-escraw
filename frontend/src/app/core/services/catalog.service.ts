@@ -8,6 +8,7 @@ import {
   ValidationVerdict,
   ProofOfListingChallenge,
   CreateListingPayload,
+  AiAuditResponse,
 } from '../models/listing.model';
 import { environment } from '../../../environments/environment';
 
@@ -96,6 +97,21 @@ export class CatalogService {
     return await this.requestProofChallenge(sellerAddress);
   }
 
+  public async auditWithAi(payload: {
+    title: string;
+    description: string;
+    category: string;
+    brand?: string;
+    model?: string;
+    declaredCondition?: number;
+    challengeNonce?: string;
+    checklist?: Record<string, unknown>;
+  }): Promise<AiAuditResponse> {
+    return await firstValueFrom(
+      this.http.post<AiAuditResponse>(`${this.apiUrl}/products/ai-audit`, payload)
+    );
+  }
+
   public async createListing(
     payload: CreateListingPayload,
     images: File[] = []
@@ -119,4 +135,5 @@ export class CatalogService {
     return res;
   }
 }
+
 

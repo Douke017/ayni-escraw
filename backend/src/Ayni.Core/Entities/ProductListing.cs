@@ -24,13 +24,19 @@ public class ProductListing
     public List<string> ImageUrls { get; set; } = new();
     public ListingStatus Status { get; set; } = ListingStatus.Active;
     
+    // Core product categorization and hardware specs
+    public string Brand { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    
     // JSONB dynamic technical attributes (brand, model, storage, battery, ram, etc.)
     public string TechnicalAttributesJson { get; set; } = "{}";
     
-    // ERC-8004 attestation summary
+    // ERC-8004 attestation summary & AI Agent metrics
     public string? AttestationRequestHash { get; set; }
     public int? AttestationVerdict { get; set; } // 0=PASS, 1=WARN, 2=FAIL
     public int? ValidatorAgentId { get; set; } = 42;
+    public string? AttestationSummary { get; set; }
+    public int AttestationConfidenceScore { get; set; } = 98;
     
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }

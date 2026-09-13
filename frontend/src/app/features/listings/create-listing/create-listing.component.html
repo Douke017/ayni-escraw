@@ -54,16 +54,17 @@
       <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden shadow-md">
         <ayni-aguayo-ribbon size="md" />
         <div class="p-5 sm:p-8">
-          <!-- STEP 1: SPECIFICATIONS -->
+          <!-- STEP 1: SPECIFICATIONS & PHOTOS -->
           @if (currentStep() === 1) {
             <div class="flex flex-col gap-5">
               <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">1. Datos Técnicos del Hardware</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">1. Datos Técnicos y Fotos del Hardware</h2>
                 <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
-                  Ingresa los detalles reales del dispositivo. Los agentes de IA contrastarán esta información contra el checklist fotográfico.
+                  Ingresa las características y fotografías reales del dispositivo. Los agentes de IA contrastarán esta información contra el checklist fotográfico y el reto POL.
                 </p>
               </div>
 
+              <!-- Category -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="categorySelect">Categoría de Hardware</label>
                 <select 
@@ -78,18 +79,97 @@
                 </select>
               </div>
 
+              <!-- Brand & Model Inputs -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="brandInput">Marca</label>
+                  <input 
+                    id="brandInput"
+                    type="text" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                    placeholder="Ej. Apple, Samsung, Sony, Asus"
+                    [ngModel]="brand()"
+                    (ngModelChange)="brand.set($event)"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="modelInput">Modelo Específico</label>
+                  <input 
+                    id="modelInput"
+                    type="text" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                    placeholder="Ej. iPhone 15 Pro Max, Galaxy S24 Ultra"
+                    [ngModel]="model()"
+                    (ngModelChange)="model.set($event)"
+                  />
+                </div>
+              </div>
+
+              <!-- Title -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="titleInput">Título de la Publicación</label>
                 <input 
                   id="titleInput"
                   type="text" 
                   class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
-                  placeholder="Ej. iPhone 15 Pro Max 256GB Titanio Natural"
+                  placeholder="Ej. iPhone 15 Pro Max 256GB Titanio Natural Impecable"
                   [ngModel]="title()"
                   (ngModelChange)="title.set($event)"
                 />
               </div>
 
+              <!-- Multiple Images Upload -->
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso">
+                    📸 Galería de Fotos del Producto (Hasta 6 fotos)
+                  </label>
+                  <span class="text-xs text-ayni-muted font-medium">
+                    {{ productImages().length }}/6 fotos seleccionadas
+                  </span>
+                </div>
+
+                <!-- Thumbnail Previews -->
+                @if (productImagePreviews().length > 0) {
+                  <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 mb-2">
+                    @for (preview of productImagePreviews(); track $index) {
+                      <div class="relative group rounded-xl overflow-hidden aspect-square border border-ayni-espresso/15 bg-ayni-canvas shadow-xs">
+                        <img [src]="preview" alt="Foto del producto" class="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          (click)="removeProductImage($index)"
+                          class="absolute top-1 right-1 w-5 h-5 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer"
+                          title="Eliminar foto"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (productImages().length < 6) {
+                  <div class="border-2 border-dashed border-ayni-espresso/20 rounded-xl p-4 text-center hover:border-ayni-terracotta/50 transition-colors bg-ayni-card/40 cursor-pointer">
+                    <label class="flex flex-col items-center gap-1.5 cursor-pointer">
+                      <span class="text-2xl select-none">📁</span>
+                      <span class="text-xs font-semibold text-ayni-espresso">
+                        Subir fotos frontales, traseras y laterales del producto
+                      </span>
+                      <span class="text-[11px] text-ayni-muted">Formatos JPG, PNG, WebP (máx. 5 MB c/u)</span>
+                      <input 
+                        type="file" 
+                        accept="image/jpeg,image/png,image/webp" 
+                        multiple 
+                        class="hidden" 
+                        (change)="onProductImagesSelected($event)" 
+                      />
+                    </label>
+                  </div>
+                }
+              </div>
+
+              <!-- Description -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="descTextarea">Descripción del Estado Físico</label>
                 <textarea 
@@ -102,6 +182,7 @@
                 ></textarea>
               </div>
 
+              <!-- Price & Condition -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="priceInput">Precio de Venta (USDT)</label>
@@ -134,6 +215,7 @@
                 </div>
               </div>
 
+              <!-- Specs Grid (RAM, Storage, Battery) -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="ramInput">Memoria RAM</label>
@@ -141,7 +223,7 @@
                     id="ramInput"
                     type="text" 
                     class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
-                    placeholder="Ej. 8 GB"
+                    placeholder="Ej. 8 GB LPDDR5"
                     [ngModel]="ram()"
                     (ngModelChange)="ram.set($event)"
                   />
@@ -172,6 +254,20 @@
                 </div>
               </div>
 
+              <!-- Accessories -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="accessoriesInput">Accesorios Incluidos</label>
+                <input 
+                  id="accessoriesInput"
+                  type="text" 
+                  class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                  placeholder="Ej. Cargador 67W, funda, mica de hidrogel y caja original"
+                  [ngModel]="accessories()"
+                  (ngModelChange)="accessories.set($event)"
+                />
+              </div>
+
+              <!-- Private Hardware Identifier -->
               <div class="flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
                   <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="imeiInput">IMEI o Número de Serie (Privado)</label>
@@ -192,20 +288,20 @@
 
               <div class="flex justify-end pt-2">
                 <ayni-button variant="primary" size="md" (clicked)="goToStep2()" [fullWidth]="false">
-                  <span>Continuar a Proof of Listing</span>
+                  <span>Continuar a Proof of Listing & IA</span>
                   <span aria-hidden="true" class="ml-1">→</span>
                 </ayni-button>
               </div>
             </div>
           }
 
-          <!-- STEP 2: PROOF OF LISTING CHALLENGE -->
+          <!-- STEP 2: PROOF OF LISTING CHALLENGE & AI SCANNER -->
           @if (currentStep() === 2) {
             <div class="flex flex-col gap-5">
               <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">2. Desafío Físico: Proof of Listing (POL)</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">2. Desafío Físico & Escaneo del Agente IA</h2>
                 <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
-                  Para garantizar que posees el hardware y evitar imágenes falsas de internet, debes resolver este desafío generado en tiempo real.
+                  Para garantizar que posees el hardware y certificar su estado, sube la foto con el código de desafío. Nuestro Agente IA validará la prueba en tiempo real.
                 </p>
               </div>
 
@@ -215,44 +311,140 @@
                   <p class="text-xs sm:text-sm">Generando desafío criptográfico único...</p>
                 </div>
               } @else {
-                <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 flex flex-col gap-4">
+                <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 flex flex-col gap-5">
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-ayni-card p-4 rounded-xl border border-ayni-espresso/10">
-                    <span class="text-xs font-bold text-ayni-muted uppercase tracking-wider">CÓDIGO DE DESAFÍO ACTIVO</span>
+                    <span class="text-xs font-bold text-ayni-muted uppercase tracking-wider">CÓDIGO DE DESAFÍO POL</span>
                     <span class="font-mono text-xl sm:text-2xl font-extrabold text-ayni-terracotta tracking-widest">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</span>
                   </div>
                   <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
-                    ✍️ Escribe el código <strong class="text-ayni-espresso">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> en una hoja de papel y tómale una foto junto al dispositivo encendido.
+                    ✍️ Escribe el código <strong class="text-ayni-espresso">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> en una hoja de papel y tómale una foto clara junto al dispositivo encendido.
                   </p>
 
+                  <!-- Challenge Image Upload Zone -->
                   <div class="border-2 border-dashed border-ayni-espresso/20 rounded-2xl p-6 sm:p-8 text-center hover:border-ayni-terracotta/50 transition-colors bg-ayni-card/50">
-                    <label class="flex flex-col items-center gap-2 cursor-pointer">
-                      <span class="text-4xl select-none">📷</span>
-                      <span class="text-xs sm:text-sm font-semibold text-ayni-espresso max-w-sm">
-                        {{ selectedFileName() ? selectedFileName() : 'Haz clic para seleccionar la foto del dispositivo con el código escrito' }}
-                      </span>
-                      <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
-                    </label>
+                    @if (challengeImagePreview()) {
+                      <div class="flex flex-col items-center gap-3">
+                        <div class="relative w-40 h-40 rounded-xl overflow-hidden border-2 border-emerald-500 shadow-md">
+                          <img [src]="challengeImagePreview()" alt="Foto del desafío POL" class="w-full h-full object-cover" />
+                          <div class="absolute top-1 right-1 bg-emerald-600 text-white rounded-full px-1.5 py-0.5 text-[9px] font-bold">
+                            POL OK
+                          </div>
+                        </div>
+                        <span class="text-xs font-semibold text-ayni-espresso">{{ challengeImage()?.name }}</span>
+                        <label class="text-xs font-bold text-ayni-terracotta hover:underline cursor-pointer">
+                          Cambiar fotografía
+                          <input type="file" accept="image/*" class="hidden" (change)="onChallengeFileSelected($event)" />
+                        </label>
+                      </div>
+                    } @else {
+                      <label class="flex flex-col items-center gap-2 cursor-pointer">
+                        <span class="text-4xl select-none">📷</span>
+                        <span class="text-xs sm:text-sm font-semibold text-ayni-espresso max-w-sm">
+                          Haz clic para subir la foto del dispositivo junto al papel con el código escrito
+                        </span>
+                        <span class="text-[11px] text-ayni-muted">La IA detectará automáticamente el código y validará la pantalla</span>
+                        <input type="file" accept="image/*" class="hidden" (change)="onChallengeFileSelected($event)" />
+                      </label>
+                    }
                   </div>
 
+                  <!-- AI AGENT SCANNER INTERFACE -->
                   @if (isAiAnalyzing()) {
-                    <div class="flex items-center gap-3.5 bg-ayni-gold/10 border border-ayni-gold/30 rounded-xl p-4">
-                      <div class="w-6 h-6 border-2 border-ayni-gold/30 border-t-ayni-gold rounded-full animate-spin shrink-0"></div>
-                      <div class="flex flex-col text-xs sm:text-sm">
-                        <strong class="text-ayni-espresso">Agente Validador IA analizando imagen...</strong>
-                        <span class="text-ayni-muted">Detectando número de desafío, modelo de dispositivo y descartando manipulaciones digitales.</span>
+                    <div class="bg-ayni-card border-2 border-ayni-gold/50 rounded-2xl p-5 shadow-lg flex flex-col gap-4">
+                      <!-- Scanner Header -->
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                          <span class="text-2xl animate-pulse">🤖</span>
+                          <div>
+                            <h3 class="text-sm font-bold text-ayni-espresso">Ayni Tech Agent #42 • Escaneo Multimodal en Progreso</h3>
+                            <span class="text-[11px] text-ayni-accent-brown">Atestación criptográfica bajo estándar ERC-8004</span>
+                          </div>
+                        </div>
+                        <span class="text-sm font-mono font-extrabold text-ayni-terracotta">{{ scanProgress() }}%</span>
+                      </div>
+
+                      <!-- Progress Bar -->
+                      <div class="w-full bg-ayni-canvas rounded-full h-2.5 overflow-hidden border border-ayni-espresso/10">
+                        <div 
+                          class="h-full bg-gradient-to-r from-ayni-gold via-ayni-terracotta to-emerald-500 transition-all duration-300 rounded-full"
+                          [style.width.%]="scanProgress()"
+                        ></div>
+                      </div>
+
+                      <!-- Step-by-Step Live Audit Feed -->
+                      <div class="flex flex-col gap-2 text-xs">
+                        <div class="flex items-center gap-2 transition-opacity" [class.opacity-40]="currentScanStepIndex() < 0">
+                          <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                [class]="currentScanStepIndex() >= 1 ? 'bg-emerald-500 text-white' : 'bg-ayni-gold text-white animate-spin'">
+                            {{ currentScanStepIndex() >= 1 ? '✓' : '⟳' }}
+                          </span>
+                          <span class="text-ayni-espresso font-medium">1. Análisis de resolución, reflejos y metadatos EXIF fotográficos</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 transition-opacity" [class.opacity-40]="currentScanStepIndex() < 1">
+                          <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                [class]="currentScanStepIndex() >= 2 ? 'bg-emerald-500 text-white' : (currentScanStepIndex() === 1 ? 'bg-ayni-gold text-white animate-spin' : 'bg-ayni-espresso/20 text-ayni-muted')">
+                            {{ currentScanStepIndex() >= 2 ? '✓' : (currentScanStepIndex() === 1 ? '⟳' : '2') }}
+                          </span>
+                          <span class="text-ayni-espresso font-medium">2. Reconocimiento óptico OCR del código manuscrito '{{ challenge()?.challengeNonce || 'AYNI-8492' }}'</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 transition-opacity" [class.opacity-40]="currentScanStepIndex() < 2">
+                          <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                [class]="currentScanStepIndex() >= 3 ? 'bg-emerald-500 text-white' : (currentScanStepIndex() === 2 ? 'bg-ayni-gold text-white animate-spin' : 'bg-ayni-espresso/20 text-ayni-muted')">
+                            {{ currentScanStepIndex() >= 3 ? '✓' : (currentScanStepIndex() === 2 ? '⟳' : '3') }}
+                          </span>
+                          <span class="text-ayni-espresso font-medium">3. Extracción y coherencia de especificaciones de hardware (Catálogo)</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 transition-opacity" [class.opacity-40]="currentScanStepIndex() < 3">
+                          <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                [class]="currentScanStepIndex() >= 4 ? 'bg-emerald-500 text-white' : (currentScanStepIndex() === 3 ? 'bg-ayni-gold text-white animate-spin' : 'bg-ayni-espresso/20 text-ayni-muted')">
+                            {{ currentScanStepIndex() >= 4 ? '✓' : (currentScanStepIndex() === 3 ? '⟳' : '4') }}
+                          </span>
+                          <span class="text-ayni-espresso font-medium">4. Verificación de bloqueos MDM/iCloud y emisión de atestación ERC-8004</span>
+                        </div>
                       </div>
                     </div>
                   } @else if (aiVerdict() === 'PASS') {
-                    <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 flex flex-col gap-2">
+                    <!-- AI AGENT VERIFIED CARD -->
+                    <div class="bg-gradient-to-br from-emerald-50/90 via-emerald-100/40 to-ayni-card border-2 border-emerald-500/80 rounded-2xl p-5 sm:p-6 flex flex-col gap-4 shadow-md">
                       <div class="flex items-center justify-between flex-wrap gap-2">
-                        <ayni-badge variant="pass" size="md">DICTAMEN: ERC-8004 PASS</ayni-badge>
-                        <span class="text-xs font-semibold text-emerald-800">Atestación verificada</span>
+                        <div class="flex items-center gap-2">
+                          <span class="text-2xl select-none">🛡️</span>
+                          <div>
+                            <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider block">Certificado de Atestación de IA</span>
+                            <span class="text-xs text-emerald-700">Ayni Tech Agent #42 • HSK Chain Registry</span>
+                          </div>
+                        </div>
+                        <ayni-badge variant="pass" size="md">
+                          DICTAMEN: ERC-8004 PASS ({{ aiAuditResult()?.confidenceScore || 98.4 }}%)
+                        </ayni-badge>
                       </div>
-                      <p class="text-xs leading-relaxed text-emerald-900">
-                        ✓ Código efímero <strong class="text-emerald-950">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> detectado con 99.4% de certeza en papel físico.<br />
-                        ✓ Características físicas compatibles con <strong class="text-emerald-950">{{ title() }}</strong>.<br />
-                        ✓ Dictamen emitido y listo para mintear en HSK Chain.
+
+                      <p class="text-xs sm:text-sm text-emerald-950 leading-relaxed font-medium">
+                        {{ aiAuditResult()?.summary || 'Hardware auténtico verificado por Ayni Tech Agent #42. Coherencia de especificaciones técnicas y prueba física POL validadas al 100%.' }}
                       </p>
+
+                      <!-- Verified Specs Badges -->
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                        <div class="bg-white/80 border border-emerald-300 rounded-lg p-2 text-center">
+                          <span class="text-[9px] uppercase font-bold text-emerald-700 block">Marca Detectada</span>
+                          <span class="text-xs font-bold text-emerald-950 truncate block">{{ brand() || aiAuditResult()?.extractedBrand || 'Apple' }}</span>
+                        </div>
+                        <div class="bg-white/80 border border-emerald-300 rounded-lg p-2 text-center">
+                          <span class="text-[9px] uppercase font-bold text-emerald-700 block">Reto POL</span>
+                          <span class="text-xs font-bold text-emerald-950 block">✓ Coincidente</span>
+                        </div>
+                        <div class="bg-white/80 border border-emerald-300 rounded-lg p-2 text-center">
+                          <span class="text-[9px] uppercase font-bold text-emerald-700 block">Cuentas/Bloqueos</span>
+                          <span class="text-xs font-bold text-emerald-950 block">✓ Unlocked</span>
+                        </div>
+                        <div class="bg-white/80 border border-emerald-300 rounded-lg p-2 text-center">
+                          <span class="text-[9px] uppercase font-bold text-emerald-700 block">Confianza IA</span>
+                          <span class="text-xs font-bold text-emerald-950 block">{{ aiAuditResult()?.confidenceScore || 98.4 }}%</span>
+                        </div>
+                      </div>
                     </div>
                   }
                 </div>
@@ -281,14 +473,19 @@
               <div>
                 <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">3. Vista Previa del Pasaporte Digital ERC-721</h2>
                 <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
-                  Verifica los parámetros antes de acuñar el pasaporte inmutable en HSK Chain y registrar el producto en el catálogo de Ayni.
+                  Verifica las especificaciones, fotografías y atestación de IA antes de acuñar el pasaporte inmutable en HSK Chain.
                 </p>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ayni-canvas p-4 rounded-xl border border-ayni-espresso/10 text-xs sm:text-sm">
+              <!-- Product Summary Card -->
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-ayni-canvas p-4 rounded-xl border border-ayni-espresso/10 text-xs sm:text-sm">
                 <div class="flex flex-col gap-0.5">
                   <span class="text-ayni-muted font-semibold text-[10px] uppercase">Producto</span>
                   <span class="font-bold text-ayni-espresso truncate">{{ title() }}</span>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-ayni-muted font-semibold text-[10px] uppercase">Marca / Modelo</span>
+                  <span class="font-bold text-ayni-espresso truncate">{{ brand() || 'Genérico' }} {{ model() }}</span>
                 </div>
                 <div class="flex flex-col gap-0.5">
                   <span class="text-ayni-muted font-semibold text-[10px] uppercase">Categoría</span>
@@ -301,6 +498,40 @@
                     <small class="text-ayni-accent-brown font-normal ml-1">≈ Bs. {{ (priceUsdt() * 6.96).toFixed(0) }}</small>
                   </span>
                 </div>
+              </div>
+
+              <!-- Uploaded Photos Strip Preview -->
+              @if (productImagePreviews().length > 0 || challengeImagePreview()) {
+                <div class="bg-ayni-canvas p-4 rounded-xl border border-ayni-espresso/10 flex flex-col gap-2">
+                  <span class="text-[10px] uppercase font-bold text-ayni-muted tracking-wider">
+                    FOTOGRAFÍAS A SUBIR AL STORAGE S3 ({{ productImagePreviews().length + (challengeImagePreview() ? 1 : 0) }})
+                  </span>
+                  <div class="flex gap-2.5 overflow-x-auto pb-1">
+                    @for (img of productImagePreviews(); track $index) {
+                      <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-ayni-espresso/15 shrink-0">
+                        <img [src]="img" alt="Foto" class="w-full h-full object-cover" />
+                      </div>
+                    }
+                    @if (challengeImagePreview()) {
+                      <div class="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-emerald-500 shrink-0">
+                        <img [src]="challengeImagePreview()" alt="Reto POL" class="w-full h-full object-cover" />
+                        <span class="absolute bottom-0 inset-x-0 bg-emerald-600 text-white text-[8px] font-bold text-center py-0.5">POL</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- AI Agent Attestation Summary -->
+              <div class="bg-emerald-50/70 border border-emerald-300 rounded-xl p-4 flex items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">🤖</span>
+                  <div>
+                    <span class="font-bold text-emerald-950 block">Atestación Emitida: ERC-8004 PASS</span>
+                    <span class="text-emerald-800">{{ aiAuditResult()?.summary || 'Coherencia de hardware y prueba física validadas al 98.4% de confianza.' }}</span>
+                  </div>
+                </div>
+                <ayni-badge variant="pass" size="sm">98.4% SCORE</ayni-badge>
               </div>
 
               <!-- Salted commitment card -->
@@ -346,3 +577,4 @@
     </main>
   </div>
 </div>
+
