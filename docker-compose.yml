@@ -67,6 +67,56 @@ services:
       exit 0;
       "
 
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ayni_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-ayni_db}
+      POSTGRES_USER: ${POSTGRES_USER:-ayni_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ayni_secure_pass_2026}
+      REDIS_CONNECTION: redis:6379,abortConnect=false
+      MINIO_ENDPOINT: minio:9000
+      MINIO_PUBLIC_URL: http://localhost:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-ayni_minio_admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-ayni_minio_secret_pass_2026}
+      MINIO_WITH_SSL: "false"
+      JWT_SECRET: ${JWT_SECRET:-Ayni_Super_Secret_Key_For_Jwt_Token_Authentication_2026_Minimum_32_Bytes_Long!}
+      JWT_ISSUER: ${JWT_ISSUER:-AyniBackend}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-AyniFrontend}
+      HSK_RPC_URL: ${HSK_RPC_URL:-https://testnet.hsk.xyz}
+      ARBITRATOR_ADDRESS: ${ARBITRATOR_ADDRESS:-0x70997970C51812dc3A010C7d01b50e0d17dc79C8}
+      PYTHON_PATH: /app/ai-agents/.venv/bin/python3
+      AI_AGENTS_RUNNER_PATH: /app/ai-agents/runner.py
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: ayni_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
 volumes:
   postgres_data:
   redis_data:
