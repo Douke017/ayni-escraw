@@ -153,7 +153,8 @@ class Web3AgentClient:
             })
 
             signed_tx = self.w3.eth.account.sign_transaction(tx_data, private_key=self.private_key)
-            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            raw_bytes = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
+            tx_hash = self.w3.eth.send_raw_transaction(raw_bytes)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
 
             return {

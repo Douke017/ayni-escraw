@@ -77,6 +77,13 @@ export const routes: Routes = [
           import('./features/verify/verify-done.component').then((m) => m.VerifyDoneComponent),
       },
       {
+        path: 'agents',
+        loadComponent: () =>
+          import('./features/agents/agents-registry.component').then(
+            (m) => m.AgentsRegistryComponent
+          ),
+      },
+      {
         path: '**',
         redirectTo: '',
       },

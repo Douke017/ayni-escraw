@@ -13,6 +13,7 @@ import {
   CreateListingPayload,
   AiAuditResponse,
 } from '../../../core/models/listing.model';
+import { SellerAgentService, AutonomousPublishResult } from '../../../core/services/seller-agent.service';
 import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -37,8 +38,23 @@ export class CreateListingComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   protected readonly catalogService = inject(CatalogService);
   protected readonly authService = inject(AuthService);
+  protected readonly sellerAgentService = inject(SellerAgentService);
 
-  // Stepper State
+  // Mode Selection: Autonomous 1-Click (Default) vs Manual 3-Step
+  public readonly isAutonomousMode = signal<boolean>(true);
+
+  // Autonomous 1-Click State
+  public readonly autoImage = signal<File | null>(null);
+  public readonly autoImagePreview = signal<string | null>(null);
+  public readonly autoPriceUsdt = signal<number>(850);
+  public readonly autoCategoryHint = signal<HardwareCategory>('SMARTPHONE');
+  public readonly isAutoPublishing = signal<boolean>(false);
+  public readonly autoPublishSuccess = signal<boolean>(false);
+  public readonly autoPublishResult = signal<AutonomousPublishResult | null>(null);
+  public readonly autoPublishProgress = signal<number>(0);
+  public readonly autoPublishStep = signal<string>('');
+
+  // Stepper State (for manual mode)
   public readonly currentStep = signal<1 | 2 | 3>(1);
   public readonly isSubmitting = signal<boolean>(false);
   public readonly isChallengeLoading = signal<boolean>(false);
@@ -314,6 +330,75 @@ export class CreateListingComponent implements OnInit, OnDestroy {
       alert(msg);
     } finally {
       this.isSubmitting.set(false);
+    }
+  }
+
+  // Autonomous 1-Click Handlers
+  public toggleMode(autonomous: boolean): void {
+    this.isAutonomousMode.set(autonomous);
+  }
+
+  public onAutoImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.autoImage.set(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.autoImagePreview.set(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  public async runAutonomousPublish(): Promise<void> {
+    const file = this.autoImage();
+    const price = this.autoPriceUsdt();
+
+    if (!file) {
+      alert('Por favor selecciona una fotografía real del hardware que deseas vender.');
+      return;
+    }
+    if (!price || price <= 0) {
+      alert('Por favor ingresa un precio válido en USDT.');
+      return;
+    }
+
+    let seller = this.authService.walletAddress();
+    if (!seller) {
+      const ok = await this.authService.connectAndAuthenticate();
+      if (!ok) return;
+      seller = this.authService.walletAddress();
+    }
+
+    this.isAutoPublishing.set(true);
+    this.autoPublishProgress.set(20);
+    this.autoPublishStep.set('Iniciando Gemini Vision multimodal para escaneo de chasis y cámara...');
+
+    try {
+      const res = await this.sellerAgentService.autonomousPublish(
+        file,
+        price,
+        seller!,
+        this.autoCategoryHint()
+      );
+
+      this.autoPublishResult.set(res);
+      this.autoPublishSuccess.set(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error durante el análisis y publicación autónoma';
+      alert(`No se pudo completar la publicación: ${msg}`);
+    } finally {
+      this.isAutoPublishing.set(false);
+    }
+  }
+
+  public viewPublishedProduct(): void {
+    const res = this.autoPublishResult();
+    if (res?.listing?.id) {
+      this.router.navigate(['/catalog', res.listing.id]);
+    } else {
+      this.router.navigate(['/catalog']);
     }
   }
 }

@@ -183,27 +183,46 @@
             </div>
           </section>
 
-          <!-- ERC-8004 AI Validation Audit Trail (Creative Highlight) -->
+          <!-- ERC-8004 AI Validation & Agent Traceability Trail -->
           <section class="flex flex-col gap-3.5">
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg sm:text-xl font-bold text-ayni-espresso font-serif">Certificado de Autenticidad del Agente IA</h2>
-              <span class="text-xs font-mono font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-2.5 py-0.5 rounded-full">
-                ERC-8004 On-Chain
-              </span>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-bold text-ayni-espresso font-serif">
+                  Rastreo y Validación On-Chain del Agente
+                </h2>
+                <ayni-badge variant="hsk" size="sm">ERC-8004</ayni-badge>
+              </div>
+              <a 
+                [href]="hskRegistryUrl" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-ayni-terracotta hover:underline bg-ayni-terracotta/10 px-3 py-1 rounded-full border border-ayni-terracotta/20 transition-all"
+                title="Auditar en HashKey Chain Explorer"
+              >
+                <span>Explorar Contrato HSK</span>
+                <span>↗</span>
+              </a>
             </div>
 
             <div class="bg-gradient-to-br from-ayni-card via-emerald-50/40 to-ayni-card border-2 border-emerald-500/70 rounded-2xl p-5 sm:p-6 shadow-md flex flex-col gap-4">
+              <!-- Agent Header -->
               <div class="flex items-start justify-between flex-wrap gap-3 pb-3 border-b border-emerald-200/60">
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-2xl shrink-0 shadow-xs">
                     🤖
                   </div>
                   <div class="flex flex-col">
-                    <div class="flex items-center gap-2">
-                      <span class="font-extrabold text-sm sm:text-base text-ayni-espresso">Ayni Tech Agent #42</span>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-600 text-white uppercase tracking-wider">Verificador Oficial</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="font-extrabold text-sm sm:text-base text-ayni-espresso">{{ agentName() }}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-600 text-white uppercase tracking-wider">
+                        Agente ID #{{ agentId() }}
+                      </span>
                     </div>
-                    <span class="text-xs text-ayni-muted">Registro: HSK Chain ERC-8004 ValidationRegistry</span>
+                    <div class="flex items-center gap-2 text-xs text-ayni-muted flex-wrap mt-0.5">
+                      <span class="font-mono">{{ agentAddress() | truncateAddress }}</span>
+                      <span>•</span>
+                      <span>Registro: <code>AyniAgentRegistry.sol</code></span>
+                    </div>
                   </div>
                 </div>
 
@@ -216,44 +235,98 @@
                 </div>
               </div>
 
+              <!-- Summary Quote -->
               <p class="text-xs sm:text-sm text-ayni-espresso leading-relaxed bg-white/70 p-3.5 rounded-xl border border-emerald-200/60">
                 {{ attestationSummary() }}
               </p>
 
-              <!-- Verification Checklist -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
-                  <span class="text-emerald-700 font-bold">✓</span>
-                  <span class="text-emerald-950 font-medium">Prueba POL efímera autenticada en papel real</span>
-                </div>
-                <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
-                  <span class="text-emerald-700 font-bold">✓</span>
-                  <span class="text-emerald-950 font-medium">Coherencia de especificaciones con fabricante</span>
-                </div>
-                <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
-                  <span class="text-emerald-700 font-bold">✓</span>
-                  <span class="text-emerald-950 font-medium">Dispositivo libre de cuentas iCloud / MDM / Google</span>
-                </div>
-                <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
-                  <span class="text-emerald-700 font-bold">✓</span>
-                  <span class="text-emerald-950 font-medium">Número de serie protegido bajo Salted Hash</span>
-                </div>
+              <!-- Step-by-Step Execution Trace (Lo que hizo el Agente) -->
+              <div class="flex flex-col gap-2">
+                <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                  Trazabilidad de Ejecución del Agente:
+                </span>
+
+                @if (isSellerAgent()) {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div class="flex items-start gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold mt-0.5">1.</span>
+                      <div>
+                        <strong class="text-emerald-950 block">Inspección Multimodal (Gemini Vision):</strong>
+                        <span class="text-emerald-900/80">Hardware y chasis diagnosticados a partir de la foto del vendedor. Condición declarada: {{ listing()!.declaredCondition }}/5 ⭐.</span>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold mt-0.5">2.</span>
+                      <div>
+                        <strong class="text-emerald-950 block">Extracción de Ficha Técnica:</strong>
+                        <span class="text-emerald-900/80">Marca, modelo, almacenamiento y especificaciones extraídas y verificadas contra fabricante.</span>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold mt-0.5">3.</span>
+                      <div>
+                        <strong class="text-emerald-950 block">Compromiso Criptográfico de IMEI:</strong>
+                        <span class="text-emerald-900/80">Hash salted keccak256 registrado en el contrato de pasaporte sin exponer datos en texto plano.</span>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold mt-0.5">4.</span>
+                      <div>
+                        <strong class="text-emerald-950 block">Publicación & Negociación Activa:</strong>
+                        <span class="text-emerald-900/80">Listado publicado automáticamente con agente comercial listo para responder FAQ y negociar ofertas en chat.</span>
+                      </div>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold">✓</span>
+                      <span class="text-emerald-950 font-medium">Prueba POL efímera autenticada en papel real</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold">✓</span>
+                      <span class="text-emerald-950 font-medium">Coherencia de especificaciones con fabricante</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold">✓</span>
+                      <span class="text-emerald-950 font-medium">Dispositivo libre de cuentas iCloud / MDM / Google</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-emerald-50/80 p-2.5 rounded-lg border border-emerald-200/60">
+                      <span class="text-emerald-700 font-bold">✓</span>
+                      <span class="text-emerald-950 font-medium">Número de serie protegido bajo Salted Hash</span>
+                    </div>
+                  </div>
+                }
               </div>
 
-              @if (listing()!.attestationRequestHash) {
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-emerald-200/60 text-[11px]">
-                  <span class="text-ayni-muted font-mono truncate">
-                    Attestation Hash: <code class="text-ayni-espresso">{{ listing()!.attestationRequestHash }}</code>
-                  </span>
+              <!-- Action bar for Hashes and Trace Modal -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-emerald-200/60 text-xs">
+                <div class="flex items-center gap-2 flex-wrap">
                   <button 
                     type="button" 
-                    (click)="copyToClipboard(listing()!.attestationRequestHash!)"
-                    class="text-emerald-800 font-bold hover:underline shrink-0 cursor-pointer"
+                    (click)="toggleAuditModal()"
+                    class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                   >
-                    Copiar Hash ERC-8004
+                    <span>🔍</span>
+                    <span>Ver Ficha Criptográfica & JSON del Agente</span>
                   </button>
+                  <a 
+                    [href]="hskRegistryUrl" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-emerald-900 font-bold hover:underline px-2 py-1.5 flex items-center gap-1"
+                  >
+                    <span>Auditar en Explorer</span>
+                    <span>↗</span>
+                  </a>
                 </div>
-              }
+
+                @if (listing()!.attestationRequestHash || listing()!.proofHash) {
+                  <span class="font-mono text-emerald-950/70 truncate max-w-xs" [title]="listing()!.attestationRequestHash || listing()!.proofHash">
+                    Hash: {{ (listing()!.attestationRequestHash || listing()!.proofHash) | truncateAddress }}
+                  </span>
+                }
+              </div>
             </div>
           </section>
         </div>
@@ -334,6 +407,114 @@
           </div>
         </aside>
       </div>
+
+      <!-- Cryptographic Traceability Modal -->
+      @if (isAuditModalOpen()) {
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fadeIn" (click)="toggleAuditModal()">
+          <div 
+            class="bg-ayni-card border-2 border-emerald-500/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-4 text-ayni-espresso max-h-[90vh] overflow-y-auto"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="flex items-center justify-between pb-3 border-b border-ayni-espresso/10">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🤖</span>
+                <div>
+                  <h3 class="text-lg font-bold text-ayni-espresso">Rastreo de Validación y Dictamen del Agente IA</h3>
+                  <span class="text-xs text-ayni-muted font-mono">ERC-8004 Standard • HSK Chain Testnet</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                class="w-8 h-8 rounded-full hover:bg-black/10 flex items-center justify-center font-bold text-lg cursor-pointer" 
+                (click)="toggleAuditModal()"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div class="flex flex-col gap-3 text-xs">
+              <!-- Agent On-Chain Identity Box -->
+              <div class="bg-ayni-canvas p-3.5 rounded-xl border border-ayni-espresso/10 flex flex-col gap-2">
+                <span class="font-bold text-ayni-terracotta uppercase tracking-wider text-[10px]">Identidad del Agente On-Chain</span>
+                <div class="flex justify-between items-center py-1 border-b border-ayni-espresso/5">
+                  <span class="text-ayni-muted">Nombre del Agente:</span>
+                  <span class="font-bold text-ayni-espresso">{{ agentName() }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-ayni-espresso/5">
+                  <span class="text-ayni-muted">ERC-8004 Agent ID:</span>
+                  <span class="font-mono font-bold text-ayni-espresso">#{{ agentId() }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-ayni-espresso/5">
+                  <span class="text-ayni-muted">Dirección del Agente:</span>
+                  <span class="font-mono font-bold text-ayni-espresso break-all">{{ agentAddress() }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                  <span class="text-ayni-muted">Contrato de Registro HSK:</span>
+                  <a [href]="hskRegistryUrl" target="_blank" rel="noopener noreferrer" class="font-mono font-bold text-emerald-800 hover:underline break-all">
+                    {{ registryAddress }} ↗
+                  </a>
+                </div>
+              </div>
+
+              <!-- Cryptographic Hashes Box -->
+              <div class="bg-ayni-canvas p-3.5 rounded-xl border border-ayni-espresso/10 flex flex-col gap-2">
+                <span class="font-bold text-ayni-terracotta uppercase tracking-wider text-[10px]">Pruebas Criptográficas y Atestación</span>
+                <div class="flex flex-col gap-1 py-1 border-b border-ayni-espresso/5">
+                  <div class="flex justify-between items-center">
+                    <span class="text-ayni-muted font-medium">Attestation / Proof Hash:</span>
+                    <button 
+                      type="button" 
+                      (click)="copyToClipboard(listing()!.attestationRequestHash || listing()!.proofHash)"
+                      class="text-emerald-800 font-bold hover:underline"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                  <code class="font-mono text-[11px] bg-ayni-card p-2 rounded border border-ayni-espresso/10 break-all text-ayni-espresso">
+                    {{ listing()!.attestationRequestHash || listing()!.proofHash }}
+                  </code>
+                </div>
+                <div class="flex flex-col gap-1 py-1">
+                  <div class="flex justify-between items-center">
+                    <span class="text-ayni-muted font-medium">Salted Commitment Salt:</span>
+                    <button 
+                      type="button" 
+                      (click)="copyToClipboard(listing()!.commitmentSalt)"
+                      class="text-emerald-800 font-bold hover:underline"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                  <code class="font-mono text-[11px] bg-ayni-card p-2 rounded border border-ayni-espresso/10 break-all text-ayni-espresso">
+                    {{ listing()!.commitmentSalt }}
+                  </code>
+                </div>
+              </div>
+
+              <!-- Structured AI Extraction JSON -->
+              <div class="bg-ayni-canvas p-3.5 rounded-xl border border-ayni-espresso/10 flex flex-col gap-2">
+                <span class="font-bold text-ayni-terracotta uppercase tracking-wider text-[10px]">Metadatos Estructurados Extraídos por IA</span>
+                <pre class="font-mono text-[11px] bg-black/90 text-emerald-400 p-3 rounded-lg overflow-x-auto max-h-48 leading-relaxed whitespace-pre-wrap">{{ listing()!.technicalAttributesJson }}</pre>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-ayni-espresso/10">
+              <a 
+                [href]="hskRegistryUrl" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="text-xs font-bold text-emerald-800 hover:underline flex items-center gap-1"
+              >
+                <span>Auditar Registro Completo en HashKey Explorer</span>
+                <span>↗</span>
+              </a>
+              <ayni-button variant="primary" size="sm" (clicked)="toggleAuditModal()">
+                <span>Cerrar</span>
+              </ayni-button>
+            </div>
+          </div>
+        </div>
+      }
     }
   </div>
 </div>

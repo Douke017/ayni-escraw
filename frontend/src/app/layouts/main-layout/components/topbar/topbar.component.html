@@ -26,6 +26,15 @@
         <span>Publicar</span>
         <span class="text-[10px] bg-ayni-gold/20 text-ayni-gold font-bold px-1.5 py-0.5 rounded border border-ayni-gold/40">POL</span>
       </a>
+      <a 
+        routerLink="/agents" 
+        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+        class="hover:text-white transition-colors py-1 flex items-center gap-1.5 cursor-pointer"
+        title="Registro y Trazabilidad de Agentes en HSK Chain"
+      >
+        <span>Agentes IA</span>
+        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40">ERC-8004</span>
+      </a>
       @if (web3Service.isConnected() || authService.isAuthenticated()) {
         <a 
           routerLink="/escrow" 
@@ -213,6 +222,13 @@
         <a routerLink="/listings/new" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
           <span class="text-lg">➕</span>
           <span>Publicar con Proof of Listing</span>
+        </a>
+        <a routerLink="/agents" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">🤖</span>
+          <div class="flex items-center gap-2">
+            <span>Agentes IA</span>
+            <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40">ERC-8004</span>
+          </div>
         </a>
         @if (web3Service.isConnected() || authService.isAuthenticated()) {
           <a routerLink="/escrow" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">

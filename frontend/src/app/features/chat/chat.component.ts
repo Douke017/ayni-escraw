@@ -15,6 +15,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { CardComponent } from '../../shared/components/card/card.component';
 import { TruncateAddressPipe } from '../../shared/pipes/truncate-address.pipe';
 import { UsdtPipe } from '../../shared/pipes/usdt.pipe';
+import { SellerAgentService } from '../../core/services/seller-agent.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -41,6 +42,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
   protected readonly catalogService = inject(CatalogService);
   protected readonly web3Service = inject(Web3Service);
+  protected readonly sellerAgentService = inject(SellerAgentService);
 
   public readonly orderId = signal<string>('');
   public readonly listing = signal<ProductListing | null>(null);
@@ -48,6 +50,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   public readonly isBondDeposited = signal<boolean>(false);
   public readonly isDepositingBond = signal<boolean>(false);
   public readonly isClaimingRefund = signal<boolean>(false);
+
+  // Autonomous Seller Agent state
+  public readonly isAgentEnabled = signal<boolean>(true);
+  public readonly isAgentResponding = signal<boolean>(false);
+  public readonly lastAgentAction = signal<string | null>(null);
 
   // Determine if connected user is the seller of this listing
   public readonly isSeller = computed(() => {
@@ -66,7 +73,41 @@ export class ChatComponent implements OnInit, OnDestroy {
     return this.signalR.chatMessages().filter((m) => m.orderId === this.orderId());
   });
 
+  public readonly hskRegistryUrl = computed(() => {
+    return (
+      this.sellerAgentService.hskInfo()?.agentRegistryUrl ||
+      'https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2'
+    );
+  });
+
+  public readonly quickOfferPrice90 = computed(() => {
+    const p = this.listing()?.priceUsdt;
+    return p ? Math.round(p * 0.9) : 0;
+  });
+
+  public readonly quickOfferPrice95 = computed(() => {
+    const p = this.listing()?.priceUsdt;
+    return p ? Math.round(p * 0.95) : 0;
+  });
+
+  public readonly parsedSpecs = computed<Record<string, unknown>>(() => {
+    const json = this.listing()?.technicalAttributesJson;
+    if (!json) return {};
+    try {
+      return JSON.parse(json);
+    } catch {
+      return {};
+    }
+  });
+
+  public readonly specEntries = computed<{ key: string; value: string }[]>(() => {
+    const specs = this.parsedSpecs();
+    return Object.entries(specs).map(([key, val]) => ({ key, value: String(val) }));
+  });
+
   public ngOnInit(): void {
+    this.sellerAgentService.getHskInfo();
+
     const queryOrderId =
       this.route.snapshot.queryParamMap.get('listingId') ||
       this.route.snapshot.paramMap.get('orderId');
@@ -170,6 +211,24 @@ export class ChatComponent implements OnInit, OnDestroy {
       await this.bondService.fetchBondStatus(this.orderId());
     } catch (e) {
       console.warn('Could not record reply metadata in backend:', e);
+    }
+
+    // Trigger Autonomous Seller Agent reply if buyer is chatting
+    if (!this.isSeller() && this.isAgentEnabled()) {
+      this.isAgentResponding.set(true);
+      try {
+        const replyRes = await this.sellerAgentService.getChatReply(
+          this.orderId(),
+          text,
+          sender!
+        );
+        this.lastAgentAction.set(replyRes.action);
+        await this.bondService.fetchBondStatus(this.orderId());
+      } catch (err) {
+        console.warn('Seller agent auto-reply failed:', err);
+      } finally {
+        this.isAgentResponding.set(false);
+      }
     }
   }
 

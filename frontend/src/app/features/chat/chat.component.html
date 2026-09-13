@@ -19,6 +19,13 @@
         @if (isSeller()) {
           <ayni-badge variant="neutral" size="sm">Modo Vendedor</ayni-badge>
         }
+        @if (isAgentEnabled()) {
+          <a [href]="hskRegistryUrl()" target="_blank" rel="noopener noreferrer" class="chat-page__agent-badge-link" title="Ver Agente Comercial #1 en HSK Chain Explorer">
+            <ayni-badge variant="hsk" size="sm">
+              🤖 Agente Comercial ERC-8004
+            </ayni-badge>
+          </a>
+        }
         <ayni-badge variant="pass" size="sm" [pulse]="true">
           SignalR Conectado
         </ayni-badge>
@@ -137,7 +144,7 @@
               >
                 <div class="chat-page__msg-header">
                   @if (msg.isAiAgent) {
-                    <span class="chat-page__msg-sender">🤖 Ayni Tech Agent (#42)</span>
+                    <span class="chat-page__msg-sender">🤖 Agente Comercial Ayni Pro (ERC-8004 #1)</span>
                   } @else {
                     <span class="chat-page__msg-sender">{{ msg.senderAddress | truncateAddress }}</span>
                   }
@@ -145,6 +152,18 @@
                 </div>
                 <div class="chat-page__msg-bubble">
                   <p class="chat-page__msg-text">{{ msg.messageText }}</p>
+                </div>
+              </div>
+            }
+
+            @if (isAgentResponding()) {
+              <div class="chat-page__msg chat-page__msg--ai chat-page__msg--typing">
+                <div class="chat-page__msg-header">
+                  <span class="chat-page__msg-sender">🤖 Agente Comercial Ayni Pro (ERC-8004 #1)</span>
+                  <span class="chat-page__msg-time">Analizando oferta con Gemini 2.5 Flash...</span>
+                </div>
+                <div class="chat-page__msg-bubble chat-page__typing-dots">
+                  <span></span><span></span><span></span>
                 </div>
               </div>
             }
@@ -176,51 +195,103 @@
             <div class="chat-page__ai-header">
               <span class="chat-page__ai-avatar">🤖</span>
               <div>
-                <h3 class="chat-page__ai-title">Asistente Ayni IA</h3>
-                <span class="chat-page__ai-status">Auditando conversación</span>
+                <h3 class="chat-page__ai-title">Agente Comercial Ayni Pro</h3>
+                <span class="chat-page__ai-status">ERC-8004 Agent ID #1 • En Línea</span>
+              </div>
+            </div>
+
+            <!-- Agent Blockchain Info Card -->
+            <div class="chat-page__ai-blockchain-box">
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Protocolo:</span>
+                <span class="chat-page__ai-bc-val">ERC-8004 Identity & Rep</span>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Red:</span>
+                <span class="chat-page__ai-bc-val">HSK Testnet (HashKey)</span>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Registro:</span>
+                <a [href]="hskRegistryUrl()" target="_blank" rel="noopener noreferrer" class="chat-page__hsk-link">
+                  0x7C98...4b2 ↗
+                </a>
+              </div>
+              <div class="chat-page__ai-bc-row">
+                <span class="chat-page__ai-bc-label">Motor IA:</span>
+                <span class="chat-page__ai-bc-val">Gemini 2.5 Flash</span>
               </div>
             </div>
 
             <div class="chat-page__ai-card">
-              <span class="chat-page__ai-card-title">Dictamen del Hardware</span>
-              <p class="chat-page__ai-card-desc">
-                iPhone 15 Pro Max: Especificaciones certificadas con PASS en ERC-8004. Salted IMEI commitment registrado en el contrato de pasaporte.
-              </p>
-              <div class="chat-page__ai-specs">
-                <span class="chat-page__spec-pill">Batería: 92% Real</span>
-                <span class="chat-page__spec-pill">OLED: Sin marcas</span>
-                <span class="chat-page__spec-pill">iCloud: Libre</span>
-              </div>
+              <span class="chat-page__ai-card-title">Ficha Técnica Certificada</span>
+              @if (listing()) {
+                <p class="chat-page__ai-card-desc">
+                  <strong>{{ listing()!.title }}</strong><br>
+                  Condición física: {{ listing()!.declaredCondition }}/5 ⭐ • Precio base: <strong>{{ listing()!.priceUsdt | usdt }}</strong>
+                </p>
+                @if (specEntries().length > 0) {
+                  <div class="chat-page__ai-specs">
+                    @for (s of specEntries(); track s.key) {
+                      <span class="chat-page__spec-pill">{{ s.key }}: {{ s.value }}</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="chat-page__ai-specs">
+                    <span class="chat-page__spec-pill">Hardware Verificado</span>
+                    <span class="chat-page__spec-pill">Garantía Escrow HSK</span>
+                  </div>
+                }
+              } @else {
+                <p class="chat-page__ai-card-desc">
+                  Selecciona una publicación para ver la ficha certificada y negociar automáticamente con el vendedor.
+                </p>
+              }
             </div>
 
             <!-- Quick Suggestion Buttons -->
             <div class="chat-page__suggestions">
-              <span class="chat-page__sugg-label">Sugerencias de Negociación:</span>
+              <span class="chat-page__sugg-label">Acciones y Ofertas Rápidas:</span>
+              @if (listing()) {
+                <button 
+                  type="button" 
+                  class="chat-page__sugg-btn"
+                  (click)="applyQuickSuggestion('Te ofrezco ' + quickOfferPrice95() + ' USDT con depósito Escrow inmediato hoy.')"
+                >
+                  💡 Oferta seria: {{ quickOfferPrice95() }} USDT (-5%)
+                </button>
+                <button 
+                  type="button" 
+                  class="chat-page__sugg-btn"
+                  (click)="applyQuickSuggestion('¿Aceptas ' + quickOfferPrice90() + ' USDT si cerramos el trato ahora por Safe Meet?')"
+                >
+                  ⚡ Contraoferta: {{ quickOfferPrice90() }} USDT (-10%)
+                </button>
+              }
               <button 
                 type="button" 
                 class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('¿El dispositivo aún tiene garantía oficial del fabricante?')"
+                (click)="applyQuickSuggestion('¿Podemos coordinar un punto de Safe Meet en una zona concurrida para probarlo?')"
               >
-                "¿Aún tiene garantía oficial?"
+                📍 Coordinar Safe Meet
               </button>
               <button 
                 type="button" 
                 class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('Te ofrezco 480 USDT con Safe Meet inmediato en estación central.')"
+                (click)="applyQuickSuggestion('¿Podemos hacer una breve llamada de Video Verify para revisar el encendido y pantalla?')"
               >
-                "Te ofrezco 480 USDT con Safe Meet"
+                📹 Solicitar Video Verify
               </button>
               <button 
                 type="button" 
                 class="chat-page__sugg-btn"
-                (click)="applyQuickSuggestion('¿Podemos hacer una llamada corta por Video Verify para revisar la pantalla?')"
+                (click)="applyQuickSuggestion('¿El dispositivo incluye caja o accesorios originales? ¿Cuál es la condición de la batería?')"
               >
-                "¿Podemos hacer Video Verify?"
+                🔋 Preguntar por batería y accesorios
               </button>
             </div>
 
             <div class="chat-page__ai-footer">
-              <ayni-button variant="secondary" size="sm" [fullWidth]="true" routerLink="/escrow/checkout">
+              <ayni-button variant="secondary" size="sm" [fullWidth]="true" [routerLink]="['/escrow/checkout', orderId()]">
                 <span>Ir al Depósito Escrow ⚡</span>
               </ayni-button>
             </div>

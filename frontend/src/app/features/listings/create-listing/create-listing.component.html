@@ -10,52 +10,312 @@
       </p>
     </header>
 
-    <!-- Stepper Navigation (Responsive horizontal) -->
-    <div class="flex items-center justify-between max-w-xl mx-auto mb-8 sm:mb-10 px-2">
-      <!-- Step 1 -->
-      <div class="flex items-center gap-2"
-           [class]="currentStep() >= 1 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
-        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
-              [class]="currentStep() === 1 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 1 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
-          {{ currentStep() > 1 ? '✓' : '1' }}
-        </span>
-        <span class="text-xs sm:text-sm hidden sm:inline">Especificaciones</span>
-      </div>
-
-      <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
-           [class]="currentStep() > 1 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
-
-      <!-- Step 2 -->
-      <div class="flex items-center gap-2"
-           [class]="currentStep() >= 2 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
-        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
-              [class]="currentStep() === 2 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 2 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
-          {{ currentStep() > 2 ? '✓' : '2' }}
-        </span>
-        <span class="text-xs sm:text-sm hidden sm:inline">POL Challenge</span>
-      </div>
-
-      <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
-           [class]="currentStep() > 2 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
-
-      <!-- Step 3 -->
-      <div class="flex items-center gap-2"
-           [class]="currentStep() === 3 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
-        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
-              [class]="currentStep() === 3 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : 'bg-ayni-espresso/10 text-ayni-muted'">
-          3
-        </span>
-        <span class="text-xs sm:text-sm hidden sm:inline">Pasaporte ERC-721</span>
-      </div>
+    <!-- Mode Switcher Tabs -->
+    <div class="flex items-center justify-center p-1.5 bg-ayni-card border border-ayni-espresso/15 rounded-2xl max-w-lg mx-auto mb-8 shadow-sm">
+      <button 
+        type="button"
+        (click)="toggleMode(true)"
+        class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+        [class]="isAutonomousMode() ? 'bg-emerald-700 text-white shadow' : 'text-ayni-muted hover:text-ayni-espresso'"
+      >
+        <span>⚡ Publicar con Seller Agent</span>
+        <span class="bg-white/20 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-extrabold">1-Click</span>
+      </button>
+      <button 
+        type="button"
+        (click)="toggleMode(false)"
+        class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+        [class]="!isAutonomousMode() ? 'bg-ayni-espresso text-white shadow' : 'text-ayni-muted hover:text-ayni-espresso'"
+      >
+        <span>📋 Modo Tradicional</span>
+        <span class="text-[10px] opacity-75">(3 Pasos)</span>
+      </button>
     </div>
+
+    @if (!isAutonomousMode()) {
+      <!-- Stepper Navigation (Responsive horizontal) -->
+      <div class="flex items-center justify-between max-w-xl mx-auto mb-8 sm:mb-10 px-2">
+        <!-- Step 1 -->
+        <div class="flex items-center gap-2"
+             [class]="currentStep() >= 1 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+          <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+                [class]="currentStep() === 1 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 1 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
+            {{ currentStep() > 1 ? '✓' : '1' }}
+          </span>
+          <span class="text-xs sm:text-sm hidden sm:inline">Especificaciones</span>
+        </div>
+
+        <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
+             [class]="currentStep() > 1 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
+
+        <!-- Step 2 -->
+        <div class="flex items-center gap-2"
+             [class]="currentStep() >= 2 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+          <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+                [class]="currentStep() === 2 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 2 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
+            {{ currentStep() > 2 ? '✓' : '2' }}
+          </span>
+          <span class="text-xs sm:text-sm hidden sm:inline">POL Challenge</span>
+        </div>
+
+        <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
+             [class]="currentStep() > 2 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
+
+        <!-- Step 3 -->
+        <div class="flex items-center gap-2"
+             [class]="currentStep() === 3 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+          <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+                [class]="currentStep() === 3 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : 'bg-ayni-espresso/10 text-ayni-muted'">
+            3
+          </span>
+          <span class="text-xs sm:text-sm hidden sm:inline">Pasaporte ERC-721</span>
+        </div>
+      </div>
+    }
 
     <!-- Form Container -->
     <main class="w-full">
       <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden shadow-md">
         <ayni-aguayo-ribbon size="md" />
         <div class="p-5 sm:p-8">
-          <!-- STEP 1: SPECIFICATIONS & PHOTOS -->
-          @if (currentStep() === 1) {
+          @if (isAutonomousMode()) {
+            <!-- AUTONOMOUS 1-CLICK SELLER AGENT PUBLISHING -->
+            @if (!autoPublishSuccess()) {
+              <div class="flex flex-col gap-6">
+                <div class="flex items-start justify-between gap-4 border-b border-ayni-espresso/10 pb-5">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                      <span class="text-lg">🤖</span>
+                      <span class="text-xs font-extrabold tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full">
+                        AYNI SELLER AGENT • ERC-8004 #1
+                      </span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">Publicación Autónoma por Visión IA</h2>
+                    <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
+                      Sube la fotografía física del dispositivo y define tu precio en USDT. Gemini 2.5 Flash Vision inspeccionará el hardware, identificará marca, modelo y estado cosmético, redactará la publicación y la registrará en HSK Chain de forma 100% autónoma.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 1. Photo Dropzone -->
+                <div class="flex flex-col gap-2">
+                  <label class="text-xs sm:text-sm font-bold text-ayni-espresso flex items-center justify-between">
+                    <span>1. Fotografía Real del Hardware</span>
+                    <span class="text-[11px] text-ayni-terracotta font-normal">* Obligatorio para inspección visual</span>
+                  </label>
+
+                  @if (!autoImagePreview()) {
+                    <label class="border-2 border-dashed border-ayni-espresso/25 hover:border-emerald-600 bg-ayni-canvas/50 hover:bg-emerald-50/40 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all text-center group">
+                      <input 
+                        type="file" 
+                        accept="image/jpeg,image/png,image/webp" 
+                        class="hidden" 
+                        (change)="onAutoImageSelected($event)" 
+                      />
+                      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                        📸
+                      </div>
+                      <div>
+                        <p class="text-sm font-bold text-ayni-espresso">Haz clic o arrastra la foto del dispositivo aquí</p>
+                        <p class="text-xs text-ayni-muted mt-0.5">Formatos JPEG, PNG o WebP (máx. 15 MB)</p>
+                      </div>
+                    </label>
+                  } @else {
+                    <div class="relative rounded-2xl border-2 border-emerald-500/40 bg-emerald-50/20 p-4 flex flex-col sm:flex-row items-center gap-4">
+                      <img 
+                        [src]="autoImagePreview()" 
+                        alt="Hardware preview" 
+                        class="w-32 h-32 object-cover rounded-xl border border-emerald-400 shadow-sm"
+                      />
+                      <div class="flex-1 text-left">
+                        <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs mb-1">
+                          <span>✓</span> Fotografía lista para Gemini Vision
+                        </div>
+                        <p class="text-xs text-ayni-muted mb-3">{{ autoImage()?.name }} ({{ (autoImage()!.size / 1024).toFixed(0) }} KB)</p>
+                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-ayni-espresso/15 text-ayni-espresso hover:bg-ayni-canvas cursor-pointer shadow-xs">
+                          <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" (change)="onAutoImageSelected($event)" />
+                          🔄 Cambiar fotografía
+                        </label>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- 2. Price and Category Inputs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-xs sm:text-sm font-bold text-ayni-espresso" for="autoPrice">
+                      2. Precio de Venta (USDT)
+                    </label>
+                    <div class="relative">
+                      <input 
+                        id="autoPrice"
+                        type="number" 
+                        min="1"
+                        step="1"
+                        class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-4 py-3 text-sm font-bold text-ayni-espresso focus:outline-none focus:border-emerald-600"
+                        placeholder="Ej. 850"
+                        [ngModel]="autoPriceUsdt()"
+                        (ngModelChange)="autoPriceUsdt.set($event)"
+                      />
+                      <span class="absolute right-3.5 top-3 text-xs font-extrabold text-ayni-muted">USDT</span>
+                    </div>
+
+                    <!-- Quick Price Pills -->
+                    <div class="flex items-center gap-1.5 mt-1">
+                      <span class="text-[11px] text-ayni-muted">Sugeridos:</span>
+                      @for (p of [300, 550, 850, 1200]; track p) {
+                        <button 
+                          type="button" 
+                          (click)="autoPriceUsdt.set(p)"
+                          class="text-[11px] px-2 py-0.5 rounded-md bg-ayni-canvas hover:bg-ayni-espresso/10 text-ayni-espresso font-semibold border border-ayni-espresso/10 cursor-pointer"
+                        >
+                          ${{ p }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-xs sm:text-sm font-bold text-ayni-espresso" for="autoCategory">
+                      3. Categoría Sugerida
+                    </label>
+                    <select 
+                      id="autoCategory"
+                      class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-3 text-sm text-ayni-espresso focus:outline-none focus:border-emerald-600 cursor-pointer"
+                      [ngModel]="autoCategoryHint()"
+                      (ngModelChange)="autoCategoryHint.set($event)"
+                    >
+                      <option value="SMARTPHONE">📱 Smartphone / Celular</option>
+                      <option value="LAPTOP">💻 Laptop / Computadora</option>
+                      <option value="COMPONENT">🖥️ Componente / Tarjeta Gráfica</option>
+                    </select>
+                    <span class="text-[11px] text-ayni-muted">El agente refinará el modelo exacto mediante visión artificial.</span>
+                  </div>
+                </div>
+
+                <!-- On-chain verification info -->
+                <div class="bg-gradient-to-r from-emerald-900/5 to-teal-900/5 border border-emerald-600/20 p-4 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xl">⛓️</span>
+                    <div>
+                      <span class="font-bold text-emerald-950 block">Registro On-Chain en HSK Chain Testnet</span>
+                      <span class="text-ayni-muted">El producto se acuñará bajo el estándar ERC-8004 con custodia temporal en AyniEscrow.</span>
+                    </div>
+                  </div>
+                  <a 
+                    href="https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-emerald-800 hover:text-emerald-950 font-bold underline shrink-0 flex items-center gap-1"
+                  >
+                    <span>Auditar Contrato</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+
+                <!-- Publish Button / Scanner Feed -->
+                @if (isAutoPublishing()) {
+                  <div class="bg-ayni-card border border-emerald-500/30 p-5 rounded-2xl flex flex-col gap-3 shadow-md">
+                    <div class="flex items-center justify-between text-xs font-bold text-emerald-900">
+                      <span class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        {{ autoPublishStep() }}
+                      </span>
+                      <span>{{ autoPublishProgress() }}%</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-ayni-canvas rounded-full overflow-hidden border border-ayni-espresso/10">
+                      <div 
+                        class="h-full bg-gradient-to-r from-emerald-500 to-teal-600 transition-all duration-500" 
+                        [style.width.%]="autoPublishProgress()"
+                      ></div>
+                    </div>
+                    <p class="text-[11px] text-ayni-muted text-center italic">
+                      Por favor no cierres la ventana. El agente está inspeccionando el chasis con Gemini Vision y firmando la atestación.
+                    </p>
+                  </div>
+                } @else {
+                  <button 
+                    type="button"
+                    (click)="runAutonomousPublish()"
+                    [disabled]="!autoImage() || autoPriceUsdt() <= 0"
+                    class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-sm sm:text-base rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>🚀 Publicar con Seller Agent Autónomo</span>
+                    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold">1-Click</span>
+                  </button>
+                }
+              </div>
+            } @else {
+              <!-- SUCCESS CARD -->
+              <div class="flex flex-col items-center text-center gap-5 py-4">
+                <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl shadow-inner animate-bounce">
+                  🎉
+                </div>
+                <div>
+                  <span class="text-xs font-extrabold text-emerald-700 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full uppercase tracking-wider">
+                    ✓ Publicación Exitosa en HSK Chain
+                  </span>
+                  <h2 class="text-2xl font-extrabold text-ayni-espresso font-serif mt-2.5">
+                    {{ autoPublishResult()?.listing?.title }}
+                  </h2>
+                  <p class="text-xs sm:text-sm text-ayni-muted max-w-md mx-auto mt-1">
+                    El Seller Agent analizó el hardware, generó la ficha técnica y publicó tu producto en el catálogo oficial de Ayni.
+                  </p>
+                </div>
+
+                <!-- Extracted Specs Badge Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-lg text-left">
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10">
+                    <span class="text-[10px] text-ayni-muted block font-semibold">MARCA Y MODELO</span>
+                    <span class="text-xs font-extrabold text-ayni-espresso">{{ autoPublishResult()?.detectedSpecs?.brand }} {{ autoPublishResult()?.detectedSpecs?.model }}</span>
+                  </div>
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10">
+                    <span class="text-[10px] text-ayni-muted block font-semibold">PRECIO FIJADO</span>
+                    <span class="text-xs font-extrabold text-emerald-700">{{ autoPublishResult()?.listing?.priceUsdt | usdt }}</span>
+                  </div>
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10">
+                    <span class="text-[10px] text-ayni-muted block font-semibold">CONDICIÓN FÍSICA</span>
+                    <span class="text-xs font-extrabold text-ayni-espresso">{{ autoPublishResult()?.detectedSpecs?.declaredCondition }}/5</span>
+                  </div>
+                  <div class="bg-ayni-canvas p-3 rounded-xl border border-ayni-espresso/10">
+                    <span class="text-[10px] text-ayni-muted block font-semibold">CONFIANZA IA</span>
+                    <span class="text-xs font-extrabold text-emerald-600">{{ autoPublishResult()?.detectedSpecs?.confidenceScore }}%</span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md pt-2">
+                  <button 
+                    type="button"
+                    (click)="viewPublishedProduct()"
+                    class="w-full py-3.5 bg-ayni-espresso hover:bg-ayni-espresso/90 text-white font-bold text-xs sm:text-sm rounded-xl shadow cursor-pointer transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>👀 Ver en el Catálogo</span>
+                  </button>
+                  <a 
+                    [href]="autoPublishResult()?.agent?.hskExplorerTx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="w-full py-3.5 bg-white border border-ayni-espresso/20 hover:bg-ayni-canvas text-ayni-espresso font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🔍 Ver en HSK Explorer</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+
+                <button 
+                  type="button" 
+                  (click)="autoPublishSuccess.set(false); autoImage.set(null); autoImagePreview.set(null)"
+                  class="text-xs text-ayni-terracotta hover:underline font-semibold cursor-pointer pt-2"
+                >
+                  + Publicar otro producto
+                </button>
+              </div>
+            }
+          } @else {
+            <!-- STEP 1: SPECIFICATIONS & PHOTOS (TRADITIONAL) -->
+            @if (currentStep() === 1) {
             <div class="flex flex-col gap-5">
               <div>
                 <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">1. Datos Técnicos y Fotos del Hardware</h2>
@@ -572,6 +832,7 @@
               </div>
             </div>
           }
+        }
         </div>
       </div>
     </main>

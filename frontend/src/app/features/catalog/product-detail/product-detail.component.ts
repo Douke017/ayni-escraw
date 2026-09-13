@@ -78,6 +78,44 @@ export class ProductDetailComponent implements OnInit {
     return HARDWARE_CATEGORIES.find((c) => c.key === item.category.toUpperCase()) || null;
   });
 
+  // Agent Tracking and ERC-8004 metadata
+  public readonly registryAddress = '0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2';
+  public readonly hskExplorerUrl = 'https://testnet-explorer.hskchain.net';
+  public readonly hskRegistryUrl = 'https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2';
+
+  public readonly isSellerAgent = computed<boolean>(() => {
+    const l = this.listing();
+    if (!l) return false;
+    return (
+      l.validatorAgentId === 1 ||
+      (l.attestationSummary?.includes('Seller Agent') ?? false) ||
+      (l.attestationSummary?.includes('ERC-8004 #1') ?? false) ||
+      (this.technicalAttributes() as Record<string, unknown>)['agent_registered_hsk'] === true
+    );
+  });
+
+  public readonly agentId = computed<number>(() => {
+    return this.isSellerAgent() ? 1 : (this.listing()?.validatorAgentId || 42);
+  });
+
+  public readonly agentName = computed<string>(() => {
+    return this.isSellerAgent()
+      ? 'Ayni Seller Agent (Agente Comercial Autónomo Pro)'
+      : 'Ayni Tech Validator Agent (Validador de Hardware)';
+  });
+
+  public readonly agentAddress = computed<string>(() => {
+    return this.isSellerAgent()
+      ? '0x6582dCD2587C6094C0Fb3ce986035B1a4157D59a'
+      : '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
+  });
+
+  public readonly isAuditModalOpen = signal<boolean>(false);
+
+  public toggleAuditModal(): void {
+    this.isAuditModalOpen.update((v) => !v);
+  }
+
   public ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -86,21 +124,14 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
-  private loadListing(id: string): void {
+  private async loadListing(id: string): Promise<void> {
     this.isLoading.set(true);
-    // Find in currently cached listings or fallback
-    const found = this.catalogService.listings().find((l) => l.id === id);
-    if (found) {
-      this.listing.set(found);
-      this.isLoading.set(false);
-    } else {
-      // Refresh catalog and look again
-      this.catalogService.fetchListings().then(() => {
-        const refound = this.catalogService.listings().find((l) => l.id === id);
-        this.listing.set(refound || null);
-        this.isLoading.set(false);
-      });
+    let found = this.catalogService.listings().find((l) => l.id === id);
+    if (!found) {
+      found = (await this.catalogService.getListingById(id)) ?? undefined;
     }
+    this.listing.set(found || null);
+    this.isLoading.set(false);
   }
 
   public copyToClipboard(text: string): void {
