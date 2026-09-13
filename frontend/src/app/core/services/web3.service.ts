@@ -417,8 +417,6 @@ export class Web3Service {
       return { success: false, message: msg };
     }
   }
-    }
-  }
 
   public async signMessage(message: string): Promise<string> {
     const addr = this.account();

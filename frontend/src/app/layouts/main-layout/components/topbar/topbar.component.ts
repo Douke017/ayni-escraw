@@ -92,29 +92,5 @@ export class TopbarComponent {
     this.authService.disconnect();
     this.closeDropdown();
   }
-
-  public async onAddUsdtToMetaMask(): Promise<void> {
-    await this.web3Service.addUsdtToMetaMask();
-    this.closeDropdown();
-  }
-
-  public async onRequestFaucet(): Promise<void> {
-    if (this.isClaimingFaucet()) return;
-    this.isClaimingFaucet.set(true);
-    this.closeDropdown();
-
-    try {
-      await this.web3Service.requestFaucet(1000);
-      alert('¡Solicitud de Faucet enviada! En unos segundos tendrás 1,000 USDT adicionales.');
-    } catch (err) {
-      alert('No se pudo completar el reclamo del faucet.');
-    } finally {
-      this.isClaimingFaucet.set(false);
-    }
-  }
-
-  public async onRefreshBalance(): Promise<void> {
-    await this.web3Service.refreshUsdtBalance();
-    this.closeDropdown();
-  }
 }
+
