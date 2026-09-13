@@ -32,8 +32,6 @@ export class TopbarComponent {
   public readonly isMenuOpen = signal<boolean>(false);
   public readonly isDropdownOpen = signal<boolean>(false);
   public readonly isConnecting = signal<boolean>(false);
-  public readonly isClaimingFaucet = signal<boolean>(false);
-  public readonly faucetNotification = signal<string | null>(null);
 
   public toggleMenu(): void {
     this.isMenuOpen.update((v) => !v);
@@ -63,34 +61,8 @@ export class TopbarComponent {
     }
   }
 
-  public async onClaimFaucet(): Promise<void> {
-    if (this.isClaimingFaucet()) return;
-    this.isClaimingFaucet.set(true);
-    try {
-      const res = await this.web3Service.claimFaucet(1000);
-      this.faucetNotification.set(res.message);
-      setTimeout(() => {
-        this.faucetNotification.set(null);
-      }, 5000);
-    } catch (err) {
-      console.error('Faucet claim error', err);
-    } finally {
-      this.isClaimingFaucet.set(false);
-    }
-  }
-
-  public async onRefreshBalance(): Promise<void> {
-    await this.web3Service.refreshUsdtBalance();
-  }
-
-  public async onAddUsdtToMetaMask(): Promise<void> {
-    await this.web3Service.addUsdtToMetaMask();
-    this.closeDropdown();
-  }
-
   public onDisconnect(): void {
     this.authService.disconnect();
     this.closeDropdown();
   }
 }
-
