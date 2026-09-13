@@ -7,19 +7,13 @@
   align-items: center;
   overflow: hidden;
   border-radius: var(--radius-full);
+  height: 2px;
 
   &__base {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      90deg,
-      var(--aguayo-red) 0%,
-      var(--aguayo-gold) 25%,
-      var(--aguayo-olive) 50%,
-      var(--aguayo-indigo) 75%,
-      var(--aguayo-burgundy) 100%
-    );
-    opacity: 0.35;
+    background: var(--border-subtle);
+    opacity: 0.8;
   }
 
   &__accent {
@@ -28,6 +22,7 @@
     height: 100%;
     margin: 0 auto;
     border-radius: var(--radius-full);
-    box-shadow: 0 0 8px currentColor;
+    background: linear-gradient(90deg, var(--aguayo-terracotta, #C0583A), var(--aguayo-gold, #D4A055));
   }
 }
+

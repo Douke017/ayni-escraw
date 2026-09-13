@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,6 @@ import { EscrowStateService } from '../../../core/services/escrow-state.service'
 import { SignalRService } from '../../../core/services/signalr.service';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 
 interface InspectionItem {
   id: string;
@@ -18,11 +18,11 @@ interface InspectionItem {
   selector: 'ayni-video-verify',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
-  ],
+],
   templateUrl: './video-verify.component.html',
   styleUrl: './video-verify.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,28 +1,28 @@
-// SPDX-License-Identifier: MIT
+import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CatalogService } from '../../core/services/catalog.service';
 import { HARDWARE_CATEGORIES } from '../../core/models/category.model';
-import { AguayoRibbonComponent } from '../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
-import { AguayoPatternComponent } from '../../shared/components/aguayo-pattern/aguayo-pattern.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { UsdtPipe } from '../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../shared/pipes/truncate-address.pipe';
+
+import { AguayoRibbonComponent } from '../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
+import { AguayoPatternComponent } from '../../shared/components/aguayo-pattern/aguayo-pattern.component';
+import { AguayoSideBarComponent } from '../../shared/components/aguayo-side-bar/aguayo-side-bar.component';
 
 @Component({
   selector: 'ayni-home',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
-    AguayoRibbonComponent,
-    AguayoPatternComponent,
-    BadgeComponent,
     ButtonComponent,
-    CardComponent,
     UsdtPipe,
     TruncateAddressPipe,
+    AguayoRibbonComponent,
+    AguayoPatternComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

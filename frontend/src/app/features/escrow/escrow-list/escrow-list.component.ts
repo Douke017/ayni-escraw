@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -6,7 +7,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EscrowOrder, OrderStatus } from '../../../core/models/order.model';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
 
@@ -14,11 +14,11 @@ import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe
   selector: 'ayni-escrow-list',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
-    UsdtPipe,
+UsdtPipe,
     TruncateAddressPipe,
   ],
   templateUrl: './escrow-list.component.html',

@@ -4,6 +4,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   ProductListing,
+  ListingStatus,
+  ValidationVerdict,
   ProofOfListingChallenge,
   CreateListingPayload,
 } from '../models/listing.model';
@@ -53,8 +55,8 @@ export class CatalogService {
       );
       this.listings.set(data || []);
       return data || [];
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al cargar catálogo de productos';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al consultar el catálogo';
       this.error.set(msg);
       this.listings.set([]);
       return [];
@@ -71,9 +73,9 @@ export class CatalogService {
         this.http.get<ProductListing>(`${this.apiUrl}/catalog/${id}`)
       );
       this.selectedListing.set(item || null);
-      return item;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : `Producto ${id} no encontrado`;
+      return item || null;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al obtener el producto';
       this.error.set(msg);
       this.selectedListing.set(null);
       return null;
@@ -95,8 +97,10 @@ export class CatalogService {
   }
 
   public async createListing(payload: CreateListingPayload): Promise<{ listing: ProductListing }> {
-    return await firstValueFrom(
+    const res = await firstValueFrom(
       this.http.post<{ listing: ProductListing }>(`${this.apiUrl}/catalog`, payload)
     );
+    this.listings.update((current) => [res.listing, ...current]);
+    return res;
   }
 }

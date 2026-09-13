@@ -3,19 +3,18 @@
 
 .ayni-card {
   display: flex;
-  background-color: var(--surface-card);
-  border: 1px solid var(--surface-border);
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
-  transition: all var(--transition-normal);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
   &--hoverable {
-    @include hover-lift;
-
     &:hover {
-      border-color: rgba(217, 119, 6, 0.35); /* subtle gold accent on hover */
-      box-shadow: var(--shadow-lg), 0 0 15px rgba(217, 119, 6, 0.08);
+      transform: translateY(-2px);
+      border-color: var(--accent, #D4A055);
+      box-shadow: var(--shadow-md);
     }
   }
 
@@ -34,14 +33,15 @@
   }
 
   &--pad-sm &__body {
-    padding: var(--space-3);
+    padding: 0.75rem;
   }
 
   &--pad-md &__body {
-    padding: var(--space-5);
+    padding: 1.25rem;
   }
 
   &--pad-lg &__body {
-    padding: var(--space-8);
+    padding: 2rem;
   }
 }
+

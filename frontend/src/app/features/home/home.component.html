@@ -1,152 +1,201 @@
-<div class="home">
-  <!-- Hero Section -->
-  <section class="home__hero">
-    <ayni-aguayo-pattern variant="detailed" [opacity]="0.14" />
-    <div class="home__hero-glow"></div>
+<!-- SPDX-License-Identifier: MIT -->
+<div class="flex flex-col w-full bg-ayni-canvas text-ayni-espresso">
+  <!-- Hero Section (Figma Qatu Hero - Andean Palette) -->
+  <section class="relative bg-ayni-espresso text-ayni-canvas py-12 sm:py-16 md:py-24 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <ayni-aguayo-pattern [opacity]="0.12"></ayni-aguayo-pattern>
+    </div>
 
-    <div class="home__container home__hero-content">
-      <div class="home__hero-badge">
-        <ayni-badge variant="hsk" size="md" [pulse]="true">
-          HSK Testnet • Web3 Escrow
-        </ayni-badge>
-        <span class="home__hero-badge-sub">Protocolo de Confianza No-Custodial</span>
-      </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <!-- Hero Left / Content -->
+        <div class="lg:col-span-7 flex flex-col items-start text-left">
+          <!-- Corazón de los Andes Tag -->
+          <div class="inline-flex items-center gap-2 bg-ayni-canvas/10 border border-ayni-gold/35 px-3 py-1.5 rounded-full mb-4 sm:mb-5 backdrop-blur-sm">
+            <span class="text-sm">✨</span>
+            <span class="text-xs sm:text-sm font-bold text-ayni-gold tracking-wide">Corazón de los Andes • Web3 Escrow</span>
+          </div>
 
-      <h1 class="home__headline">
-        El Mercado Andino de <span class="home__text-gradient">Hardware Verificado</span> y Escrow Criptográfico
-      </h1>
+          <!-- Main Heading -->
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.15] tracking-tight text-white mb-4 sm:mb-6 font-serif">
+            El marketplace <span class="text-ayni-gold relative inline-block after:content-[''] after:absolute after:bottom-1 after:left-0 after:right-0 after:h-1 sm:after:h-1.5 after:bg-gradient-to-r after:from-ayni-terracotta after:to-ayni-gold after:rounded">más grande</span> de Bolivia
+          </h1>
 
-      <p class="home__subheadline">
-        Compra y vende smartphones, laptops y componentes sin intermediarios bancarios. Custodia criptográfica vía Smart Contracts en HSK Chain, agentes de IA evaluando hardware y pasaportes digitales ERC-721.
-      </p>
+          <!-- Subtitle -->
+          <p class="text-sm sm:text-base md:text-lg leading-relaxed text-ayni-canvas/90 max-w-xl mb-6 sm:mb-8 font-normal">
+            Adéntrate en Ayni Marketplace. Descubre la magia de un mercado auténtico con custodia descentralizada vía Smart Contracts en HSK Chain, pasaportes digitales ERC-721 y agentes autónomos ERC-8004.
+          </p>
 
-      <div class="home__hero-actions">
-        <ayni-button variant="primary" size="lg" routerLink="/catalog">
-          <span>Explorar Catálogo</span>
-          <span aria-hidden="true">→</span>
-        </ayni-button>
+          <!-- Dual CTA Buttons (Mobile Full-width, Desktop Row) -->
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto mb-8 sm:mb-10">
+            <ayni-button variant="primary" size="lg" routerLink="/catalog" [fullWidth]="true">
+              <span class="font-bold">Entrar al Catálogo</span>
+              <span aria-hidden="true" class="ml-1">→</span>
+            </ayni-button>
 
-        <ayni-button variant="secondary" size="lg" routerLink="/listings/new">
-          <span>Publicar con Proof of Listing</span>
-          <span aria-hidden="true">📸</span>
-        </ayni-button>
-      </div>
+            <ayni-button variant="outline" size="lg" routerLink="/listings/new" [fullWidth]="true">
+              <span class="font-semibold">Soy Vendedor / Artesano</span>
+            </ayni-button>
+          </div>
 
-      <!-- Live Trust Metrics -->
-      <div class="home__metrics">
-        <div class="home__metric-item">
-          <span class="home__metric-value">0%</span>
-          <span class="home__metric-label">Custodia Centralizada</span>
+          <!-- Trust Metrics Ribbon -->
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-4 sm:gap-6 bg-ayni-canvas/10 border border-ayni-canvas/15 rounded-2xl p-4 sm:px-6 w-full md:w-fit backdrop-blur-md">
+            <div class="flex flex-col">
+              <span class="text-base sm:text-lg font-extrabold text-white">0%</span>
+              <span class="text-[10px] text-ayni-canvas/70 uppercase tracking-wider font-semibold">Custodia Central</span>
+            </div>
+            <div class="hidden sm:block w-px h-6 bg-white/15"></div>
+            <div class="flex flex-col">
+              <span class="text-base sm:text-lg font-extrabold text-white">Permit2</span>
+              <span class="text-[10px] text-ayni-canvas/70 uppercase tracking-wider font-semibold">Single Sig EIP-712</span>
+            </div>
+            <div class="hidden sm:block w-px h-6 bg-white/15"></div>
+            <div class="flex flex-col">
+              <span class="text-base sm:text-lg font-extrabold text-white">ERC-8004</span>
+              <span class="text-[10px] text-ayni-canvas/70 uppercase tracking-wider font-semibold">Validación IA</span>
+            </div>
+            <div class="hidden sm:block w-px h-6 bg-white/15"></div>
+            <div class="flex flex-col">
+              <span class="text-base sm:text-lg font-extrabold text-white">60s TTL</span>
+              <span class="text-[10px] text-ayni-canvas/70 uppercase tracking-wider font-semibold">Safe Meet QR</span>
+            </div>
+          </div>
         </div>
-        <div class="home__metric-divider"></div>
-        <div class="home__metric-item">
-          <span class="home__metric-value">Permit2</span>
-          <span class="home__metric-label">Depósito EIP-712</span>
-        </div>
-        <div class="home__metric-divider"></div>
-        <div class="home__metric-item">
-          <span class="home__metric-value">ERC-8004</span>
-          <span class="home__metric-label">Validación IA On-Chain</span>
-        </div>
-        <div class="home__metric-divider"></div>
-        <div class="home__metric-item">
-          <span class="home__metric-value">60s TTL</span>
-          <span class="home__metric-label">Safe Meet Anti-Fraude</span>
+
+        <!-- Hero Featured Card with Aguayo Ribbon -->
+        <div class="lg:col-span-5 flex justify-center w-full mt-4 lg:mt-0">
+          <div class="w-full max-w-sm sm:max-w-md bg-ayni-card text-ayni-espresso rounded-2xl overflow-hidden shadow-2xl border border-ayni-gold/25 hover:-translate-y-1 hover:shadow-3xl transition-all duration-200">
+            <ayni-aguayo-ribbon size="md"></ayni-aguayo-ribbon>
+            <div class="p-5 sm:p-6 flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-ayni-terracotta text-white uppercase tracking-wider">Más Vendido</span>
+                <span class="text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full bg-ayni-olive/15 text-ayni-olive border border-ayni-olive/30">HSK Chain</span>
+              </div>
+              <div class="text-5xl sm:text-6xl text-center py-6 bg-ayni-canvas-muted rounded-xl select-none">💻</div>
+              <div class="flex flex-col gap-1.5">
+                <span class="text-[11px] font-bold text-ayni-accent-brown uppercase tracking-wider">Destacado de la Semana</span>
+                <h3 class="text-lg sm:text-xl font-extrabold text-ayni-espresso leading-snug">MacBook Pro 16" M3 Max</h3>
+                <p class="text-xs sm:text-sm text-ayni-muted">36GB RAM • 1TB SSD • Dictamen PASS Verificado</p>
+                <div class="flex items-center justify-between pt-3 mt-1 border-t border-ayni-espresso/10">
+                  <div class="flex flex-col">
+                    <span class="text-lg sm:text-xl font-extrabold text-ayni-espresso">2,450.00 USDT</span>
+                    <span class="text-xs text-ayni-accent-brown font-semibold">~ Bs. 17,052</span>
+                  </div>
+                  <ayni-button variant="primary" size="sm" routerLink="/catalog">
+                    <span>Ver Oferta</span>
+                  </ayni-button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Andean ribbon separator -->
-    <ayni-aguayo-ribbon size="sm" />
   </section>
 
-  <!-- Puestos de Hardware (Categories) -->
-  <section class="home__section home__categories">
-    <div class="home__container">
-      <div class="home__section-header">
-        <span class="home__section-pre">Puestos del Mercado</span>
-        <h2 class="home__section-title">Categorías de Hardware Tecnológico</h2>
-        <p class="home__section-desc">
-          Dispositivos verificados minuciosamente. Salud de batería, componentes sin sobrecalentamiento y números de serie protegidos con hashes salted.
-        </p>
+  <!-- Explora nuestros Puestos (Figma 4-card Puestos Grid) -->
+  <section class="py-12 sm:py-16 bg-ayni-canvas">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8 sm:mb-10 text-left">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-ayni-espresso tracking-tight mb-2 font-serif">Explora nuestros Puestos</h2>
+        <p class="text-sm sm:text-base text-ayni-muted max-w-2xl">Cada sector de Ayni Marketplace está lleno de tecnología, tradición y confianza. ¿Qué buscas hoy?</p>
       </div>
 
-      <div class="home__category-grid">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         @for (cat of categories; track cat.key) {
-          <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.key }" class="home__category-link">
-            <ayni-card [sideBarColor]="cat.aguayoColorToken" [hoverable]="true" padding="md">
-              <div class="home__cat-card">
-                <span class="home__cat-icon">{{ cat.icon }}</span>
-                <h3 class="home__cat-title">{{ cat.label }}</h3>
-                <p class="home__cat-desc">{{ cat.description }}</p>
-                <span class="home__cat-cta" [style.color]="cat.aguayoColorToken">
-                  Ver dispositivos verificados →
-                </span>
+          <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.key }"
+             class="flex relative bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden no-underline text-inherit shadow-sm hover:-translate-y-1 hover:shadow-md hover:border-ayni-gold/40 active:scale-[0.98] transition-all duration-200 group">
+            <div class="w-2.5 shrink-0 transition-colors"
+                 [class.bg-[#8B3A3A]]="cat.key === 'SMARTPHONE'"
+                 [class.bg-ayni-olive]="cat.key === 'LAPTOP'"
+                 [class.bg-ayni-gold]="cat.key === 'COMPONENT'"
+                 [class.bg-ayni-terracotta]="cat.key === 'CONSOLES'"></div>
+            <div class="flex items-center gap-3.5 p-4 sm:p-5 flex-1 min-w-0">
+              <div class="w-12 h-12 rounded-xl bg-ayni-canvas flex items-center justify-center shrink-0 border border-ayni-espresso/10 text-2xl select-none">
+                <span>{{ cat.icon }}</span>
               </div>
-            </ayni-card>
+              <div class="flex flex-col min-w-0">
+                <h3 class="text-sm sm:text-base font-bold text-ayni-espresso truncate">{{ cat.label }}</h3>
+                <span class="text-xs font-semibold text-ayni-accent-brown group-hover:text-ayni-terracotta group-hover:translate-x-0.5 transition-all duration-150 inline-block mt-0.5">Ver puesto →</span>
+              </div>
+            </div>
           </a>
         }
       </div>
     </div>
   </section>
 
-  <!-- Verified Devices Showcase -->
-  <section class="home__section home__showcase">
-    <div class="home__container">
-      <div class="home__section-header-row">
+  <!-- Lo más buscado en la feria (Figma Featured Showcase) -->
+  <section class="py-12 sm:py-16 bg-[#F8F3EA]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
         <div>
-          <span class="home__section-pre">Garantía On-Chain</span>
-          <h2 class="home__section-title">Dispositivos con Dictamen ERC-8004 PASS</h2>
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-ayni-terracotta uppercase tracking-wider mb-1.5">
+            <span>🔥</span>
+            <span>Lo más buscado en la feria</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-ayni-espresso tracking-tight mb-1.5 font-serif">Productos Verificados</h2>
+          <p class="text-xs sm:text-sm text-ayni-muted">Hardware con dictamen ERC-8004 PASS y custodia activa en Smart Contracts</p>
         </div>
         <ayni-button variant="outline" size="sm" routerLink="/catalog">
-          <span>Ver todos ({{ catalogService.listings().length }})</span>
+          <span>Ver todo el catálogo ({{ catalogService.listings().length }}) →</span>
         </ayni-button>
       </div>
 
       @if (catalogService.isLoading()) {
-        <div class="home__loading">
-          <span class="home__loading-spinner"></span>
-          <p>Cargando dispositivos en HSK Chain...</p>
+        <div class="flex flex-col items-center justify-center gap-3 py-16 text-ayni-muted">
+          <div class="w-8 h-8 border-2 border-ayni-espresso/15 border-t-ayni-terracotta rounded-full animate-spin"></div>
+          <p class="text-sm">Cargando productos desde HSK Chain...</p>
         </div>
       } @else {
-        <div class="home__product-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           @for (item of catalogService.listings().slice(0, 4); track item.id) {
-            <a [routerLink]="['/catalog', item.id]" class="home__product-card-link">
-              <ayni-card [hoverable]="true" padding="none">
-                <div class="home__product-card">
-                  <!-- Card Header Banner -->
-                  <div class="home__product-media">
-                    <div class="home__product-badge-overlay">
-                      <ayni-badge variant="pass" size="sm">
-                        ERC-8004 PASS
-                      </ayni-badge>
-                    </div>
-                    <span class="home__product-icon">💻</span>
+            <a [routerLink]="['/catalog', item.id]" class="no-underline text-inherit flex flex-col group">
+              <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden flex flex-col h-full shadow-sm group-hover:-translate-y-1 group-hover:border-ayni-gold/40 group-hover:shadow-lg transition-all duration-200">
+                <!-- Authentic Aguayo Ribbon Top -->
+                <ayni-aguayo-ribbon size="md"></ayni-aguayo-ribbon>
+
+                <!-- Media Area -->
+                <div class="relative h-40 sm:h-44 bg-ayni-canvas-muted flex items-center justify-center">
+                  <div class="absolute top-2.5 left-2.5">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-ayni-terracotta text-white uppercase tracking-wider">Más vendido</span>
                   </div>
-
-                  <!-- Card Info -->
-                  <div class="home__product-content">
-                    <span class="home__product-cat">{{ item.category }}</span>
-                    <h3 class="home__product-title">{{ item.title }}</h3>
-                    <p class="home__product-desc">{{ item.description }}</p>
-
-                    <div class="home__product-specs">
-                      <span class="home__product-pill">Condición: {{ item.declaredCondition }}/10</span>
-                      <span class="home__product-pill">Commitment Salted 🔐</span>
-                    </div>
-
-                    <div class="home__product-footer">
-                      <div class="home__product-price-box">
-                        <span class="home__product-price-label">Precio Escrow</span>
-                        <span class="home__product-price">{{ item.priceUsdt | usdt }}</span>
-                      </div>
-                      <span class="home__product-seller">
-                        {{ item.sellerAddress | truncateAddress }}
-                      </span>
-                    </div>
+                  <div class="text-5xl sm:text-6xl select-none transition-transform group-hover:scale-105 duration-200">
+                    @if (item.category === 'SMARTPHONE') { 📱 }
+                    @else if (item.category === 'LAPTOP') { 💻 }
+                    @else if (item.category === 'COMPONENT') { ⚡ }
+                    @else { 🎮 }
                   </div>
                 </div>
-              </ayni-card>
+
+                <!-- Info Area -->
+                <div class="p-4 sm:p-5 flex flex-col flex-1 gap-2">
+                  <span class="text-[10px] sm:text-[11px] uppercase font-bold text-ayni-accent-brown tracking-wider">{{ item.category }} • Ayni Verificado</span>
+                  <h3 class="text-sm sm:text-base font-bold text-ayni-espresso leading-snug truncate">{{ item.title }}</h3>
+                  <p class="text-xs text-ayni-muted line-clamp-2 min-h-[2.25rem] leading-relaxed">{{ item.description }}</p>
+
+                  <div class="flex flex-wrap gap-1.5 my-1">
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-canvas text-ayni-espresso font-semibold border border-ayni-espresso/10">Condición: {{ item.declaredCondition }}/10</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-ayni-canvas text-ayni-espresso font-semibold border border-ayni-espresso/10">Commitment 🔐</span>
+                  </div>
+
+                  <div class="flex items-end justify-between mt-auto pt-3 border-t border-ayni-espresso/10">
+                    <div class="flex flex-col">
+                      <span class="text-base sm:text-lg font-extrabold text-ayni-espresso leading-none">{{ item.priceUsdt | usdt }}</span>
+                      <span class="text-[11px] text-ayni-accent-brown font-semibold mt-0.5">Bs. {{ (item.priceUsdt * 6.96).toFixed(0) }}</span>
+                    </div>
+                    <span class="text-[11px] text-ayni-muted font-mono bg-ayni-espresso/5 px-1.5 py-0.5 rounded">
+                      {{ item.sellerAddress | truncateAddress }}
+                    </span>
+                  </div>
+
+                  <div class="mt-3">
+                    <ayni-button variant="primary" size="sm" [fullWidth]="true">
+                      <span>Ver Detalles</span>
+                    </ayni-button>
+                  </div>
+                </div>
+              </div>
             </a>
           }
         </div>
@@ -154,47 +203,96 @@
     </div>
   </section>
 
-  <!-- 4 Pillars of Andean Trust -->
-  <section class="home__section home__pillars">
-    <div class="home__container">
-      <div class="home__section-header">
-        <span class="home__section-pre">Arquitectura de Seguridad</span>
-        <h2 class="home__section-title">El Código del Ayni: Confianza Criptográfica</h2>
-        <p class="home__section-desc">
-          Inspirado en el principio andino de reciprocidad y justicia comunitaria, implementado con criptografía moderna.
-        </p>
+  <!-- La Identidad de Nuestros Colores (Figma Storytelling Section) -->
+  <section class="relative bg-ayni-espresso text-ayni-canvas py-16 sm:py-20 md:py-24 overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 z-10">
+      <ayni-aguayo-ribbon size="lg"></ayni-aguayo-ribbon>
+    </div>
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <ayni-aguayo-pattern [opacity]="0.08"></ayni-aguayo-pattern>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div class="lg:col-span-7 flex flex-col gap-4 sm:gap-5 text-left">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ayni-gold leading-tight tracking-tight font-serif">La Identidad de Nuestros Colores</h2>
+          <p class="text-sm sm:text-base md:text-lg leading-relaxed text-ayni-canvas/95">
+            Cada hilo cuenta una historia. El rojo representa la fuerza y vitalidad de nuestra gente, el ocre dorado es la riqueza de nuestra tierra, y la unión de todos estos colores crea una armonía perfecta que ha vestido a los Andes por milenios.
+          </p>
+          <p class="text-xs sm:text-sm md:text-base leading-relaxed text-ayni-canvas/75">
+            Al comprar en Ayni Marketplace, no solo adquieres tecnología o hardware verificado: te llevas una pieza del corazón y la tradición boliviana, blindada por la seguridad descentralizada de smart contracts y apoyando el comercio justo.
+          </p>
+          <div class="mt-2">
+            <ayni-button variant="secondary" size="lg" routerLink="/catalog">
+              <span>Únete a nuestra comunidad</span>
+              <span aria-hidden="true" class="ml-1">→</span>
+            </ayni-button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 flex justify-center w-full">
+          <div class="w-full max-w-md bg-ayni-canvas/5 border border-ayni-gold/30 rounded-2xl p-6 sm:p-8 backdrop-blur-md shadow-xl">
+            <div class="flex flex-col gap-3.5">
+              <span class="text-xs font-bold text-ayni-gold uppercase tracking-widest">Tradición & Futuro</span>
+              <h4 class="text-lg sm:text-xl font-extrabold text-white">Comercio Andino Descentralizado</h4>
+              <p class="text-xs sm:text-sm leading-relaxed text-ayni-canvas/80">
+                Fusión de identidad cultural andina con la vanguardia de Web3: depósitos con Uniswap Permit2, pasaportes NFT ERC-721 y agentes autónomos ERC-8004.
+              </p>
+              <div class="grid grid-cols-2 gap-4 pt-4 border-t border-ayni-canvas/15 mt-2">
+                <div class="flex flex-col">
+                  <span class="text-2xl font-extrabold text-ayni-gold">100%</span>
+                  <span class="text-[10px] sm:text-xs text-ayni-canvas/70 uppercase tracking-wider font-semibold">Auditable On-Chain</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-2xl font-extrabold text-ayni-gold">60s</span>
+                  <span class="text-[10px] sm:text-xs text-ayni-canvas/70 uppercase tracking-wider font-semibold">Safe Meet TTL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cryptographic Trust Pillars -->
+  <section class="py-12 sm:py-16 bg-ayni-canvas border-t-2 border-ayni-espresso/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8 sm:mb-10 text-left">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-ayni-espresso tracking-tight mb-2 font-serif">Confianza Criptográfica de Extremo a Extremo</h2>
+        <p class="text-sm sm:text-base text-ayni-muted max-w-2xl">Custodia garantizada por Smart Contracts descentralizados y visión artificial</p>
       </div>
 
-      <div class="home__pillars-grid">
-        <div class="home__pillar-card">
-          <div class="home__pillar-icon">🛡️</div>
-          <h3 class="home__pillar-title">Escrow No-Custodial</h3>
-          <p class="home__pillar-desc">
-            Tus USDT se depositan en el contrato inteligente <code>AyniEscrow</code> mediante Uniswap Permit2 con una sola firma EIP-712. Nadie, ni siquiera Ayni, puede sustraer tus fondos.
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div class="bg-ayni-card border border-ayni-espresso/10 border-t-4 border-t-ayni-terracotta rounded-2xl p-5 sm:p-6 flex flex-col gap-3 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+          <div class="text-3xl">🛡️</div>
+          <h3 class="text-base font-bold text-ayni-espresso">Escrow No-Custodial</h3>
+          <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+            Tus fondos se depositan en el contrato <code class="text-xs bg-ayni-canvas px-1 py-0.5 rounded text-ayni-espresso font-semibold">AyniEscrow</code> mediante Uniswap Permit2 con firma off-chain EIP-712. Nadie puede sustraer tus fondos.
           </p>
         </div>
 
-        <div class="home__pillar-card">
-          <div class="home__pillar-icon">📸</div>
-          <h3 class="home__pillar-title">Proof of Listing (POL)</h3>
-          <p class="home__pillar-desc">
-            Cada publicación requiere una fotografía del hardware físico con un código efímero único generado por el sistema. El agente de IA valida la posesión antes de listar.
+        <div class="bg-ayni-card border border-ayni-espresso/10 border-t-4 border-t-ayni-olive rounded-2xl p-5 sm:p-6 flex flex-col gap-3 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+          <div class="text-3xl">📸</div>
+          <h3 class="text-base font-bold text-ayni-espresso">Proof of Listing (POL)</h3>
+          <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+            Cada publicación requiere una imagen física con un desafío efímero. Agentes de IA validan la autenticidad y condición antes de autorizar la venta.
           </p>
         </div>
 
-        <div class="home__pillar-card">
-          <div class="home__pillar-icon">⏱️</div>
-          <h3 class="home__pillar-title">Safe Meet 60s QR</h3>
-          <p class="home__pillar-desc">
-            Para entregas en persona, el vendedor genera un QR efímero en Redis con expiración estricta de 60 segundos. Al ser escaneado por el comprador, los fondos se liquidan al instante.
+        <div class="bg-ayni-card border border-ayni-espresso/10 border-t-4 border-t-ayni-gold rounded-2xl p-5 sm:p-6 flex flex-col gap-3 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+          <div class="text-3xl">⏱️</div>
+          <h3 class="text-base font-bold text-ayni-espresso">Safe Meet 60s QR</h3>
+          <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+            Para transacciones presenciales, el vendedor genera un QR efímero en Redis de 60 segundos. Al ser escaneado por el comprador, se liquida la custodia.
           </p>
         </div>
 
-        <div class="home__pillar-card">
-          <div class="home__pillar-icon">📜</div>
-          <h3 class="home__pillar-title">Pasaporte Digital ERC-721</h3>
-          <p class="home__pillar-desc">
-            Cada dispositivo se acuña como un NFT en HSK Chain con hash <code>keccak256(imei, salt, seller)</code>. La privacidad del IMEI está protegida y el historial es auditable.
+        <div class="bg-ayni-card border border-ayni-espresso/10 border-t-4 border-t-[#8B3A3A] rounded-2xl p-5 sm:p-6 flex flex-col gap-3 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+          <div class="text-3xl">📜</div>
+          <h3 class="text-base font-bold text-ayni-espresso">Pasaporte Digital ERC-721</h3>
+          <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+            Cada dispositivo acuña un NFT en HSK Chain con hash privado <code class="text-xs bg-ayni-canvas px-1 py-0.5 rounded text-ayni-espresso font-semibold">keccak256(imei, salt, seller)</code>, protegiendo identificadores y certificando historial.
           </p>
         </div>
       </div>

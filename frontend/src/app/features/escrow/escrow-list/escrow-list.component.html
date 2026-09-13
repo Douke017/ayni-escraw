@@ -1,89 +1,86 @@
-<div class="escrow-list">
-  <div class="escrow-list__container">
-    <header class="escrow-list__header">
-      <span class="escrow-list__pre">Protocolo No-Custodial en HSK Chain</span>
-      <h1 class="escrow-list__title">Tus Transacciones Escrow</h1>
-      <p class="escrow-list__subtitle">
+<!-- SPDX-License-Identifier: MIT -->
+<div class="flex flex-col py-8 sm:py-12 pb-24 bg-ayni-canvas text-ayni-espresso">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <header class="mb-8 sm:mb-10 text-left">
+      <span class="text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Protocolo No-Custodial en HSK Chain</span>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight mb-2 font-serif">Tus Transacciones Escrow</h1>
+      <p class="text-xs sm:text-sm md:text-base text-ayni-muted max-w-2xl leading-relaxed">
         Gestiona depósitos de seguridad, entregas presenciales con Safe Meet QR y verificación remota.
       </p>
     </header>
 
     @if (escrowService.isLoading()) {
-      <div class="escrow-list__loading">
-        <span class="escrow-list__spinner"></span>
-        <p>Consultando transacciones en la red HSK...</p>
+      <div class="flex flex-col items-center justify-center py-20 gap-3 text-ayni-muted">
+        <div class="w-9 h-9 border-3 border-ayni-espresso/15 border-t-ayni-terracotta rounded-full animate-spin"></div>
+        <p class="text-sm font-medium">Consultando transacciones en la red HSK...</p>
       </div>
     } @else if (escrowService.orders().length === 0) {
-      <div class="escrow-list__empty">
-        <span class="escrow-list__empty-icon">🤝</span>
-        <h2>No tienes órdenes activas</h2>
-        <p>Cuando compres un dispositivo o aceptes una oferta de compra, aparecerá aquí con su estado en la blockchain.</p>
+      <div class="flex flex-col items-center justify-center text-center py-20 gap-4 text-ayni-muted">
+        <span class="text-5xl select-none">🤝</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">No tienes órdenes activas</h2>
+        <p class="text-xs sm:text-sm max-w-md">Cuando compres un dispositivo o aceptes una oferta de compra, aparecerá aquí con su estado en la blockchain.</p>
         <ayni-button variant="primary" size="md" routerLink="/catalog">
           Explorar Catálogo
         </ayni-button>
       </div>
     } @else {
-      <div class="escrow-list__grid">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         @for (order of escrowService.orders(); track order.id) {
-          <ayni-card padding="md" [hoverable]="true">
-            <div class="escrow-list__item">
-              <div class="escrow-list__item-header">
-                <div>
-                  <span class="escrow-list__order-id">Orden #{{ order.onChainOrderId }}</span>
-                  <span class="escrow-list__order-date">{{ order.createdAtUtc }}</span>
-                </div>
-                <ayni-badge [variant]="getStatusVariant(order.status)" size="sm">
-                  {{ getStatusLabel(order.status) }}
-                </ayni-badge>
+          <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-ayni-gold/40 transition-all flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-3 border-b border-ayni-espresso/10">
+              <div>
+                <span class="text-sm sm:text-base font-bold text-ayni-espresso block">Orden #{{ order.onChainOrderId }}</span>
+                <span class="text-[11px] text-ayni-muted">{{ order.createdAtUtc }}</span>
               </div>
+              <ayni-badge [variant]="getStatusVariant(order.status)" size="sm">
+                {{ getStatusLabel(order.status) }}
+              </ayni-badge>
+            </div>
 
-              <div class="escrow-list__item-body">
-                <div class="escrow-list__party-box">
-                  <div class="escrow-list__party">
-                    <span class="escrow-list__party-role">Comprador:</span>
-                    <span class="escrow-list__party-addr">{{ order.buyerAddress | truncateAddress }}</span>
-                  </div>
-                  <div class="escrow-list__party">
-                    <span class="escrow-list__party-role">Vendedor:</span>
-                    <span class="escrow-list__party-addr">{{ order.sellerAddress | truncateAddress }}</span>
-                  </div>
-                  <div class="escrow-list__party">
-                    <span class="escrow-list__party-role">Arbitro Multisig:</span>
-                    <span class="escrow-list__party-addr">{{ order.arbitratorAddress | truncateAddress }}</span>
-                  </div>
+            <div class="flex flex-col gap-3">
+              <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3 flex flex-col gap-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-ayni-muted">Comprador:</span>
+                  <span class="font-mono font-semibold text-ayni-espresso">{{ order.buyerAddress | truncateAddress }}</span>
                 </div>
-
-                <div class="escrow-list__amount-box">
-                  <span class="escrow-list__amount-label">Monto en Custodia Smart Contract</span>
-                  <span class="escrow-list__amount-val">{{ order.amountUsdt | usdt }}</span>
+                <div class="flex items-center justify-between">
+                  <span class="text-ayni-muted">Vendedor:</span>
+                  <span class="font-mono font-semibold text-ayni-espresso">{{ order.sellerAddress | truncateAddress }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-ayni-muted">Árbitro Multisig:</span>
+                  <span class="font-mono font-semibold text-ayni-espresso">{{ order.arbitratorAddress | truncateAddress }}</span>
                 </div>
               </div>
 
-              <div class="escrow-list__item-actions">
-                @if (order.status === 1) {
-                  <!-- FUNDED: show Safe Meet QR button -->
-                  <ayni-button variant="primary" size="sm" [routerLink]="['/escrow/safe-meet', order.id]">
-                    <span>Abrir Safe Meet 60s QR ⏱️</span>
-                  </ayni-button>
-                  <ayni-button variant="secondary" size="sm" [routerLink]="['/escrow/video-verify', order.id]">
-                    <span>Video Verify 📹</span>
-                  </ayni-button>
-                } @else if (order.status === 2 || order.status === 3) {
-                  <!-- Inspection window: release or dispute -->
-                  <ayni-button variant="primary" size="sm" (clicked)="escrowService.releaseFunds(order.id)">
-                    <span>Liberar Fondos al Vendedor ✓</span>
-                  </ayni-button>
-                  <ayni-button variant="danger" size="sm" (clicked)="escrowService.raiseDispute(order.id, 'Falla de hardware no declarada')">
-                    <span>Iniciar Disputa 2/3 ⚖️</span>
-                  </ayni-button>
-                } @else {
-                  <ayni-button variant="secondary" size="sm" [routerLink]="['/escrow/safe-meet', order.id]">
-                    <span>Ver Detalles de Transacción</span>
-                  </ayni-button>
-                }
+              <div class="flex items-center justify-between p-3 bg-ayni-canvas/50 rounded-xl border border-ayni-espresso/10">
+                <span class="text-xs text-ayni-muted">Monto en Custodia:</span>
+                <span class="text-lg font-extrabold font-mono text-ayni-espresso">{{ order.amountUsdt | usdt }}</span>
               </div>
             </div>
-          </ayni-card>
+
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-ayni-espresso/10 mt-auto">
+              @if (order.status === 1) {
+                <ayni-button variant="primary" size="sm" [routerLink]="['/escrow/safe-meet', order.id]">
+                  <span>Abrir Safe Meet 60s QR ⏱️</span>
+                </ayni-button>
+                <ayni-button variant="secondary" size="sm" [routerLink]="['/escrow/video-verify', order.id]">
+                  <span>Video Verify 📹</span>
+                </ayni-button>
+              } @else if (order.status === 2 || order.status === 3) {
+                <ayni-button variant="primary" size="sm" (clicked)="escrowService.releaseFunds(order.id)">
+                  <span>Liberar Fondos al Vendedor ✓</span>
+                </ayni-button>
+                <ayni-button variant="danger" size="sm" (clicked)="escrowService.raiseDispute(order.id, 'Falla de hardware no declarada')">
+                  <span>Iniciar Disputa 2/3 ⚖️</span>
+                </ayni-button>
+              } @else {
+                <ayni-button variant="secondary" size="sm" [routerLink]="['/escrow/safe-meet', order.id]">
+                  <span>Ver Detalles de Transacción</span>
+                </ayni-button>
+              }
+            </div>
+          </div>
         }
       </div>
     }

@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
@@ -6,20 +7,21 @@ import { keccak256, encodePacked } from 'viem';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { HARDWARE_CATEGORIES, HardwareCategory, ProofOfListingChallenge, CreateListingPayload } from '../../../core/models/listing.model';
+import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 
 @Component({
   selector: 'ayni-create-listing',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
+    AguayoRibbonComponent,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
-    UsdtPipe,
+UsdtPipe,
   ],
   templateUrl: './create-listing.component.html',
   styleUrl: './create-listing.component.scss',

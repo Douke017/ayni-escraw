@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,7 +8,6 @@ import { SignalRService } from '../../../core/services/signalr.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { CountdownTimerComponent } from '../../../shared/components/countdown-timer/countdown-timer.component';
 import { QrCodeComponent } from '../../../shared/components/qr-code/qr-code.component';
 
@@ -15,12 +15,12 @@ import { QrCodeComponent } from '../../../shared/components/qr-code/qr-code.comp
   selector: 'ayni-safe-meet',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     RouterLink,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
-    CountdownTimerComponent,
+CountdownTimerComponent,
     QrCodeComponent,
   ],
   templateUrl: './safe-meet.component.html',

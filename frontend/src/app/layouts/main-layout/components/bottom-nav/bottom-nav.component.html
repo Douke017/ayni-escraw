@@ -1,0 +1,73 @@
+<!-- SPDX-License-Identifier: MIT -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-ayni-espresso border-t border-ayni-gold/30 shadow-[0_-4px_20px_rgba(61,43,31,0.25)] pb-[env(safe-area-inset-bottom,0px)]" aria-label="Navegación móvil">
+  <div class="flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
+    <!-- 1. Inicio -->
+    <a 
+      routerLink="/" 
+      routerLinkActive="!text-ayni-gold font-bold" 
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-ayni-canvas/70 hover:text-ayni-gold transition-colors duration-200"
+    >
+      <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span class="text-[10px] tracking-tight">Inicio</span>
+    </a>
+
+    <!-- 2. Catálogo -->
+    <a 
+      routerLink="/catalog" 
+      routerLinkActive="!text-ayni-gold font-bold" 
+      class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-ayni-canvas/70 hover:text-ayni-gold transition-colors duration-200"
+    >
+      <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="7" height="7" x="3" y="3" rx="1"/>
+        <rect width="7" height="7" x="14" y="3" rx="1"/>
+        <rect width="7" height="7" x="14" y="14" rx="1"/>
+        <rect width="7" height="7" x="3" y="14" rx="1"/>
+      </svg>
+      <span class="text-[10px] tracking-tight">Catálogo</span>
+    </a>
+
+    <!-- 3. Publicar (Center Action Button) -->
+    <a 
+      routerLink="/listings/new" 
+      class="flex flex-col items-center justify-center flex-1 -mt-6 group focus:outline-none"
+      aria-label="Publicar producto"
+    >
+      <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-ayni-terracotta to-ayni-terracotta-hover text-white shadow-glow-terracotta flex items-center justify-center border-2 border-ayni-canvas transition-transform duration-150 group-hover:scale-105 active:scale-95">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+      <span class="text-[10px] font-bold mt-1 text-ayni-canvas/90 group-hover:text-ayni-gold">Publicar</span>
+    </a>
+
+    <!-- 4. Mis Órdenes / Escrow -->
+    <a 
+      routerLink="/escrow" 
+      routerLinkActive="!text-ayni-gold font-bold" 
+      class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-ayni-canvas/70 hover:text-ayni-gold transition-colors duration-200"
+    >
+      <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+      <span class="text-[10px] tracking-tight">Escrow</span>
+    </a>
+
+    <!-- 5. Chat & Negociación IA -->
+    <a 
+      routerLink="/chat" 
+      routerLinkActive="!text-ayni-gold font-bold" 
+      class="flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-ayni-canvas/70 hover:text-ayni-gold transition-colors duration-200"
+    >
+      <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="text-[10px] tracking-tight">Chat</span>
+    </a>
+  </div>
+</nav>

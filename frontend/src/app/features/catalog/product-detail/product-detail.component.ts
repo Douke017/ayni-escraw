@@ -1,28 +1,29 @@
+import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { KeyValuePipe } from '@angular/common';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { ProductListing, ValidationVerdict } from '../../../core/models/listing.model';
 import { HARDWARE_CATEGORIES } from '../../../core/models/category.model';
-import { AguayoStripeComponent } from '../../../shared/components/aguayo-stripe/aguayo-stripe.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
+
+import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 
 @Component({
   selector: 'ayni-product-detail',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
     KeyValuePipe,
-    AguayoStripeComponent,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
     UsdtPipe,
     TruncateAddressPipe,
+    AguayoRibbonComponent,
   ],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss',

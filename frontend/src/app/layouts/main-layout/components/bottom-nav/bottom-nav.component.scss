@@ -1,0 +1,115 @@
+/* SPDX-License-Identifier: MIT */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background-color: rgba(61, 43, 31, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(184, 137, 74, 0.3);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 64px;
+    padding: 0 0.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    text-decoration: none;
+    color: rgba(240, 230, 211, 0.7);
+    transition: color 0.15s ease, transform 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      transform: scale(0.94);
+    }
+
+    &--active {
+      color: var(--aguayo-gold, #D4A055);
+
+      .bottom-nav__icon {
+        stroke-width: 2.3;
+      }
+
+      .bottom-nav__label {
+        font-weight: 700;
+      }
+    }
+  }
+
+  &__icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  &__label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  &__action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    text-decoration: none;
+    color: #F0E6D3;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      transform: scale(0.94);
+    }
+
+    &--active-action {
+      .bottom-nav__action-circle {
+        background-color: #A0482E;
+        box-shadow: 0 4px 14px rgba(192, 88, 58, 0.4);
+      }
+    }
+  }
+
+  &__action-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: var(--aguayo-terracotta, #C0583A);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 12px rgba(192, 88, 58, 0.35);
+    transition: background-color 0.2s ease, transform 0.15s ease;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+

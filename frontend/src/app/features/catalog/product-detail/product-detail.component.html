@@ -1,142 +1,158 @@
-<div class="product-detail">
-  <div class="product-detail__container">
+<!-- SPDX-License-Identifier: MIT -->
+<div class="flex flex-col py-6 sm:py-8 pb-16 bg-ayni-canvas text-ayni-espresso">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
     <!-- Breadcrumb & Back -->
-    <nav class="product-detail__breadcrumb" aria-label="Navegación secundaria">
-      <a routerLink="/catalog" class="product-detail__back-link">
-        ← Volver al Catálogo
+    <nav class="flex items-center gap-2 text-xs sm:text-sm mb-6" aria-label="Navegación secundaria">
+      <a routerLink="/catalog" class="text-ayni-espresso hover:text-ayni-terracotta font-bold transition-colors">
+        ← Catálogo
       </a>
-      <span class="product-detail__breadcrumb-sep">/</span>
-      <span class="product-detail__breadcrumb-current">
+      <span class="text-ayni-muted">/</span>
+      <span class="text-ayni-muted truncate max-w-xs sm:max-w-md">
         {{ listing()?.title || 'Cargando dispositivo...' }}
       </span>
     </nav>
 
     @if (isLoading()) {
-      <div class="product-detail__loading">
-        <span class="product-detail__spinner"></span>
-        <p>Cargando información técnica y auditoría en HSK Chain...</p>
+      <div class="flex flex-col items-center justify-center text-center py-20 gap-4 text-ayni-muted">
+        <div class="w-9 h-9 border-3 border-ayni-espresso/15 border-t-ayni-terracotta rounded-full animate-spin"></div>
+        <p class="text-sm font-medium">Cargando información técnica y atestaciones en HSK Chain...</p>
       </div>
     } @else if (!listing()) {
-      <div class="product-detail__not-found">
-        <span class="product-detail__not-found-icon">⚠️</span>
-        <h2>Dispositivo no encontrado</h2>
-        <p>El producto solicitado no existe o ya fue adquirido mediante el contrato Escrow.</p>
+      <div class="flex flex-col items-center justify-center text-center py-20 gap-4 text-ayni-muted">
+        <span class="text-5xl select-none">⚠️</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso">Dispositivo no encontrado</h2>
+        <p class="text-sm max-w-md">El producto solicitado no existe o ya fue adquirido mediante el contrato Escrow.</p>
         <ayni-button variant="primary" size="md" routerLink="/catalog">
-          Volver a explorar
+          <span>Volver al Catálogo</span>
         </ayni-button>
       </div>
     } @else {
       <!-- Main Product Header & Split -->
-      <div class="product-detail__layout">
-        <!-- Left: Gallery, Specs & Privacy Card -->
-        <div class="product-detail__main">
-          <!-- Visual Media Card -->
-          <div class="product-detail__media-card">
-            <div class="product-detail__media-preview">
-              <span class="product-detail__media-icon">{{ categoryMeta()?.icon || '💻' }}</span>
-              <div class="product-detail__media-badges">
-                <ayni-badge variant="pass" size="md" [pulse]="true">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Column: Gallery, Specs, Privacy Card & AI Audit (Cols 1-7 or 1-8) -->
+        <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-8">
+          <!-- Visual Media Card (Figma Hero Gallery) -->
+          <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden shadow-sm">
+            <ayni-aguayo-ribbon size="md"></ayni-aguayo-ribbon>
+            <div class="h-64 sm:h-80 md:h-96 bg-ayni-canvas-muted flex items-center justify-center relative">
+              <span class="text-7xl sm:text-8xl md:text-9xl select-none">
+                @if (listing()!.category === 'SMARTPHONE') { 📱 }
+                @else if (listing()!.category === 'LAPTOP') { 💻 }
+                @else if (listing()!.category === 'COMPONENT') { ⚡ }
+                @else { 🎮 }
+              </span>
+              <div class="absolute top-4 left-4 flex gap-2 flex-wrap">
+                <ayni-badge variant="pass" size="sm" [pulse]="true">
                   ERC-8004 PASS
                 </ayni-badge>
-                <ayni-badge variant="pol" size="sm">
-                  Proof of Listing OK
-                </ayni-badge>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-ayni-espresso/10 text-ayni-espresso border border-ayni-espresso/15">
+                  POL Challenge OK
+                </span>
               </div>
             </div>
-            <ayni-aguayo-stripe [accentColor]="categoryMeta()?.aguayoColorToken || 'var(--aguayo-gold)'" />
           </div>
 
           <!-- Product Title and General Description -->
-          <section class="product-detail__info-section">
-            <span class="product-detail__category-label">
-              {{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10
-            </span>
-            <h1 class="product-detail__title">{{ listing()!.title }}</h1>
-            <p class="product-detail__description">{{ listing()!.description }}</p>
+          <section class="flex flex-col gap-3">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span class="text-xs font-extrabold text-ayni-terracotta uppercase tracking-wider">{{ listing()!.category }}</span>
+              <span class="text-xs font-semibold bg-ayni-olive/15 text-ayni-olive px-2.5 py-0.5 rounded border border-ayni-olive/25">
+                Condición: {{ listing()!.declaredCondition }}/10
+              </span>
+              <span class="text-xs font-bold text-ayni-accent-brown bg-ayni-gold/15 px-2.5 py-0.5 rounded border border-ayni-gold/25">
+                Ayni Certificado
+              </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight leading-tight font-serif">
+              {{ listing()!.title }}
+            </h1>
+            <p class="text-sm sm:text-base leading-relaxed text-ayni-muted">
+              {{ listing()!.description }}
+            </p>
           </section>
 
           <!-- Technical Specs Matrix -->
-          <section class="product-detail__specs-section">
-            <h2 class="product-detail__section-title">Especificaciones Técnicas Normalizadas</h2>
-            <div class="product-detail__specs-grid">
+          <section class="flex flex-col gap-3.5">
+            <h2 class="text-lg sm:text-xl font-bold text-ayni-espresso font-serif">Especificaciones de Hardware</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               @for (entry of technicalAttributes() | keyvalue; track entry.key) {
-                <div class="product-detail__spec-box">
-                  <span class="product-detail__spec-key">{{ entry.key }}</span>
-                  <span class="product-detail__spec-val">{{ entry.value }}</span>
+                <div class="bg-ayni-card border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-1 shadow-sm">
+                  <span class="text-[10px] sm:text-xs uppercase text-ayni-muted font-semibold tracking-wider">{{ entry.key }}</span>
+                  <span class="text-sm sm:text-base font-bold text-ayni-espresso">{{ entry.value }}</span>
                 </div>
               }
             </div>
           </section>
 
           <!-- Privacy Barrier: Salted IMEI Commitment (Non-Plaintext) -->
-          <section class="product-detail__privacy-section">
-            <ayni-card sideBarColor="var(--aguayo-gold)" padding="md">
-              <div class="product-detail__privacy-box">
-                <div class="product-detail__privacy-header">
-                  <span class="product-detail__privacy-icon">🔐</span>
-                  <div>
-                    <h3 class="product-detail__privacy-title">Privacidad Criptográfica de Hardware</h3>
-                    <p class="product-detail__privacy-subtitle">
-                      Salted Commitment: keccak256(imei, salt, seller)
-                    </p>
-                  </div>
-                </div>
-
-                <p class="product-detail__privacy-desc">
-                  Por seguridad y prevención de bloqueos o clonaciones fraudulentas, el identificador de hardware (IMEI/Serial) <strong>nunca se expone en texto plano</strong> en la aplicación ni en la blockchain.
-                </p>
-
-                <div class="product-detail__hash-container">
-                  <div class="product-detail__hash-row">
-                    <span class="product-detail__hash-label">Commitment Hash:</span>
-                    <code class="product-detail__hash-code">{{ listing()!.proofHash }}</code>
-                  </div>
-                  <div class="product-detail__hash-row">
-                    <span class="product-detail__hash-label">Commitment Salt:</span>
-                    <code class="product-detail__hash-code">{{ listing()!.commitmentSalt }}</code>
-                  </div>
-                </div>
-
-                <div class="product-detail__privacy-action">
-                  <button 
-                    type="button" 
-                    class="product-detail__copy-btn"
-                    (click)="copyToClipboard(listing()!.proofHash)"
-                  >
-                    @if (isCopied()) {
-                      <span>✓ Hash copiado al portapapeles</span>
-                    } @else {
-                      <span>📋 Copiar Hash de Compromiso para Auditoría</span>
-                    }
-                  </button>
+          <section class="flex flex-col">
+            <div class="bg-ayni-card border border-ayni-gold/35 rounded-2xl p-5 sm:p-6 flex flex-col gap-4 shadow-sm">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl sm:text-3xl">🔐</span>
+                <div>
+                  <h3 class="text-base sm:text-lg font-bold text-ayni-espresso">Privacidad Criptográfica de Hardware</h3>
+                  <p class="text-xs font-mono text-ayni-accent-brown">
+                    Commitment: keccak256(imei, salt, seller)
+                  </p>
                 </div>
               </div>
-            </ayni-card>
+
+              <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+                Por seguridad y prevención de clonaciones, el número de serie / IMEI <strong class="text-ayni-espresso">nunca se expone en texto plano</strong> on-chain. Se verifica mediante compromiso criptográfico con sal aleatoria.
+              </p>
+
+              <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-2">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="text-xs text-ayni-muted font-semibold sm:w-36 shrink-0">Commitment Hash:</span>
+                  <code class="text-xs font-mono text-ayni-espresso bg-ayni-card px-2 py-1 rounded border border-ayni-espresso/10 break-all">
+                    {{ listing()!.proofHash }}
+                  </code>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="text-xs text-ayni-muted font-semibold sm:w-36 shrink-0">Commitment Salt:</span>
+                  <code class="text-xs font-mono text-ayni-espresso bg-ayni-card px-2 py-1 rounded border border-ayni-espresso/10 break-all">
+                    {{ listing()!.commitmentSalt }}
+                  </code>
+                </div>
+              </div>
+
+              <div>
+                <button 
+                  type="button" 
+                  class="w-full bg-ayni-card border border-ayni-terracotta/40 hover:bg-ayni-terracotta hover:text-white text-ayni-terracotta font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all duration-150 cursor-pointer text-center"
+                  (click)="copyToClipboard(listing()!.proofHash)"
+                >
+                  @if (isCopied()) {
+                    <span>✓ Hash copiado al portapapeles</span>
+                  } @else {
+                    <span>📋 Copiar Hash de Compromiso</span>
+                  }
+                </button>
+              </div>
+            </div>
           </section>
 
           <!-- ERC-8004 AI Validation Audit Trail -->
-          <section class="product-detail__audit-section">
-            <h2 class="product-detail__section-title">Atestación del Agente de IA (ERC-8004)</h2>
-            <div class="product-detail__audit-card">
-              <div class="product-detail__audit-step">
-                <div class="product-detail__audit-badge-col">
-                  <span class="product-detail__audit-icon">🤖</span>
-                </div>
-                <div class="product-detail__audit-details">
-                  <div class="product-detail__audit-row">
-                    <span class="product-detail__audit-name">Validador:</span>
-                    <span class="product-detail__audit-val">Agent NFT #42 (Ayni Tech Verifier)</span>
+          <section class="flex flex-col gap-3.5">
+            <h2 class="text-lg sm:text-xl font-bold text-ayni-espresso font-serif">Atestación IA ERC-8004</h2>
+            <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl select-none">🤖</span>
+                <div class="flex flex-col gap-2 flex-1 min-w-0">
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <span class="text-ayni-muted font-medium sm:w-20 shrink-0">Validador:</span>
+                    <span class="font-bold text-ayni-espresso">Ayni Tech Agent #42</span>
                   </div>
-                  <div class="product-detail__audit-row">
-                    <span class="product-detail__audit-name">Registro:</span>
-                    <span class="product-detail__audit-val">HSK AyniAgentRegistry (ValidationRegistry)</span>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <span class="text-ayni-muted font-medium sm:w-20 shrink-0">Registro:</span>
+                    <span class="font-bold text-ayni-espresso">HSK Chain ValidationRegistry</span>
                   </div>
-                  <div class="product-detail__audit-row">
-                    <span class="product-detail__audit-name">Dictamen:</span>
-                    <ayni-badge variant="pass" size="sm">PASS (100% de coherencia técnica)</ayni-badge>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <span class="text-ayni-muted font-medium sm:w-20 shrink-0">Dictamen:</span>
+                    <ayni-badge variant="pass" size="sm">PASS (Coherencia de Hardware Verificada)</ayni-badge>
                   </div>
-                  <p class="product-detail__audit-summary">
-                    El agente analizó las especificaciones del fabricante contra el checklist fotográfico presentado por el vendedor. No se detectaron contradicciones ni signos de manipulación de hardware.
+                  <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed mt-1">
+                    El agente analizó las especificaciones del fabricante contra el checklist fotográfico presentado. Sin indicios de manipulación de hardware ni contradicciones de modelo.
                   </p>
                 </div>
               </div>
@@ -144,77 +160,80 @@
           </section>
         </div>
 
-        <!-- Right: Purchase CTA & Trust Sidebar -->
-        <aside class="product-detail__sidebar">
-          <ayni-card sideBarColor="var(--aguayo-red)" padding="lg">
-            <div class="product-detail__buy-box">
-              <span class="product-detail__buy-label">Precio Escrow No-Custodial</span>
-              <div class="product-detail__price-tag">
+        <!-- Right Column / Sidebar: Purchase CTA & Trust (Cols 8-12 or 9-12) -->
+        <aside class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24">
+          <div class="bg-ayni-card border border-ayni-espresso/10 border-t-4 border-t-ayni-terracotta rounded-2xl p-5 sm:p-6 flex flex-col gap-4 shadow-lg">
+            <span class="text-xs uppercase font-semibold text-ayni-muted tracking-wider">Precio Escrow No-Custodial</span>
+            
+            <div class="flex flex-col">
+              <span class="text-3xl sm:text-4xl font-extrabold text-ayni-espresso leading-none">
                 {{ listing()!.priceUsdt | usdt }}
-              </div>
+              </span>
+              <span class="text-xs sm:text-sm font-bold text-ayni-accent-brown mt-1">
+                ~ Bs. {{ (listing()!.priceUsdt * 6.96).toFixed(0) }} BOB
+              </span>
+            </div>
 
-              <div class="product-detail__network-chip">
-                <span class="product-detail__net-dot"></span>
-                <span>USDT en HSK Chain Testnet</span>
-              </div>
+            <div class="inline-flex items-center gap-2 text-xs text-ayni-espresso bg-ayni-canvas border border-ayni-espresso/10 px-3 py-1.5 rounded-full w-fit">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></span>
+              <span class="font-medium">USDT en HSK Chain</span>
+            </div>
 
-              <div class="product-detail__cta-group">
-                <ayni-button 
-                  variant="primary" 
-                  size="lg" 
-                  [fullWidth]="true"
-                  (clicked)="proceedToCheckout()"
-                >
-                  <span>Depositar en Escrow</span>
-                  <span aria-hidden="true">⚡</span>
-                </ayni-button>
+            <div class="flex flex-col gap-2.5 my-1">
+              <ayni-button 
+                variant="primary" 
+                size="lg" 
+                [fullWidth]="true"
+                (clicked)="proceedToCheckout()"
+              >
+                <span class="font-bold">Depositar en Escrow</span>
+                <span aria-hidden="true" class="ml-1">→</span>
+              </ayni-button>
 
-                <ayni-button 
-                  variant="secondary" 
-                  size="md" 
-                  [fullWidth]="true"
-                  (clicked)="startChat()"
-                >
-                  <span>Chatear con Vendedor (Bond 0.30 USDT)</span>
-                  <span aria-hidden="true">💬</span>
-                </ayni-button>
-              </div>
+              <ayni-button 
+                variant="outline" 
+                size="md" 
+                [fullWidth]="true"
+                (clicked)="startChat()"
+              >
+                <span>Chatear (Intent Bond 0.30 USDT)</span>
+              </ayni-button>
+            </div>
 
-              <div class="product-detail__guarantee-list">
-                <div class="product-detail__guarantee-item">
-                  <span class="product-detail__guar-icon">🛡️</span>
-                  <div>
-                    <strong>Depósito Permit2 EIP-712:</strong>
-                    <span>Una sola firma criptográfica sin doble aprobación ERC-20.</span>
-                  </div>
-                </div>
-                <div class="product-detail__guarantee-item">
-                  <span class="product-detail__guar-icon">⏱️</span>
-                  <div>
-                    <strong>Safe Meet 60s QR:</strong>
-                    <span>Liberación presencial con código de un solo uso en Redis.</span>
-                  </div>
-                </div>
-                <div class="product-detail__guarantee-item">
-                  <span class="product-detail__guar-icon">⚖️</span>
-                  <div>
-                    <strong>Arbitraje 2-de-3 Multisig:</strong>
-                    <span>Protección contra disputas sin intermediario central.</span>
-                  </div>
+            <div class="flex flex-col gap-3 py-4 border-t border-b border-ayni-espresso/10 text-xs leading-relaxed text-ayni-muted">
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">🛡️</span>
+                <div>
+                  <strong class="text-ayni-espresso block">Depósito Permit2:</strong>
+                  <span>Firma off-chain EIP-712 sin doble transacción ni aprobación previa.</span>
                 </div>
               </div>
-
-              <div class="product-detail__seller-card">
-                <span class="product-detail__seller-header">Vendedor Verificado</span>
-                <div class="product-detail__seller-info">
-                  <span class="product-detail__seller-addr">
-                    {{ listing()!.sellerAddress | truncateAddress }}
-                  </span>
-                  <ayni-badge variant="neutral" size="sm">Score: 98/100</ayni-badge>
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">⏱️</span>
+                <div>
+                  <strong class="text-ayni-espresso block">Safe Meet 60s QR:</strong>
+                  <span>Entrega presencial con liberación instantánea de fondos vía Redis nonce.</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0">⚖️</span>
+                <div>
+                  <strong class="text-ayni-espresso block">Multisig 2/3 Arbitraje:</strong>
+                  <span>Protección ante desacuerdos sin control centralizado.</span>
                 </div>
               </div>
             </div>
-          </ayni-card>
+
+            <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3.5 flex flex-col gap-1.5">
+              <span class="text-[10px] uppercase font-semibold text-ayni-muted tracking-wider">Vendedor Verificado</span>
+              <div class="flex items-center justify-between">
+                <span class="font-mono text-xs sm:text-sm font-bold text-ayni-espresso">
+                  {{ listing()!.sellerAddress | truncateAddress }}
+                </span>
+                <ayni-badge variant="neutral" size="sm">Score: 98/100</ayni-badge>
+              </div>
+            </div>
+          </div>
         </aside>
       </div>
     }

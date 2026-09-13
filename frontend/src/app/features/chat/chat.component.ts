@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -8,20 +9,19 @@ import { ChatBondService } from '../../core/services/chat-bond.service';
 import { AuthService } from '../../core/services/auth.service';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { TruncateAddressPipe } from '../../shared/pipes/truncate-address.pipe';
 
 @Component({
   selector: 'ayni-chat',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     DatePipe,
     RouterLink,
     BadgeComponent,
     ButtonComponent,
-    CardComponent,
-    TruncateAddressPipe,
+TruncateAddressPipe,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
