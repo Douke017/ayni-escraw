@@ -1,0 +1,23 @@
+<button
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  class="ayni-btn"
+  [class.ayni-btn--primary]="variant() === 'primary'"
+  [class.ayni-btn--secondary]="variant() === 'secondary'"
+  [class.ayni-btn--outline]="variant() === 'outline'"
+  [class.ayni-btn--danger]="variant() === 'danger'"
+  [class.ayni-btn--ghost]="variant() === 'ghost'"
+  [class.ayni-btn--sm]="size() === 'sm'"
+  [class.ayni-btn--md]="size() === 'md'"
+  [class.ayni-btn--lg]="size() === 'lg'"
+  [class.ayni-btn--full]="fullWidth()"
+  [class.ayni-btn--loading]="loading()"
+  (click)="onClick($event)"
+>
+  @if (loading()) {
+    <span class="ayni-btn__spinner" aria-hidden="true"></span>
+  }
+  <span class="ayni-btn__label">
+    <ng-content />
+  </span>
+</button>

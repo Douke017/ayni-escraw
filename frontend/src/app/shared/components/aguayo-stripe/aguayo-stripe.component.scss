@@ -1,0 +1,33 @@
+/* SPDX-License-Identifier: MIT */
+
+.aguayo-stripe {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+
+  &__base {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--aguayo-red) 0%,
+      var(--aguayo-gold) 25%,
+      var(--aguayo-olive) 50%,
+      var(--aguayo-indigo) 75%,
+      var(--aguayo-burgundy) 100%
+    );
+    opacity: 0.35;
+  }
+
+  &__accent {
+    position: relative;
+    width: 35%;
+    height: 100%;
+    margin: 0 auto;
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 8px currentColor;
+  }
+}

@@ -1,1 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
+/* SPDX-License-Identifier: MIT */
+/* Ayni Escrow — Main Global Styles Entry Point */
+
+@use 'tokens';
+@use 'reset';
+@use 'typography';
+@use 'mixins';

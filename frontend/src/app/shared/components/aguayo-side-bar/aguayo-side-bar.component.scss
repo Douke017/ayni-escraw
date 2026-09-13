@@ -1,0 +1,14 @@
+/* SPDX-License-Identifier: MIT */
+
+.aguayo-side-bar {
+  width: 4px;
+  height: 100%;
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+  flex-shrink: 0;
+  transition: width var(--transition-fast);
+
+  &:hover {
+    width: 6px;
+  }
+}

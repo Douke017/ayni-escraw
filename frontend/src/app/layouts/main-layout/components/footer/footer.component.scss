@@ -1,0 +1,194 @@
+/* SPDX-License-Identifier: MIT */
+@use 'mixins' as *;
+
+.footer {
+  position: relative;
+  background-color: var(--aguayo-deep);
+  border-top: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  overflow: hidden;
+  margin-top: auto;
+
+  &__container {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-4) var(--space-6);
+
+    @include md {
+      padding: var(--space-16) var(--space-6) var(--space-8);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-10);
+
+    @include sm {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include lg {
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
+      gap: var(--space-10);
+    }
+  }
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    &--brand {
+      gap: var(--space-4);
+    }
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__logo-icon {
+    color: var(--aguayo-gold);
+    font-size: 1.5rem;
+  }
+
+  &__logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--aguayo-cream);
+  }
+
+  &__desc {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 380px;
+  }
+
+  &__network-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--surface-border);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    width: fit-content;
+    color: var(--text-secondary);
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #10b981;
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--aguayo-cream);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-1);
+  }
+
+  &__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  &__link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--aguayo-gold);
+    }
+  }
+
+  &__contract-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  &__code {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--aguayo-gold);
+  }
+
+  &__security-note {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+
+  &__chip {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+  }
+
+  &__ribbon-wrapper {
+    margin: var(--space-6) 0 var(--space-6);
+  }
+
+  &__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: space-between;
+
+    @include md {
+      flex-direction: row;
+    }
+  }
+
+  &__copyright {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  &__bottom-links {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  &__bottom-link {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}

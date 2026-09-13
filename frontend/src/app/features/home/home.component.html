@@ -1,0 +1,203 @@
+<div class="home">
+  <!-- Hero Section -->
+  <section class="home__hero">
+    <ayni-aguayo-pattern variant="detailed" [opacity]="0.14" />
+    <div class="home__hero-glow"></div>
+
+    <div class="home__container home__hero-content">
+      <div class="home__hero-badge">
+        <ayni-badge variant="hsk" size="md" [pulse]="true">
+          HSK Testnet • Web3 Escrow
+        </ayni-badge>
+        <span class="home__hero-badge-sub">Protocolo de Confianza No-Custodial</span>
+      </div>
+
+      <h1 class="home__headline">
+        El Mercado Andino de <span class="home__text-gradient">Hardware Verificado</span> y Escrow Criptográfico
+      </h1>
+
+      <p class="home__subheadline">
+        Compra y vende smartphones, laptops y componentes sin intermediarios bancarios. Custodia criptográfica vía Smart Contracts en HSK Chain, agentes de IA evaluando hardware y pasaportes digitales ERC-721.
+      </p>
+
+      <div class="home__hero-actions">
+        <ayni-button variant="primary" size="lg" routerLink="/catalog">
+          <span>Explorar Catálogo</span>
+          <span aria-hidden="true">→</span>
+        </ayni-button>
+
+        <ayni-button variant="secondary" size="lg" routerLink="/listings/new">
+          <span>Publicar con Proof of Listing</span>
+          <span aria-hidden="true">📸</span>
+        </ayni-button>
+      </div>
+
+      <!-- Live Trust Metrics -->
+      <div class="home__metrics">
+        <div class="home__metric-item">
+          <span class="home__metric-value">0%</span>
+          <span class="home__metric-label">Custodia Centralizada</span>
+        </div>
+        <div class="home__metric-divider"></div>
+        <div class="home__metric-item">
+          <span class="home__metric-value">Permit2</span>
+          <span class="home__metric-label">Depósito EIP-712</span>
+        </div>
+        <div class="home__metric-divider"></div>
+        <div class="home__metric-item">
+          <span class="home__metric-value">ERC-8004</span>
+          <span class="home__metric-label">Validación IA On-Chain</span>
+        </div>
+        <div class="home__metric-divider"></div>
+        <div class="home__metric-item">
+          <span class="home__metric-value">60s TTL</span>
+          <span class="home__metric-label">Safe Meet Anti-Fraude</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Andean ribbon separator -->
+    <ayni-aguayo-ribbon size="sm" />
+  </section>
+
+  <!-- Puestos de Hardware (Categories) -->
+  <section class="home__section home__categories">
+    <div class="home__container">
+      <div class="home__section-header">
+        <span class="home__section-pre">Puestos del Mercado</span>
+        <h2 class="home__section-title">Categorías de Hardware Tecnológico</h2>
+        <p class="home__section-desc">
+          Dispositivos verificados minuciosamente. Salud de batería, componentes sin sobrecalentamiento y números de serie protegidos con hashes salted.
+        </p>
+      </div>
+
+      <div class="home__category-grid">
+        @for (cat of categories; track cat.key) {
+          <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.key }" class="home__category-link">
+            <ayni-card [sideBarColor]="cat.aguayoColorToken" [hoverable]="true" padding="md">
+              <div class="home__cat-card">
+                <span class="home__cat-icon">{{ cat.icon }}</span>
+                <h3 class="home__cat-title">{{ cat.label }}</h3>
+                <p class="home__cat-desc">{{ cat.description }}</p>
+                <span class="home__cat-cta" [style.color]="cat.aguayoColorToken">
+                  Ver dispositivos verificados →
+                </span>
+              </div>
+            </ayni-card>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Verified Devices Showcase -->
+  <section class="home__section home__showcase">
+    <div class="home__container">
+      <div class="home__section-header-row">
+        <div>
+          <span class="home__section-pre">Garantía On-Chain</span>
+          <h2 class="home__section-title">Dispositivos con Dictamen ERC-8004 PASS</h2>
+        </div>
+        <ayni-button variant="outline" size="sm" routerLink="/catalog">
+          <span>Ver todos ({{ catalogService.listings().length }})</span>
+        </ayni-button>
+      </div>
+
+      @if (catalogService.isLoading()) {
+        <div class="home__loading">
+          <span class="home__loading-spinner"></span>
+          <p>Cargando dispositivos en HSK Chain...</p>
+        </div>
+      } @else {
+        <div class="home__product-grid">
+          @for (item of catalogService.listings().slice(0, 4); track item.id) {
+            <a [routerLink]="['/catalog', item.id]" class="home__product-card-link">
+              <ayni-card [hoverable]="true" padding="none">
+                <div class="home__product-card">
+                  <!-- Card Header Banner -->
+                  <div class="home__product-media">
+                    <div class="home__product-badge-overlay">
+                      <ayni-badge variant="pass" size="sm">
+                        ERC-8004 PASS
+                      </ayni-badge>
+                    </div>
+                    <span class="home__product-icon">💻</span>
+                  </div>
+
+                  <!-- Card Info -->
+                  <div class="home__product-content">
+                    <span class="home__product-cat">{{ item.category }}</span>
+                    <h3 class="home__product-title">{{ item.title }}</h3>
+                    <p class="home__product-desc">{{ item.description }}</p>
+
+                    <div class="home__product-specs">
+                      <span class="home__product-pill">Condición: {{ item.declaredCondition }}/10</span>
+                      <span class="home__product-pill">Commitment Salted 🔐</span>
+                    </div>
+
+                    <div class="home__product-footer">
+                      <div class="home__product-price-box">
+                        <span class="home__product-price-label">Precio Escrow</span>
+                        <span class="home__product-price">{{ item.priceUsdt | usdt }}</span>
+                      </div>
+                      <span class="home__product-seller">
+                        {{ item.sellerAddress | truncateAddress }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </ayni-card>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 4 Pillars of Andean Trust -->
+  <section class="home__section home__pillars">
+    <div class="home__container">
+      <div class="home__section-header">
+        <span class="home__section-pre">Arquitectura de Seguridad</span>
+        <h2 class="home__section-title">El Código del Ayni: Confianza Criptográfica</h2>
+        <p class="home__section-desc">
+          Inspirado en el principio andino de reciprocidad y justicia comunitaria, implementado con criptografía moderna.
+        </p>
+      </div>
+
+      <div class="home__pillars-grid">
+        <div class="home__pillar-card">
+          <div class="home__pillar-icon">🛡️</div>
+          <h3 class="home__pillar-title">Escrow No-Custodial</h3>
+          <p class="home__pillar-desc">
+            Tus USDT se depositan en el contrato inteligente <code>AyniEscrow</code> mediante Uniswap Permit2 con una sola firma EIP-712. Nadie, ni siquiera Ayni, puede sustraer tus fondos.
+          </p>
+        </div>
+
+        <div class="home__pillar-card">
+          <div class="home__pillar-icon">📸</div>
+          <h3 class="home__pillar-title">Proof of Listing (POL)</h3>
+          <p class="home__pillar-desc">
+            Cada publicación requiere una fotografía del hardware físico con un código efímero único generado por el sistema. El agente de IA valida la posesión antes de listar.
+          </p>
+        </div>
+
+        <div class="home__pillar-card">
+          <div class="home__pillar-icon">⏱️</div>
+          <h3 class="home__pillar-title">Safe Meet 60s QR</h3>
+          <p class="home__pillar-desc">
+            Para entregas en persona, el vendedor genera un QR efímero en Redis con expiración estricta de 60 segundos. Al ser escaneado por el comprador, los fondos se liquidan al instante.
+          </p>
+        </div>
+
+        <div class="home__pillar-card">
+          <div class="home__pillar-icon">📜</div>
+          <h3 class="home__pillar-title">Pasaporte Digital ERC-721</h3>
+          <p class="home__pillar-desc">
+            Cada dispositivo se acuña como un NFT en HSK Chain con hash <code>keccak256(imei, salt, seller)</code>. La privacidad del IMEI está protegida y el historial es auditable.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

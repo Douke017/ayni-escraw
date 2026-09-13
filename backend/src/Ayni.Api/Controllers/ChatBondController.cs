@@ -133,6 +133,31 @@ public class ChatBondController : ControllerBase
             status = bond.Status.ToString()
         });
     }
+
+    [HttpPost("{orderId:guid}/claim-refund")]
+    public async Task<IActionResult> ClaimRefund(Guid orderId)
+    {
+        var bond = await _dbContext.ChatBonds.FirstOrDefaultAsync(b => b.OrderId == orderId);
+        if (bond == null)
+        {
+            return NotFound(new { error = $"Chat bond for order {orderId} not found" });
+        }
+
+        if (!bond.IsRefundEligible && bond.Status != ChatBondStatus.RefundEligible)
+        {
+            return BadRequest(new { error = "Chat bond is not eligible for full refund. Minimum 2 mutual replies required." });
+        }
+
+        bond.Status = ChatBondStatus.Refunded;
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new
+        {
+            success = true,
+            status = bond.Status.ToString(),
+            refundAmountUsdt = bond.DepositAmountUsdt
+        });
+    }
 }
 
 public class BondDepositRequest

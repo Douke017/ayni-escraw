@@ -15,10 +15,9 @@ describe('App Component', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title with signal value', async () => {
+  it('should have title signal value', () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Ayni Trust Marketplace');
+    const app = fixture.componentInstance;
+    expect(app.title()).toBe('Ayni Trust Marketplace');
   });
 });

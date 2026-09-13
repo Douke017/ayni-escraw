@@ -1,0 +1,45 @@
+<div 
+  class="countdown"
+  [class.countdown--urgent]="urgencyState() === 'urgent'"
+  [class.countdown--warning]="urgencyState() === 'warning'"
+  [class.countdown--normal]="urgencyState() === 'normal'"
+>
+  @if (variant() === 'circular') {
+    <div class="countdown__circular">
+      <svg class="countdown__svg" viewBox="0 0 88 88" aria-hidden="true">
+        <circle
+          class="countdown__track"
+          cx="44"
+          cy="44"
+          [attr.r]="radius"
+        />
+        <circle
+          class="countdown__indicator"
+          cx="44"
+          cy="44"
+          [attr.r]="radius"
+          [style.strokeDasharray]="circumference"
+          [style.strokeDashoffset]="strokeDashoffset()"
+        />
+      </svg>
+      <div class="countdown__overlay">
+        <span class="countdown__digits">{{ formattedTime() }}</span>
+        @if (showLabels()) {
+          <span class="countdown__label">restante</span>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="countdown__linear">
+      <div class="countdown__bar-track">
+        <div 
+          class="countdown__bar-indicator"
+          [style.width.%]="progress() * 100"
+        ></div>
+      </div>
+      @if (showLabels()) {
+        <span class="countdown__digits-linear">{{ formattedTime() }}</span>
+      }
+    </div>
+  }
+</div>

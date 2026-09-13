@@ -1,0 +1,42 @@
+/* SPDX-License-Identifier: MIT */
+/* Ayni Escrow — Responsive Breakpoints & Hover-Lift Mixins */
+
+/* Mobile-first breakpoints */
+@mixin sm {
+  @media (min-width: 640px) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: 1280px) {
+    @content;
+  }
+}
+
+/* Hover-lift interaction */
+@mixin hover-lift($lift: -4px, $shadow: var(--shadow-lg), $border-color: null) {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY($lift);
+    box-shadow: $shadow;
+    @if $border-color != null {
+      border-color: $border-color;
+    }
+  }
+}

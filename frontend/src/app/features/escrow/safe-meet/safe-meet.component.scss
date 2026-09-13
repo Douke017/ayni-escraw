@@ -1,0 +1,311 @@
+/* SPDX-License-Identifier: MIT */
+@use 'mixins' as *;
+
+.safe-meet {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) 0 var(--space-16);
+
+  &__container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    width: 100%;
+
+    @include md {
+      padding: 0 var(--space-6);
+    }
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+  }
+
+  &__pre {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--aguayo-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+
+  &__title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--aguayo-cream);
+    margin-bottom: var(--space-2);
+
+    @include md {
+      font-size: 2.25rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Role Tabs */
+  &__role-tabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+    background-color: var(--surface-card);
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--surface-border);
+  }
+
+  &__tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 0.65rem 1rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &--active {
+      background-color: var(--surface-hover);
+      color: var(--aguayo-gold);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  /* Seller View */
+  &__seller-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-6);
+  }
+
+  &__seller-top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-width: 500px;
+  }
+
+  &__sec-label {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  &__sec-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  &__qr-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+
+    @include sm {
+      flex-direction: row;
+      justify-content: center;
+      gap: var(--space-8);
+    }
+  }
+
+  &__qr-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__timer-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    max-width: 200px;
+  }
+
+  &__timer-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__nonce-display {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    max-width: 480px;
+  }
+
+  &__nonce-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  &__nonce-code {
+    font-family: monospace;
+    font-size: 0.8125rem;
+    color: var(--aguayo-gold);
+    word-break: break-all;
+  }
+
+  &__seller-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Buyer View */
+  &__buyer-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  &__buyer-top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  &__buyer-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  &__input-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__input-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    @include sm {
+      flex-direction: row;
+    }
+  }
+
+  &__input {
+    flex: 1;
+    background-color: var(--surface-hover);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.85rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    outline: none;
+    transition: all var(--transition-fast);
+
+    &:focus {
+      border-color: var(--aguayo-gold);
+    }
+  }
+
+  &__feedback {
+    font-size: 0.8125rem;
+    color: #10b981;
+    margin-top: var(--space-1);
+  }
+
+  &__buyer-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    background-color: rgba(217, 119, 6, 0.08);
+    border: 1px solid rgba(217, 119, 6, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+
+    strong {
+      color: var(--aguayo-gold);
+      display: block;
+    }
+  }
+
+  &__notice-icon {
+    font-size: 1.25rem;
+  }
+
+  /* Confirmed Card */
+  &__confirmed-wrap {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__confirmed-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+  }
+
+  &__confirmed-icon {
+    font-size: 4rem;
+  }
+
+  &__confirmed-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #10b981;
+  }
+
+  &__confirmed-desc {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  &__confirmed-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  &__confirmed-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    margin-top: var(--space-2);
+
+    @include sm {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+}

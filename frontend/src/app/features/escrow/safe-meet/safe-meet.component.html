@@ -1,0 +1,161 @@
+<div class="safe-meet">
+  <div class="safe-meet__container">
+    <header class="safe-meet__header">
+      <span class="safe-meet__pre">Protocolo de Entrega Presencial</span>
+      <h1 class="safe-meet__title">Safe Meet 60s QR Anti-Replay</h1>
+      <p class="safe-meet__subtitle">
+        Entrega de hardware cara a cara protegida por un secreto efímero en Redis con expiración estricta de 60 segundos y consumo atómico mediante Lua script.
+      </p>
+    </header>
+
+    @if (handoffConfirmed()) {
+      <div class="safe-meet__confirmed-wrap">
+        <ayni-card sideBarColor="#10b981" padding="lg">
+          <div class="safe-meet__confirmed-card">
+            <span class="safe-meet__confirmed-icon">🤝</span>
+            <h2 class="safe-meet__confirmed-title">¡Entrega de Hardware Confirmada!</h2>
+            <p class="safe-meet__confirmed-desc">
+              El comprador escaneó con éxito el código efímero. El Smart Contract ha registrado la entrega física y comenzó la ventana de inspección de hardware de 24 horas.
+            </p>
+            <div class="safe-meet__confirmed-meta">
+              <ayni-badge variant="pass" size="md">ESTADO: HANDOFF CONFIRMED</ayni-badge>
+              <span>Transacción en HSK Chain sincronizada por SignalR</span>
+            </div>
+            <div class="safe-meet__confirmed-actions">
+              <ayni-button variant="primary" size="md" routerLink="/escrow">
+                Volver a Mis Transacciones
+              </ayni-button>
+              <ayni-button variant="secondary" size="md" [routerLink]="['/escrow/video-verify', orderId()]">
+                Abrir Video Verify Checklist
+              </ayni-button>
+            </div>
+          </div>
+        </ayni-card>
+      </div>
+    } @else {
+      <!-- Role Selector Tabs -->
+      <div class="safe-meet__role-tabs">
+        <button 
+          type="button" 
+          class="safe-meet__tab"
+          [class.safe-meet__tab--active]="activeMode() === 'seller'"
+          (click)="setMode('seller')"
+        >
+          <span>📱 Soy Vendedor (Mostrar QR)</span>
+        </button>
+        <button 
+          type="button" 
+          class="safe-meet__tab"
+          [class.safe-meet__tab--active]="activeMode() === 'buyer'"
+          (click)="setMode('buyer')"
+        >
+          <span>📷 Soy Comprador (Escanear / Validar)</span>
+        </button>
+      </div>
+
+      <!-- Content by Active Role -->
+      <div class="safe-meet__card-wrap">
+        <ayni-card padding="lg">
+          <!-- SELLER MODE -->
+          @if (activeMode() === 'seller') {
+            <div class="safe-meet__seller-view">
+              <div class="safe-meet__seller-top">
+                <span class="safe-meet__sec-label">Código Efímero de Seguridad</span>
+                <span class="safe-meet__sec-desc">
+                  Muestra este código al comprador <strong>únicamente cuando tengas el hardware frente a él</strong> y ambos estén listos para la entrega.
+                </span>
+              </div>
+
+              <!-- QR Code & Countdown Timer -->
+              <div class="safe-meet__qr-zone">
+                <div class="safe-meet__qr-frame">
+                  <ayni-qr-code 
+                    [data]="escrowService.safeMeetQr()?.nonce || 'ayni_safemeet_dummy_nonce'" 
+                    [size]="220" 
+                  />
+                </div>
+
+                <div class="safe-meet__timer-zone">
+                  <ayni-countdown-timer 
+                    [remainingSeconds]="escrowService.countdownSeconds()" 
+                    [totalSeconds]="60"
+                    variant="circular"
+                  />
+                  <span class="safe-meet__timer-text">
+                    El código expira en 60s y se regenera automáticamente para evitar ataques de repetición.
+                  </span>
+                </div>
+              </div>
+
+              <div class="safe-meet__nonce-display">
+                <span class="safe-meet__nonce-label">Valor del Secreto (Redis):</span>
+                <code class="safe-meet__nonce-code">{{ escrowService.safeMeetQr()?.nonce }}</code>
+              </div>
+
+              <div class="safe-meet__seller-actions">
+                <ayni-button variant="secondary" size="sm" (clicked)="generateNewQr()">
+                  <span>Regenerar QR Manualmente 🔄</span>
+                </ayni-button>
+
+                <!-- Demo helper to simulate scan from same device -->
+                <ayni-button variant="outline" size="sm" (clicked)="simulateBuyerScan()">
+                  <span>⚡ Simular Escaneo del Comprador</span>
+                </ayni-button>
+              </div>
+            </div>
+          }
+
+          <!-- BUYER MODE -->
+          @if (activeMode() === 'buyer') {
+            <div class="safe-meet__buyer-view">
+              <div class="safe-meet__buyer-top">
+                <span class="safe-meet__sec-label">Confirmar Recepción de Hardware</span>
+                <p class="safe-meet__sec-desc">
+                  Escanea el código QR que muestra el vendedor o ingresa el código efímero de 32 caracteres visible en su pantalla.
+                </p>
+              </div>
+
+              <div class="safe-meet__buyer-form">
+                <label class="safe-meet__input-label" for="secretInput">
+                  Código Secreto de Safe Meet
+                </label>
+                <div class="safe-meet__input-row">
+                  <input 
+                    id="secretInput"
+                    type="text" 
+                    class="safe-meet__input" 
+                    placeholder="Pega o escribe el código de 60 segundos del vendedor..."
+                    [ngModel]="manualSecretInput()"
+                    (ngModelChange)="manualSecretInput.set($event)"
+                  />
+                  <ayni-button 
+                    variant="primary" 
+                    size="md" 
+                    [loading]="isValidating()"
+                    (clicked)="onValidateQr()"
+                  >
+                    <span>Validar y Confirmar Entrega</span>
+                  </ayni-button>
+                </div>
+
+                @if (validationMessage()) {
+                  <div class="safe-meet__feedback">
+                    {{ validationMessage() }}
+                  </div>
+                }
+              </div>
+
+              <div class="safe-meet__buyer-notice">
+                <span class="safe-meet__notice-icon">⚠️</span>
+                <div>
+                  <strong>Regla de oro de Ayni:</strong>
+                  <span>No valides el código hasta haber tenido el dispositivo en tus manos y comprobar que enciende y coincide con las especificaciones acordadas.</span>
+                </div>
+              </div>
+            </div>
+          }
+        </ayni-card>
+      </div>
+    }
+  </div>
+</div>

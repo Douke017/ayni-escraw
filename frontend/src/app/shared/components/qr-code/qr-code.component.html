@@ -1,0 +1,22 @@
+<div 
+  class="ayni-qr"
+  [style.width.px]="size()"
+  [style.height.px]="size()"
+>
+  @if (qrDataUrl()) {
+    <img 
+      [src]="qrDataUrl()" 
+      [alt]="alt()" 
+      class="ayni-qr__image"
+      loading="lazy"
+    />
+  } @else if (isError()) {
+    <div class="ayni-qr__error">
+      <span>⚠️ Error al generar QR</span>
+    </div>
+  } @else {
+    <div class="ayni-qr__placeholder">
+      <span class="ayni-qr__spinner"></span>
+    </div>
+  }
+</div>

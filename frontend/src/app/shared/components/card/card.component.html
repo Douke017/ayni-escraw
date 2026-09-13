@@ -1,0 +1,16 @@
+<div 
+  class="ayni-card"
+  [class.ayni-card--hoverable]="hoverable()"
+  [class.ayni-card--interactive]="interactive()"
+  [class.ayni-card--pad-none]="padding() === 'none'"
+  [class.ayni-card--pad-sm]="padding() === 'sm'"
+  [class.ayni-card--pad-md]="padding() === 'md'"
+  [class.ayni-card--pad-lg]="padding() === 'lg'"
+>
+  @if (sideBarColor()) {
+    <ayni-aguayo-side-bar [primaryColor]="sideBarColor()!" />
+  }
+  <div class="ayni-card__body">
+    <ng-content />
+  </div>
+</div>

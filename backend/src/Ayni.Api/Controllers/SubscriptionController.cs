@@ -62,14 +62,16 @@ public class SubscriptionController : ControllerBase
     }
 
     [HttpGet("status")]
-    public async Task<IActionResult> CheckStatus([FromQuery] string address)
+    [HttpGet("status/{address}")]
+    public async Task<IActionResult> CheckStatus([FromRoute] string? address = null, [FromQuery(Name = "address")] string? queryAddress = null)
     {
-        if (string.IsNullOrWhiteSpace(address) || !address.StartsWith("0x"))
+        var targetAddress = !string.IsNullOrWhiteSpace(address) ? address : queryAddress;
+        if (string.IsNullOrWhiteSpace(targetAddress) || !targetAddress.StartsWith("0x"))
         {
             return BadRequest(new { error = "Invalid wallet address format" });
         }
 
-        var normalizedAddress = address.ToLowerInvariant();
+        var normalizedAddress = targetAddress.ToLowerInvariant();
         var now = DateTime.UtcNow;
 
         var activeSub = await _dbContext.Subscriptions

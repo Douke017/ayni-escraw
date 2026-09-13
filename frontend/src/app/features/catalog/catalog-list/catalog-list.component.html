@@ -1,0 +1,144 @@
+<div class="catalog">
+  <!-- Header Banner -->
+  <header class="catalog__header">
+    <div class="catalog__container">
+      <div class="catalog__header-content">
+        <span class="catalog__pre">Hardware Verificado en HSK Chain</span>
+        <h1 class="catalog__title">Catálogo de Equipos y Componentes</h1>
+        <p class="catalog__subtitle">
+          Cada dispositivo cuenta con atestación de IA ERC-8004, validación de estado físico y depósito no-custodial en USDT.
+        </p>
+      </div>
+
+      <!-- Search & Sorting Controls -->
+      <div class="catalog__controls">
+        <div class="catalog__search-box">
+          <span class="catalog__search-icon">🔍</span>
+          <input
+            type="text"
+            class="catalog__search-input"
+            placeholder="Buscar por marca, modelo o especificación..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+          @if (searchQuery()) {
+            <button type="button" class="catalog__search-clear" (click)="searchQuery.set('')">✕</button>
+          }
+        </div>
+
+        <div class="catalog__sort-box">
+          <label class="catalog__sort-label" for="sortSelect">Ordenar:</label>
+          <select 
+            id="sortSelect"
+            class="catalog__sort-select"
+            [ngModel]="sortBy()"
+            (ngModelChange)="sortBy.set($event)"
+          >
+            <option value="newest">Más recientes</option>
+            <option value="price_asc">Menor precio</option>
+            <option value="price_desc">Mayor precio</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="catalog__tabs">
+        <button
+          type="button"
+          class="catalog__tab"
+          [class.catalog__tab--active]="selectedCategory() === 'ALL'"
+          (click)="setCategory('ALL')"
+        >
+          <span>Todos los Puestos</span>
+        </button>
+        @for (cat of categories; track cat.key) {
+          <button
+            type="button"
+            class="catalog__tab"
+            [class.catalog__tab--active]="selectedCategory() === cat.key"
+            (click)="setCategory(cat.key)"
+          >
+            <span>{{ cat.icon }} {{ cat.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+    <ayni-aguayo-ribbon size="xs" />
+  </header>
+
+  <!-- Main Grid Content -->
+  <main class="catalog__content">
+    <div class="catalog__container">
+      @if (catalogService.isLoading()) {
+        <div class="catalog__loading">
+          <span class="catalog__loading-spinner"></span>
+          <p>Consultando catálogo en la blockchain...</p>
+        </div>
+      } @else if (filteredListings().length === 0) {
+        <div class="catalog__empty">
+          <span class="catalog__empty-icon">📦</span>
+          <h3 class="catalog__empty-title">No encontramos dispositivos con estos filtros</h3>
+          <p class="catalog__empty-desc">Prueba limpiando tu búsqueda o seleccionando otra categoría.</p>
+          <ayni-button variant="secondary" size="sm" (clicked)="searchQuery.set(''); selectedCategory.set('ALL')">
+            Restablecer Filtros
+          </ayni-button>
+        </div>
+      } @else {
+        <div class="catalog__meta-row">
+          <span class="catalog__results-count">
+            Mostrando <strong>{{ filteredListings().length }}</strong> dispositivos verificados
+          </span>
+          <span class="catalog__safety-chip">🛡️ 100% Depósito Protegido por Smart Contract</span>
+        </div>
+
+        <div class="catalog__grid">
+          @for (item of filteredListings(); track item.id) {
+            <a [routerLink]="['/catalog', item.id]" class="catalog__card-link">
+              <ayni-card [sideBarColor]="getCategoryColor(item.category)" [hoverable]="true" padding="none">
+                <div class="catalog__card">
+                  <!-- Visual Thumbnail -->
+                  <div class="catalog__card-media">
+                    <div class="catalog__card-overlay">
+                      <ayni-badge [variant]="getVerdictBadgeVariant(item.attestationVerdict)" size="sm">
+                        ERC-8004 PASS
+                      </ayni-badge>
+                    </div>
+                    <span class="catalog__card-icon">⚡</span>
+                  </div>
+
+                  <!-- Details -->
+                  <div class="catalog__card-body">
+                    <div class="catalog__card-top">
+                      <span class="catalog__card-category">{{ item.category }}</span>
+                      <span class="catalog__card-condition">Condición {{ item.declaredCondition }}/10</span>
+                    </div>
+
+                    <h3 class="catalog__card-title">{{ item.title }}</h3>
+                    <p class="catalog__card-desc">{{ item.description }}</p>
+
+                    <div class="catalog__card-badges">
+                      <span class="catalog__pill">🔐 Salted Hash Commit</span>
+                      <span class="catalog__pill">⚡ Permit2 Ready</span>
+                    </div>
+
+                    <div class="catalog__card-footer">
+                      <div class="catalog__price-box">
+                        <span class="catalog__price-label">Precio</span>
+                        <span class="catalog__price-val">{{ item.priceUsdt | usdt }}</span>
+                      </div>
+
+                      <div class="catalog__seller-box">
+                        <span class="catalog__seller-label">Vendedor</span>
+                        <span class="catalog__seller-addr">{{ item.sellerAddress | truncateAddress }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ayni-card>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </main>
+</div>

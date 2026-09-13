@@ -1,0 +1,24 @@
+<span 
+  class="ayni-badge"
+  [class.ayni-badge--pass]="variant() === 'pass'"
+  [class.ayni-badge--warn]="variant() === 'warn'"
+  [class.ayni-badge--fail]="variant() === 'fail'"
+  [class.ayni-badge--funded]="variant() === 'funded'"
+  [class.ayni-badge--refund]="variant() === 'refund'"
+  [class.ayni-badge--neutral]="variant() === 'neutral'"
+  [class.ayni-badge--hsk]="variant() === 'hsk'"
+  [class.ayni-badge--pol]="variant() === 'pol'"
+  [class.ayni-badge--sm]="size() === 'sm'"
+  [class.ayni-badge--md]="size() === 'md'"
+  [class.ayni-badge--lg]="size() === 'lg'"
+>
+  @if (pulse()) {
+    <span class="ayni-badge__pulse" aria-hidden="true"></span>
+  }
+  @if (icon()) {
+    <span class="ayni-badge__icon" aria-hidden="true">{{ icon() }}</span>
+  }
+  <span class="ayni-badge__content">
+    <ng-content />
+  </span>
+</span>

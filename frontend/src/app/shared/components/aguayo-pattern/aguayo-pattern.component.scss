@@ -1,0 +1,31 @@
+/* SPDX-License-Identifier: MIT */
+
+.aguayo-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+
+  &--vibrant {
+    background-image: 
+      linear-gradient(135deg, var(--aguayo-red) 25%, transparent 25%),
+      linear-gradient(225deg, var(--aguayo-red) 25%, transparent 25%),
+      linear-gradient(45deg, var(--aguayo-gold) 25%, transparent 25%),
+      linear-gradient(315deg, var(--aguayo-gold) 25%, transparent 25%);
+    background-position: 10px 0, 10px 0, 0 0, 0 0;
+    background-size: 20px 20px;
+    background-repeat: repeat;
+  }
+
+  &--detailed {
+    background-image:
+      radial-gradient(var(--aguayo-gold) 15%, transparent 16%),
+      radial-gradient(var(--aguayo-red) 15%, transparent 16%),
+      linear-gradient(45deg, transparent 48%, var(--aguayo-indigo) 48%, var(--aguayo-indigo) 52%, transparent 52%);
+    background-size: 32px 32px;
+    background-position: 0 0, 16px 16px, 0 0;
+    background-repeat: repeat;
+  }
+}

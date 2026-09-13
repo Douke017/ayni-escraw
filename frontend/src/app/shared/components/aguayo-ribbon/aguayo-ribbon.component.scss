@@ -1,0 +1,52 @@
+/* SPDX-License-Identifier: MIT */
+
+.aguayo-ribbon {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  height: 6px;
+
+  &--xs {
+    height: 3px;
+  }
+
+  &--sm {
+    height: 4px;
+  }
+
+  &--md {
+    height: 6px;
+  }
+
+  &--lg {
+    height: 10px;
+  }
+
+  &--rounded {
+    border-radius: var(--radius-full);
+  }
+
+  &__stripe {
+    flex: 1;
+    height: 100%;
+
+    &--red {
+      background-color: var(--aguayo-red);
+    }
+    &--gold {
+      background-color: var(--aguayo-gold);
+    }
+    &--olive {
+      background-color: var(--aguayo-olive);
+    }
+    &--indigo {
+      background-color: var(--aguayo-indigo);
+    }
+    &--burgundy {
+      background-color: var(--aguayo-burgundy);
+    }
+    &--brown {
+      background-color: var(--aguayo-brown);
+    }
+  }
+}

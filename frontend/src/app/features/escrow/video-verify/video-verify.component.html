@@ -1,0 +1,123 @@
+<div class="video-verify">
+  <div class="video-verify__container">
+    <header class="video-verify__header">
+      <div class="video-verify__header-left">
+        <span class="video-verify__pre">Inspección Remota de Hardware</span>
+        <h1 class="video-verify__title">Video Verify • 100ms Live Session</h1>
+        <span class="video-verify__order-tag">Orden: #{{ orderId() }}</span>
+      </div>
+      <div class="video-verify__header-right">
+        <ayni-badge variant="hsk" size="md" [pulse]="true">
+          Sincronizado vía SignalR
+        </ayni-badge>
+      </div>
+    </header>
+
+    <div class="video-verify__grid">
+      <!-- Main Video Screen Area -->
+      <div class="video-verify__video-pane">
+        <div class="video-verify__video-feed">
+          <div class="video-verify__overlay-badge">
+            <span class="video-verify__live-dot"></span>
+            <span>EN VIVO (100ms WebRTC)</span>
+          </div>
+
+          <!-- Mock Video Stream Screen -->
+          <div class="video-verify__mock-stream">
+            <span class="video-verify__stream-icon">📹</span>
+            <span class="video-verify__stream-text">Feed del Hardware del Vendedor</span>
+            <span class="video-verify__stream-sub">Mostrando número de serie y test táctil en vivo</span>
+          </div>
+
+          <!-- Floating PiP (Self view) -->
+          <div class="video-verify__pip">
+            <span class="video-verify__pip-icon">👤</span>
+            <span class="video-verify__pip-label">Tú (Comprador)</span>
+          </div>
+
+          <!-- Video Control Bar -->
+          <div class="video-verify__controls">
+            <button 
+              type="button" 
+              class="video-verify__ctrl-btn"
+              [class.video-verify__ctrl-btn--active]="isAudioMuted()"
+              (click)="toggleAudio()"
+            >
+              {{ isAudioMuted() ? '🔇' : '🎙️' }}
+            </button>
+            <button 
+              type="button" 
+              class="video-verify__ctrl-btn"
+              [class.video-verify__ctrl-btn--active]="isVideoMuted()"
+              (click)="toggleVideo()"
+            >
+              {{ isVideoMuted() ? '🚫' : '📹' }}
+            </button>
+            <button 
+              type="button" 
+              class="video-verify__ctrl-btn video-verify__ctrl-btn--danger"
+              (click)="isCallActive.set(false)"
+            >
+              📞 Finalizar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Checklist & Settlement Sidebar -->
+      <div class="video-verify__checklist-pane">
+        <ayni-card sideBarColor="var(--aguayo-indigo)" padding="md">
+          <div class="video-verify__checklist-wrap">
+            <div class="video-verify__cl-header">
+              <h3 class="video-verify__cl-title">Checklist de Integridad Física</h3>
+              <span class="video-verify__cl-count">
+                {{ checkedCount() }}/{{ checklist().length }} Verificados
+              </span>
+            </div>
+
+            <div class="video-verify__items">
+              @for (item of checklist(); track item.id) {
+                <label class="video-verify__item" [class.video-verify__item--checked]="item.checked">
+                  <input 
+                    type="checkbox" 
+                    class="video-verify__checkbox"
+                    [checked]="item.checked" 
+                    (change)="toggleCheck(item)"
+                  />
+                  <div class="video-verify__item-text">
+                    <span class="video-verify__item-label">{{ item.label }}</span>
+                    <span class="video-verify__item-desc">{{ item.description }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+
+            <div class="video-verify__settle-box">
+              <span class="video-verify__settle-label">Dictamen del Comprador</span>
+              <div class="video-verify__settle-actions">
+                <ayni-button 
+                  variant="primary" 
+                  size="md" 
+                  [fullWidth]="true"
+                  [disabled]="!allChecked()"
+                  (clicked)="onReleaseFunds()"
+                >
+                  <span>Aprobar y Liberar Fondos ✓</span>
+                </ayni-button>
+
+                <ayni-button 
+                  variant="danger" 
+                  size="sm" 
+                  [fullWidth]="true"
+                  (clicked)="onRaiseDispute()"
+                >
+                  <span>Reportar Falla / Iniciar Disputa 2/3</span>
+                </ayni-button>
+              </div>
+            </div>
+          </div>
+        </ayni-card>
+      </div>
+    </div>
+  </div>
+</div>

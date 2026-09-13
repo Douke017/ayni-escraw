@@ -153,6 +153,90 @@ public class EscrowController : ControllerBase
             inspectionDeadlineUtc = order.InspectionDeadlineUtc
         });
     }
+
+    [HttpPost("orders/{id:guid}/fund")]
+    public async Task<IActionResult> FundOrder(Guid id)
+    {
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound(new { error = $"Order with ID {id} not found" });
+        }
+
+        order.Status = OrderStatus.Funded;
+        await _dbContext.SaveChangesAsync();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), OrderStatus.Funded, timestamp);
+
+        return Ok(new { success = true, status = order.Status.ToString() });
+    }
+
+    [HttpPost("orders/{id:guid}/settle")]
+    public async Task<IActionResult> SettleOrder(Guid id)
+    {
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound(new { error = $"Order with ID {id} not found" });
+        }
+
+        order.Status = OrderStatus.Settled;
+        if (order.ListingId.HasValue)
+        {
+            var listing = await _dbContext.ProductListings.FindAsync(order.ListingId.Value);
+            if (listing != null)
+            {
+                listing.Status = ListingStatus.Sold;
+            }
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), OrderStatus.Settled, timestamp);
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").SettlementConfirmed(order.Id.ToString(), "0xsettlementtx123");
+
+        return Ok(new { success = true, status = order.Status.ToString() });
+    }
+
+    [HttpPost("orders/{id:guid}/dispute")]
+    public async Task<IActionResult> OpenDispute(Guid id, [FromBody] OpenDisputeRequest? request)
+    {
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound(new { error = $"Order with ID {id} not found" });
+        }
+
+        order.Status = OrderStatus.Disputed;
+        order.IsDisputed = true;
+        order.DisputeReason = request?.Reason ?? "D01_DEFECT";
+        await _dbContext.SaveChangesAsync();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), OrderStatus.Disputed, timestamp);
+
+        return Ok(new { success = true, status = order.Status.ToString(), reason = order.DisputeReason });
+    }
+
+    [HttpPost("orders/{id:guid}/resolve-dispute")]
+    public async Task<IActionResult> ResolveDispute(Guid id, [FromBody] ResolveDisputeRequest request)
+    {
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound(new { error = $"Order with ID {id} not found" });
+        }
+
+        order.Status = request.RefundToBuyer ? OrderStatus.Refunded : OrderStatus.Settled;
+        await _dbContext.SaveChangesAsync();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), order.Status, timestamp);
+
+        return Ok(new { success = true, status = order.Status.ToString() });
+    }
 }
 
 public class CreateOrderRequest
@@ -170,4 +254,14 @@ public class ValidateQrRequest
 {
     public string Nonce { get; set; } = string.Empty;
     public string? BuyerAddress { get; set; }
+}
+
+public class OpenDisputeRequest
+{
+    public string? Reason { get; set; }
+}
+
+public class ResolveDisputeRequest
+{
+    public bool RefundToBuyer { get; set; } = true;
 }

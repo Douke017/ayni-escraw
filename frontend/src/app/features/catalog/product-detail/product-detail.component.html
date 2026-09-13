@@ -1,0 +1,222 @@
+<div class="product-detail">
+  <div class="product-detail__container">
+    <!-- Breadcrumb & Back -->
+    <nav class="product-detail__breadcrumb" aria-label="Navegación secundaria">
+      <a routerLink="/catalog" class="product-detail__back-link">
+        ← Volver al Catálogo
+      </a>
+      <span class="product-detail__breadcrumb-sep">/</span>
+      <span class="product-detail__breadcrumb-current">
+        {{ listing()?.title || 'Cargando dispositivo...' }}
+      </span>
+    </nav>
+
+    @if (isLoading()) {
+      <div class="product-detail__loading">
+        <span class="product-detail__spinner"></span>
+        <p>Cargando información técnica y auditoría en HSK Chain...</p>
+      </div>
+    } @else if (!listing()) {
+      <div class="product-detail__not-found">
+        <span class="product-detail__not-found-icon">⚠️</span>
+        <h2>Dispositivo no encontrado</h2>
+        <p>El producto solicitado no existe o ya fue adquirido mediante el contrato Escrow.</p>
+        <ayni-button variant="primary" size="md" routerLink="/catalog">
+          Volver a explorar
+        </ayni-button>
+      </div>
+    } @else {
+      <!-- Main Product Header & Split -->
+      <div class="product-detail__layout">
+        <!-- Left: Gallery, Specs & Privacy Card -->
+        <div class="product-detail__main">
+          <!-- Visual Media Card -->
+          <div class="product-detail__media-card">
+            <div class="product-detail__media-preview">
+              <span class="product-detail__media-icon">{{ categoryMeta()?.icon || '💻' }}</span>
+              <div class="product-detail__media-badges">
+                <ayni-badge variant="pass" size="md" [pulse]="true">
+                  ERC-8004 PASS
+                </ayni-badge>
+                <ayni-badge variant="pol" size="sm">
+                  Proof of Listing OK
+                </ayni-badge>
+              </div>
+            </div>
+            <ayni-aguayo-stripe [accentColor]="categoryMeta()?.aguayoColorToken || 'var(--aguayo-gold)'" />
+          </div>
+
+          <!-- Product Title and General Description -->
+          <section class="product-detail__info-section">
+            <span class="product-detail__category-label">
+              {{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10
+            </span>
+            <h1 class="product-detail__title">{{ listing()!.title }}</h1>
+            <p class="product-detail__description">{{ listing()!.description }}</p>
+          </section>
+
+          <!-- Technical Specs Matrix -->
+          <section class="product-detail__specs-section">
+            <h2 class="product-detail__section-title">Especificaciones Técnicas Normalizadas</h2>
+            <div class="product-detail__specs-grid">
+              @for (entry of technicalAttributes() | keyvalue; track entry.key) {
+                <div class="product-detail__spec-box">
+                  <span class="product-detail__spec-key">{{ entry.key }}</span>
+                  <span class="product-detail__spec-val">{{ entry.value }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Privacy Barrier: Salted IMEI Commitment (Non-Plaintext) -->
+          <section class="product-detail__privacy-section">
+            <ayni-card sideBarColor="var(--aguayo-gold)" padding="md">
+              <div class="product-detail__privacy-box">
+                <div class="product-detail__privacy-header">
+                  <span class="product-detail__privacy-icon">🔐</span>
+                  <div>
+                    <h3 class="product-detail__privacy-title">Privacidad Criptográfica de Hardware</h3>
+                    <p class="product-detail__privacy-subtitle">
+                      Salted Commitment: keccak256(imei, salt, seller)
+                    </p>
+                  </div>
+                </div>
+
+                <p class="product-detail__privacy-desc">
+                  Por seguridad y prevención de bloqueos o clonaciones fraudulentas, el identificador de hardware (IMEI/Serial) <strong>nunca se expone en texto plano</strong> en la aplicación ni en la blockchain.
+                </p>
+
+                <div class="product-detail__hash-container">
+                  <div class="product-detail__hash-row">
+                    <span class="product-detail__hash-label">Commitment Hash:</span>
+                    <code class="product-detail__hash-code">{{ listing()!.proofHash }}</code>
+                  </div>
+                  <div class="product-detail__hash-row">
+                    <span class="product-detail__hash-label">Commitment Salt:</span>
+                    <code class="product-detail__hash-code">{{ listing()!.commitmentSalt }}</code>
+                  </div>
+                </div>
+
+                <div class="product-detail__privacy-action">
+                  <button 
+                    type="button" 
+                    class="product-detail__copy-btn"
+                    (click)="copyToClipboard(listing()!.proofHash)"
+                  >
+                    @if (isCopied()) {
+                      <span>✓ Hash copiado al portapapeles</span>
+                    } @else {
+                      <span>📋 Copiar Hash de Compromiso para Auditoría</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </ayni-card>
+          </section>
+
+          <!-- ERC-8004 AI Validation Audit Trail -->
+          <section class="product-detail__audit-section">
+            <h2 class="product-detail__section-title">Atestación del Agente de IA (ERC-8004)</h2>
+            <div class="product-detail__audit-card">
+              <div class="product-detail__audit-step">
+                <div class="product-detail__audit-badge-col">
+                  <span class="product-detail__audit-icon">🤖</span>
+                </div>
+                <div class="product-detail__audit-details">
+                  <div class="product-detail__audit-row">
+                    <span class="product-detail__audit-name">Validador:</span>
+                    <span class="product-detail__audit-val">Agent NFT #42 (Ayni Tech Verifier)</span>
+                  </div>
+                  <div class="product-detail__audit-row">
+                    <span class="product-detail__audit-name">Registro:</span>
+                    <span class="product-detail__audit-val">HSK AyniAgentRegistry (ValidationRegistry)</span>
+                  </div>
+                  <div class="product-detail__audit-row">
+                    <span class="product-detail__audit-name">Dictamen:</span>
+                    <ayni-badge variant="pass" size="sm">PASS (100% de coherencia técnica)</ayni-badge>
+                  </div>
+                  <p class="product-detail__audit-summary">
+                    El agente analizó las especificaciones del fabricante contra el checklist fotográfico presentado por el vendedor. No se detectaron contradicciones ni signos de manipulación de hardware.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Purchase CTA & Trust Sidebar -->
+        <aside class="product-detail__sidebar">
+          <ayni-card sideBarColor="var(--aguayo-red)" padding="lg">
+            <div class="product-detail__buy-box">
+              <span class="product-detail__buy-label">Precio Escrow No-Custodial</span>
+              <div class="product-detail__price-tag">
+                {{ listing()!.priceUsdt | usdt }}
+              </div>
+
+              <div class="product-detail__network-chip">
+                <span class="product-detail__net-dot"></span>
+                <span>USDT en HSK Chain Testnet</span>
+              </div>
+
+              <div class="product-detail__cta-group">
+                <ayni-button 
+                  variant="primary" 
+                  size="lg" 
+                  [fullWidth]="true"
+                  (clicked)="proceedToCheckout()"
+                >
+                  <span>Depositar en Escrow</span>
+                  <span aria-hidden="true">⚡</span>
+                </ayni-button>
+
+                <ayni-button 
+                  variant="secondary" 
+                  size="md" 
+                  [fullWidth]="true"
+                  (clicked)="startChat()"
+                >
+                  <span>Chatear con Vendedor (Bond 0.30 USDT)</span>
+                  <span aria-hidden="true">💬</span>
+                </ayni-button>
+              </div>
+
+              <div class="product-detail__guarantee-list">
+                <div class="product-detail__guarantee-item">
+                  <span class="product-detail__guar-icon">🛡️</span>
+                  <div>
+                    <strong>Depósito Permit2 EIP-712:</strong>
+                    <span>Una sola firma criptográfica sin doble aprobación ERC-20.</span>
+                  </div>
+                </div>
+                <div class="product-detail__guarantee-item">
+                  <span class="product-detail__guar-icon">⏱️</span>
+                  <div>
+                    <strong>Safe Meet 60s QR:</strong>
+                    <span>Liberación presencial con código de un solo uso en Redis.</span>
+                  </div>
+                </div>
+                <div class="product-detail__guarantee-item">
+                  <span class="product-detail__guar-icon">⚖️</span>
+                  <div>
+                    <strong>Arbitraje 2-de-3 Multisig:</strong>
+                    <span>Protección contra disputas sin intermediario central.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="product-detail__seller-card">
+                <span class="product-detail__seller-header">Vendedor Verificado</span>
+                <div class="product-detail__seller-info">
+                  <span class="product-detail__seller-addr">
+                    {{ listing()!.sellerAddress | truncateAddress }}
+                  </span>
+                  <ayni-badge variant="neutral" size="sm">Score: 98/100</ayni-badge>
+                </div>
+              </div>
+            </div>
+          </ayni-card>
+        </aside>
+      </div>
+    }
+  </div>
+</div>

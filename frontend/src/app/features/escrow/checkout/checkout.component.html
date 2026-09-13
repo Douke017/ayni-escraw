@@ -1,0 +1,131 @@
+<div class="checkout">
+  <div class="checkout__container">
+    <header class="checkout__header">
+      <span class="checkout__pre">Uniswap Permit2 • EIP-712</span>
+      <h1 class="checkout__title">Depósito en Escrow No-Custodial</h1>
+      <p class="checkout__subtitle">
+        Tus fondos permanecerán asegurados en el contrato inteligente <code>AyniEscrow</code> en HSK Chain. El vendedor no recibirá el dinero hasta que confirmes la entrega mediante Safe Meet o inspección.
+      </p>
+    </header>
+
+    @if (isSuccess()) {
+      <div class="checkout__success-wrap">
+        <ayni-card sideBarColor="#10b981" padding="lg">
+          <div class="checkout__success-card">
+            <span class="checkout__success-icon">🎉</span>
+            <h2 class="checkout__success-title">¡Depósito Permit2 Confirmado en HSK Chain!</h2>
+            <p class="checkout__success-desc">
+              Los fondos fueron bloqueados exitosamente en el Smart Contract. Ahora puedes coordinar la entrega física con el código Safe Meet de 60 segundos o programar una videollamada de verificación.
+            </p>
+
+            <div class="checkout__success-actions">
+              <ayni-button variant="primary" size="lg" (clicked)="goToSafeMeet()">
+                <span>Continuar a Safe Meet QR ⏱️</span>
+              </ayni-button>
+              <ayni-button variant="secondary" size="md" routerLink="/escrow">
+                <span>Ver Mis Transacciones</span>
+              </ayni-button>
+            </div>
+          </div>
+        </ayni-card>
+      </div>
+    } @else if (!listing()) {
+      <div class="checkout__empty">
+        <span>⚠️ No se ha seleccionado ningún dispositivo para el depósito.</span>
+        <ayni-button variant="primary" size="md" routerLink="/catalog">Ir al Catálogo</ayni-button>
+      </div>
+    } @else {
+      <div class="checkout__grid">
+        <!-- Left: Summary of Purchase -->
+        <div class="checkout__summary">
+          <ayni-card padding="md">
+            <h3 class="checkout__card-title">Resumen del Hardware</h3>
+            <div class="checkout__product-row">
+              <span class="checkout__prod-icon">💻</span>
+              <div>
+                <h4 class="checkout__prod-title">{{ listing()!.title }}</h4>
+                <span class="checkout__prod-cat">{{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10</span>
+              </div>
+            </div>
+
+            <div class="checkout__line-items">
+              <div class="checkout__line">
+                <span>Precio del producto:</span>
+                <span class="checkout__line-val">{{ listing()!.priceUsdt | usdt }}</span>
+              </div>
+              <div class="checkout__line">
+                <span>Comisión Escrow Ayni (0% en Testnet):</span>
+                <span class="checkout__line-val">0.00 USDT</span>
+              </div>
+              <div class="checkout__line">
+                <span>Gas HSK Estimado:</span>
+                <span class="checkout__line-val">&lt; 0.001 HSK</span>
+              </div>
+              <div class="checkout__divider"></div>
+              <div class="checkout__line checkout__line--total">
+                <span>Total a Bloquear:</span>
+                <span class="checkout__line-total-val">{{ listing()!.priceUsdt | usdt }}</span>
+              </div>
+            </div>
+          </ayni-card>
+
+          <!-- Permit2 Explanation Card -->
+          <div class="checkout__info-box">
+            <div class="checkout__info-header">
+              <span class="checkout__info-icon">⚡</span>
+              <strong>¿Cómo funciona Uniswap Permit2?</strong>
+            </div>
+            <p class="checkout__info-text">
+              A diferencia de los protocolos Web3 tradicionales que exigen dos transacciones separadas (1. <code>approve</code> ERC-20 y 2. <code>transferFrom</code>), Permit2 te permite autorizar la transferencia con una sola firma criptográfica off-chain (EIP-712).
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Action & Wallet State -->
+        <div class="checkout__action-col">
+          <ayni-card sideBarColor="var(--aguayo-gold)" padding="lg">
+            <h3 class="checkout__card-title">Confirmación de Firma</h3>
+
+            <div class="checkout__wallet-status">
+              <div class="checkout__wallet-row">
+                <span class="checkout__w-label">Tu Billetera:</span>
+                <span class="checkout__w-val">{{ (authService.walletAddress() || 'Desconectada') | truncateAddress }}</span>
+              </div>
+              <div class="checkout__wallet-row">
+                <span class="checkout__w-label">Saldo USDT HSK:</span>
+                <span class="checkout__w-val">{{ web3Service.usdtBalance() | usdt }}</span>
+              </div>
+              <div class="checkout__wallet-row">
+                <span class="checkout__w-label">Red:</span>
+                <ayni-badge variant="hsk" size="sm">HSK Testnet (133)</ayni-badge>
+              </div>
+            </div>
+
+            <div class="checkout__cta-wrap">
+              @if (!authService.isAuthenticated()) {
+                <ayni-button variant="primary" size="lg" [fullWidth]="true" (clicked)="authService.connectAndAuthenticate()">
+                  Conectar Wallet con SIWE
+                </ayni-button>
+              } @else {
+                <ayni-button 
+                  variant="primary" 
+                  size="lg" 
+                  [fullWidth]="true" 
+                  [loading]="isSubmitting()"
+                  (clicked)="onDepositWithPermit2()"
+                >
+                  <span>Firmar y Bloquear Fondos en Escrow</span>
+                  <span aria-hidden="true">⚡</span>
+                </ayni-button>
+              }
+            </div>
+
+            <p class="checkout__legal-note">
+              Al hacer clic, firmarás la autorización EIP-712. Los fondos quedan asegurados en el contrato <code>AyniEscrow.sol</code> y únicamente tú o el árbitro 2/3 podrán autorizar la liberación o reembolso.
+            </p>
+          </ayni-card>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { Web3Service, hskTestnet } from './web3.service';
 import { SignalRService } from './signalr.service';
 import { EscrowStateService, EscrowUiStatus } from './escrow-state.service';
@@ -9,9 +11,12 @@ describe('Vanilla Angular 22 Signals Services', () => {
   let escrowStateService: EscrowStateService;
 
   beforeEach(() => {
-    web3Service = new Web3Service();
-    signalRService = new SignalRService();
-    escrowStateService = new EscrowStateService();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), Web3Service, SignalRService, EscrowStateService],
+    });
+    web3Service = TestBed.inject(Web3Service);
+    signalRService = TestBed.inject(SignalRService);
+    escrowStateService = TestBed.inject(EscrowStateService);
   });
 
   describe('Web3Service Signals', () => {

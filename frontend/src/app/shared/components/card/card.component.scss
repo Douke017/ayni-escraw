@@ -1,0 +1,47 @@
+/* SPDX-License-Identifier: MIT */
+@use 'mixins' as *;
+
+.ayni-card {
+  display: flex;
+  background-color: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  transition: all var(--transition-normal);
+
+  &--hoverable {
+    @include hover-lift;
+
+    &:hover {
+      border-color: rgba(217, 119, 6, 0.35); /* subtle gold accent on hover */
+      box-shadow: var(--shadow-lg), 0 0 15px rgba(217, 119, 6, 0.08);
+    }
+  }
+
+  &--interactive {
+    cursor: pointer;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Padding options */
+  &--pad-none &__body {
+    padding: 0;
+  }
+
+  &--pad-sm &__body {
+    padding: var(--space-3);
+  }
+
+  &--pad-md &__body {
+    padding: var(--space-5);
+  }
+
+  &--pad-lg &__body {
+    padding: var(--space-8);
+  }
+}
