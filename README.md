@@ -99,9 +99,10 @@ El marketplace implementa una gobernanza de roles clara y segura:
 - `POST /api/auth/verify`: Valida firma de MetaMask y emite JWT Bearer Token.
 - `GET /api/users/me` *(Auth)*: Obtiene el perfil completo, estado de KYC y roles disponibles.
 - `POST /api/users/me/switch-role` *(Auth)*: Alterna el rol activo entre `"Buyer"` y `"Seller"`.
-- `POST /api/users/kyc/initiate` *(Auth)*: Inicia sesión de verificación Didit KYC.
+- `POST /api/users/kyc/initiate` *(Auth)*: Inicia sesión de verificación Didit KYC (Workflow "Free KYC").
 - `GET /api/users/kyc/status` *(Auth)*: Consulta el estado de aprobación del KYC.
 - `POST /api/users/kyc/complete` *(Auth)*: Completa/simula verificación Didit KYC.
+- `POST /api/webhooks/didit`: Webhook receptor de decisiones de Didit con validación HMAC-SHA256 (`X-Signature-V2`), timestamp freshness y canonicalización JSON.
 
 ### Catálogo y Productos (`/api/products`)
 - `GET /api/products`: Lista publicaciones públicas con filtros por categoría, búsqueda y rango de precio.
@@ -155,7 +156,7 @@ Abrir `http://localhost:4200` en el navegador.
 
 ## 🧪 Ejecución de Pruebas
 
-### Pruebas del Backend (19 tests de integración)
+### Pruebas del Backend (24 tests unitarios y de integración)
 ```bash
 dotnet test backend/tests/Ayni.Tests/Ayni.Tests.csproj
 ```
