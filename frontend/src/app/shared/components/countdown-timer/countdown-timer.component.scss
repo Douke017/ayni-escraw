@@ -6,14 +6,14 @@
   justify-content: center;
 
   /* Urgency color definitions */
-  --timer-color: var(--aguayo-olive);
+  --timer-color: #6B7A3D;
 
   &--warning {
-    --timer-color: var(--aguayo-gold);
+    --timer-color: var(--accent-gold, #D4A055);
   }
 
   &--urgent {
-    --timer-color: var(--aguayo-red);
+    --timer-color: var(--primary-accent, #C0583A);
   }
 
   &__circular {
@@ -30,7 +30,7 @@
 
   &__track {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.08);
+    stroke: rgba(61, 43, 31, 0.12);
     stroke-width: 6;
   }
 
@@ -39,7 +39,7 @@
     stroke: var(--timer-color);
     stroke-width: 6;
     stroke-linecap: round;
-    transition: stroke-dashoffset 1s linear, stroke var(--transition-normal);
+    transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
   }
 
   &__overlay {
@@ -55,45 +55,47 @@
   &__digits {
     font-size: 1.125rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--primary-dark, #3D2B1F);
     font-variant-numeric: tabular-nums;
   }
 
   &__label {
     font-size: 0.625rem;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-muted, #7A6555);
     letter-spacing: 0.05em;
+    font-weight: 600;
   }
 
   &__linear {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 0.75rem;
     width: 100%;
   }
 
   &__bar-track {
     flex: 1;
     height: 8px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
+    background-color: rgba(61, 43, 31, 0.1);
+    border-radius: var(--radius-full, 9999px);
     overflow: hidden;
   }
 
   &__bar-indicator {
     height: 100%;
     background-color: var(--timer-color);
-    border-radius: var(--radius-full);
-    transition: width 1s linear, background-color var(--transition-normal);
+    border-radius: var(--radius-full, 9999px);
+    transition: width 1s linear, background-color 0.3s ease;
   }
 
   &__digits-linear {
     font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: 800;
+    color: var(--primary-dark, #3D2B1F);
     font-variant-numeric: tabular-nums;
     min-width: 48px;
     text-align: right;
   }
 }
+

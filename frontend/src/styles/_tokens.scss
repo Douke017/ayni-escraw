@@ -1,66 +1,102 @@
 /* SPDX-License-Identifier: MIT */
-/* Ayni Escrow — Design Tokens & Andean Aguayo Palette */
+/* Ayni / Qatu Marketplace — Design Tokens (Qatu-Design Figma) */
 
 :root {
-  /* Surfaces & Backgrounds */
+  /* Surfaces & Backgrounds (Warm Andean Canvas & Cards) */
   --background: #F0E6D3;
   --foreground: #3D2B1F;
   --card: #FFFBF5;
   --card-foreground: #3D2B1F;
+  --card-muted: #E8DCC8;
+  --card-border: #E8DCC8;
   --popover: #FFFBF5;
   --popover-foreground: #3D2B1F;
 
-  /* Brand & Actions */
-  --primary: #B54834;
-  --primary-hover: #8B3A3A;
-  --primary-foreground: #FFFBF5;
-  --secondary: #D4A055;
-  --secondary-hover: #B8894A;
+  /* Brand Primary & Secondary (Qatu Terracotta & Espresso) */
+  --primary: #C0583A;
+  --primary-hover: #A0482E;
+  --primary-active: #8B3A24;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary & Surface Buttons */
+  --secondary: #F0E6D3;
+  --secondary-hover: #E8DCC8;
   --secondary-foreground: #3D2B1F;
 
-  /* Functional Status */
+  /* Dark Espresso Accent Surfaces (Header, Hero Backdrop, Dark Buttons) */
+  --dark-surface: #3D2B1F;
+  --dark-surface-hover: #2E1F16;
+  --dark-foreground: #F0E6D3;
+  --dark-muted: rgba(240, 230, 211, 0.7);
+
+  /* Functional Status & Web3 */
   --muted: #E8DCC8;
   --muted-foreground: #7A6555;
-  --accent: #8B6914;
-  --accent-foreground: #FFFBF5;
-  --destructive: #D4183D;
+  --muted-dark: #3D2B1F;
+  --accent: #D4A055;           /* Qatu Gold / Ocre */
+  --accent-foreground: #3D2B1F;
+  --destructive: #8B3A3A;      /* Andean Wine / Red */
   --destructive-foreground: #FFFFFF;
-  --success: #2E7D32;
+  --success: #6B7A3D;          /* Andean Olive / Moss Green */
   --success-foreground: #FFFFFF;
-  --warning: #ED6C02;
-  --warning-foreground: #FFFFFF;
+  --warning: #D4A055;
+  --warning-foreground: #3D2B1F;
+
+  /* Semantic UI Aliases */
+  --brand-primary: #C0583A;
+  --brand-on-primary: #FFFFFF;
+  --surface-card: #FFFBF5;
+  --surface-hover: #F0E6D3;
+  --surface-border: #E8DCC8;
+  --text-primary: #3D2B1F;
+  --text-secondary: #7A6555;
+  --text-muted: #9B8B7E;
+  --color-white: #FFFFFF;
+  --color-black: #3D2B1F;
 
   /* Borders & Focus */
-  --border: rgba(61, 43, 31, 0.16);
-  --border-focus: #D4A055;
+  --border: #E8DCC8;
+  --border-subtle: #F0E6D3;
+  --border-focus: #C0583A;
   --input-background: #FFFBF5;
-  --ring: #B54834;
+  --ring: #C0583A;
 
-  /* Andean Aguayo Signature Palette */
+  /* Official Qatu Aguayo 6-Stripe Ribbon Tokens (Figma Guia de Estilos) */
+  --aguayo-terracotta: #C0583A;
+  --aguayo-gold: #D4A055;
+  --aguayo-olive: #6B7A3D;
+  --aguayo-slate: #4A5478;
+  --aguayo-wine: #8B3A3A;
+  --aguayo-brown: #B8894A;
+
+  /* Backward Compatibility Token Aliases */
   --aguayo-deep: #3D2B1F;
   --aguayo-red: #C0583A;
-  --aguayo-gold: #D4A055;
   --aguayo-cream: #F0E6D3;
-  --aguayo-brown: #B8894A;
   --aguayo-burgundy: #8B3A3A;
-  --aguayo-olive: #6B7A3D;
   --aguayo-indigo: #4A5478;
 
-  /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
-  --radius-full: 9999px;
+  /* Web3 Protocol Brand Tokens */
+  --hsk-blue: #4A5478;
+  --verified-badge: #6B7A3D;
+  --escrow-gold: #D4A055;
 
-  /* Shadows */
+  /* Radii (Qatu standards) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;     /* Buttons, Inputs */
+  --radius-lg: 12px;    /* Product Cards */
+  --radius-xl: 16px;    /* Category Tiles & Banners */
+  --radius-2xl: 24px;   /* Modals & Hero */
+  --radius-full: 9999px;/* Chips, Pills & Search */
+
+  /* Elevation Shadows */
   --shadow-sm: 0 1px 3px rgba(61, 43, 31, 0.08);
   --shadow-md: 0 4px 12px rgba(61, 43, 31, 0.10);
-  --shadow-lg: 0 8px 24px rgba(61, 43, 31, 0.14);
-  --shadow-xl: 0 16px 36px rgba(61, 43, 31, 0.18);
-  --shadow-glow-red: 0 4px 16px rgba(192, 88, 58, 0.35);
-  --shadow-glow-gold: 0 4px 16px rgba(212, 160, 85, 0.40);
+  --shadow-lg: 0 10px 24px rgba(61, 43, 31, 0.14);
+  --shadow-xl: 0 20px 40px rgba(61, 43, 31, 0.18);
+  --shadow-glow-red: 0 4px 16px rgba(192, 88, 58, 0.25);
+  --shadow-glow-gold: 0 4px 16px rgba(212, 160, 85, 0.25);
 
   /* Typography Scale */
   --text-xs: 0.75rem;     /* 12px */
@@ -71,5 +107,5 @@
   --text-2xl: 1.5rem;     /* 24px */
   --text-3xl: 1.875rem;   /* 30px */
   --text-4xl: 2.25rem;    /* 36px */
-  --text-5xl: 3rem;       /* 48px */
+  --text-5xl: 2.75rem;    /* 44px */
 }

@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { type Address } from 'viem';
 import { CatalogService } from '../../../core/services/catalog.service';
@@ -9,7 +10,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ProductListing } from '../../../core/models/listing.model';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
 import { environment } from '../../../../environments/environment';
@@ -18,10 +18,9 @@ import { environment } from '../../../../environments/environment';
   selector: 'ayni-checkout',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
-    BadgeComponent,
     ButtonComponent,
-    CardComponent,
     UsdtPipe,
     TruncateAddressPipe,
   ],
@@ -42,6 +41,29 @@ export class CheckoutComponent implements OnInit {
   public readonly isSuccess = signal<boolean>(false);
   public readonly createdOrderId = signal<string | null>(null);
   public readonly errorMessage = signal<string | null>(null);
+  public readonly faucetNotification = signal<string | null>(null);
+  public readonly isClaimingFaucet = signal<boolean>(false);
+
+  public readonly isBalanceInsufficient = computed(() => {
+    const item = this.listing();
+    if (!item) return false;
+    const balanceNum = parseFloat(this.web3Service.usdtBalance() || '0');
+    return balanceNum < item.priceUsdt;
+  });
+
+  public async onClaimFaucet(): Promise<void> {
+    this.isClaimingFaucet.set(true);
+    try {
+      await this.web3Service.claimFaucet(1000);
+      this.faucetNotification.set('¡+1,000 USDT reclamados exitosamente del Faucet!');
+      setTimeout(() => this.faucetNotification.set(null), 5000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al reclamar USDT del Faucet';
+      this.errorMessage.set(msg);
+    } finally {
+      this.isClaimingFaucet.set(false);
+    }
+  }
 
   public ngOnInit(): void {
     const listingId = this.route.snapshot.queryParamMap.get('listingId');
@@ -60,13 +82,18 @@ export class CheckoutComponent implements OnInit {
 
   public async onDepositWithPermit2(): Promise<void> {
     if (this.isSubmitting()) return;
-    if (!this.authService.isAuthenticated()) {
+    if (!this.web3Service.isConnected() && !this.authService.isAuthenticated()) {
       await this.authService.connectAndAuthenticate();
-      if (!this.authService.isAuthenticated()) return;
+      if (!this.web3Service.isConnected() && !this.authService.isAuthenticated()) return;
     }
 
     const item = this.listing();
     if (!item) return;
+
+    if (this.isBalanceInsufficient()) {
+      this.errorMessage.set(`Saldo USDT insuficiente (${this.web3Service.usdtBalance()} < ${item.priceUsdt} USDT). Puedes reclamar fondos en el Faucet.`);
+      return;
+    }
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);

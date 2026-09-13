@@ -1,129 +1,136 @@
-<div class="checkout">
-  <div class="checkout__container">
-    <header class="checkout__header">
-      <span class="checkout__pre">Uniswap Permit2 • EIP-712</span>
-      <h1 class="checkout__title">Depósito en Escrow No-Custodial</h1>
-      <p class="checkout__subtitle">
-        Tus fondos permanecerán asegurados en el contrato inteligente <code>AyniEscrow</code> en HSK Chain. El vendedor no recibirá el dinero hasta que confirmes la entrega mediante Safe Meet o inspección.
+<!-- SPDX-License-Identifier: MIT -->
+<div class="flex flex-col py-6 sm:py-12 pb-24 bg-ayni-canvas text-ayni-espresso w-full max-w-full overflow-x-hidden">
+  <div class="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
+    <header class="text-center mb-6 sm:mb-10">
+      <span class="text-[10px] sm:text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Uniswap Permit2 • EIP-712</span>
+      <h1 class="text-xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight mb-2 font-serif break-words">Depósito en Escrow No-Custodial</h1>
+      <p class="text-xs sm:text-sm md:text-base text-ayni-muted max-w-xl mx-auto leading-relaxed">
+        Tus fondos permanecerán asegurados en el contrato inteligente <code class="text-xs bg-ayni-espresso/10 px-1 py-0.5 rounded text-ayni-espresso font-semibold font-mono break-all">AyniEscrow</code> en HSK Chain. El vendedor no recibirá el dinero hasta que confirmes la entrega física o inspección.
       </p>
     </header>
 
     @if (isSuccess()) {
-      <div class="checkout__success-wrap">
-        <ayni-card sideBarColor="#10b981" padding="lg">
-          <div class="checkout__success-card">
-            <span class="checkout__success-icon">🎉</span>
-            <h2 class="checkout__success-title">¡Depósito Permit2 Confirmado en HSK Chain!</h2>
-            <p class="checkout__success-desc">
-              Los fondos fueron bloqueados exitosamente en el Smart Contract. Ahora puedes coordinar la entrega física con el código Safe Meet de 60 segundos o programar una videollamada de verificación.
-            </p>
+      <div class="max-w-xl mx-auto">
+        <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-5 sm:p-8 shadow-xl text-center flex flex-col items-center gap-4">
+          <span class="text-4xl sm:text-5xl select-none">🎉</span>
+          <h2 class="text-lg sm:text-2xl font-extrabold text-ayni-espresso font-serif">¡Depósito Permit2 Confirmado en HSK Chain!</h2>
+          <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed">
+            Los fondos fueron bloqueados exitosamente en el Smart Contract. Ahora puedes coordinar la entrega física con el código Safe Meet de 60 segundos o programar una videollamada de verificación.
+          </p>
 
-            <div class="checkout__success-actions">
-              <ayni-button variant="primary" size="lg" (clicked)="goToSafeMeet()">
-                <span>Continuar a Safe Meet QR ⏱️</span>
-              </ayni-button>
-              <ayni-button variant="secondary" size="md" routerLink="/escrow">
-                <span>Ver Mis Transacciones</span>
-              </ayni-button>
-            </div>
+          <div class="flex flex-col sm:flex-row gap-3 w-full justify-center mt-2">
+            <ayni-button variant="primary" size="lg" (clicked)="goToSafeMeet()" [fullWidth]="true">
+              <span>Continuar a Safe Meet QR ⏱️</span>
+            </ayni-button>
+            <ayni-button variant="secondary" size="md" routerLink="/escrow" [fullWidth]="true">
+              <span>Ver Mis Transacciones</span>
+            </ayni-button>
           </div>
-        </ayni-card>
+        </div>
       </div>
     } @else if (!listing()) {
-      <div class="checkout__empty">
-        <span>⚠️ No se ha seleccionado ningún dispositivo para el depósito.</span>
+      <div class="flex flex-col items-center justify-center text-center py-16 gap-4 text-ayni-muted">
+        <span class="text-4xl">⚠️</span>
+        <p class="text-sm sm:text-base">No se ha seleccionado ningún dispositivo para el depósito.</p>
         <ayni-button variant="primary" size="md" routerLink="/catalog">Ir al Catálogo</ayni-button>
       </div>
     } @else {
-      <div class="checkout__grid">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         <!-- Left: Summary of Purchase -->
-        <div class="checkout__summary">
-          <ayni-card padding="md">
-            <h3 class="checkout__card-title">Resumen del Hardware</h3>
-            <div class="checkout__product-row">
-              <span class="checkout__prod-icon">💻</span>
-              <div>
-                <h4 class="checkout__prod-title">{{ listing()!.title }}</h4>
-                <span class="checkout__prod-cat">{{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10</span>
+        <div class="lg:col-span-7 flex flex-col gap-4">
+          <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <h3 class="text-base sm:text-lg font-bold text-ayni-espresso mb-3 sm:mb-4 font-serif">Resumen del Hardware</h3>
+            
+            <div class="flex items-center gap-3 pb-3 sm:pb-4 border-b border-ayni-espresso/10 mb-3 sm:mb-4">
+              <span class="text-3xl sm:text-4xl bg-ayni-canvas-muted p-2 rounded-xl select-none shrink-0">💻</span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-sm sm:text-base font-bold text-ayni-espresso truncate">{{ listing()!.title }}</h4>
+                <span class="text-xs font-semibold text-ayni-accent-brown">{{ listing()!.category }} • Condición {{ listing()!.declaredCondition }}/10</span>
               </div>
             </div>
 
-            <div class="checkout__line-items">
-              <div class="checkout__line">
-                <span>Precio del producto:</span>
-                <span class="checkout__line-val">{{ listing()!.priceUsdt | usdt }}</span>
+            <div class="flex flex-col gap-2.5 text-xs sm:text-sm">
+              <div class="flex items-center justify-between gap-2 text-ayni-muted">
+                <span class="shrink-0">Precio del producto:</span>
+                <span class="font-mono font-bold text-ayni-espresso text-right">{{ listing()!.priceUsdt | usdt }}</span>
               </div>
-              <div class="checkout__line">
-                <span>Comisión Escrow Ayni (0% en Testnet):</span>
-                <span class="checkout__line-val">0.00 USDT</span>
+              <div class="flex items-center justify-between gap-2 text-ayni-muted">
+                <span class="shrink-0">Comisión Escrow Ayni (0% en Testnet):</span>
+                <span class="font-mono font-bold text-ayni-espresso text-right">0.00 USDT</span>
               </div>
-              <div class="checkout__line">
-                <span>Gas HSK Estimado:</span>
-                <span class="checkout__line-val">&lt; 0.001 HSK</span>
+              <div class="flex items-center justify-between gap-2 text-ayni-muted">
+                <span class="shrink-0">Gas HSK Estimado:</span>
+                <span class="font-mono font-bold text-ayni-espresso text-right">&lt; 0.001 HSK</span>
               </div>
-              <div class="checkout__divider"></div>
-              <div class="checkout__line checkout__line--total">
-                <span>Total a Bloquear:</span>
-                <span class="checkout__line-total-val">{{ listing()!.priceUsdt | usdt }}</span>
+              <div class="h-px bg-ayni-espresso/10 my-1"></div>
+              <div class="flex items-center justify-between gap-2 text-ayni-espresso pt-1">
+                <span class="font-bold shrink-0">Total a Bloquear:</span>
+                <span class="text-base sm:text-xl font-extrabold font-mono text-ayni-espresso text-right">{{ listing()!.priceUsdt | usdt }}</span>
               </div>
             </div>
-          </ayni-card>
+          </div>
 
-          <!-- Permit2 Explanation Card -->
-          <div class="checkout__info-box">
-            <div class="checkout__info-header">
-              <span class="checkout__info-icon">⚡</span>
-              <strong>¿Cómo funciona Uniswap Permit2?</strong>
+          <!-- Permit2 Explanation Box -->
+          <div class="bg-ayni-card border border-ayni-gold/35 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center gap-2 text-sm sm:text-base font-bold text-ayni-espresso mb-2">
+              <span class="text-base text-ayni-gold shrink-0">⚡</span>
+              <span>¿Cómo funciona Uniswap Permit2?</span>
             </div>
-            <p class="checkout__info-text">
-              A diferencia de los protocolos Web3 tradicionales que exigen dos transacciones separadas (1. <code>approve</code> ERC-20 y 2. <code>transferFrom</code>), Permit2 te permite autorizar la transferencia con una sola firma criptográfica off-chain (EIP-712).
+            <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+              A diferencia de los protocolos Web3 tradicionales que exigen dos transacciones separadas (1. <code class="text-xs bg-ayni-canvas px-1 rounded text-ayni-espresso font-mono break-all">approve</code> ERC-20 y 2. <code class="text-xs bg-ayni-canvas px-1 rounded text-ayni-espresso font-mono break-all">transferFrom</code>), Permit2 te permite autorizar la transferencia con una sola firma criptográfica off-chain (EIP-712).
             </p>
           </div>
         </div>
 
         <!-- Right: Action & Wallet State -->
-        <div class="checkout__action-col">
-          <ayni-card sideBarColor="var(--aguayo-gold)" padding="lg">
-            <h3 class="checkout__card-title">Confirmación de Firma</h3>
+        <div class="lg:col-span-5 flex flex-col gap-4">
+          <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <h3 class="text-base sm:text-lg font-bold text-ayni-espresso mb-3 sm:mb-4 font-serif">Confirmación de Firma</h3>
 
-            <div class="checkout__wallet-status">
-              <div class="checkout__wallet-row">
-                <span class="checkout__w-label">Tu Billetera:</span>
-                <span class="checkout__w-val">{{ (authService.walletAddress() || 'Desconectada') | truncateAddress }}</span>
+            <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-xl p-3 sm:p-3.5 flex flex-col gap-2.5 mb-4 text-xs sm:text-sm">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-ayni-muted shrink-0">Tu Billetera:</span>
+                <span class="font-mono font-bold text-ayni-espresso truncate text-right">{{ (web3Service.account() || authService.walletAddress() || 'Desconectada') | truncateAddress }}</span>
               </div>
-              <div class="checkout__wallet-row">
-                <span class="checkout__w-label">Saldo USDT HSK:</span>
-                <span class="checkout__w-val">{{ web3Service.usdtBalance() | usdt }}</span>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-ayni-muted shrink-0">Saldo USDT HSK:</span>
+                <span class="font-mono font-bold text-ayni-espresso text-right">{{ web3Service.usdtBalance() | usdt }}</span>
               </div>
-              <div class="checkout__wallet-row">
-                <span class="checkout__w-label">Red:</span>
-                <ayni-badge variant="hsk" size="sm">HSK Testnet (133)</ayni-badge>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-ayni-muted shrink-0">Red:</span>
+                <span class="font-mono text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded bg-ayni-olive/15 text-ayni-olive border border-ayni-olive/25 shrink-0">HSK TESTNET (133)</span>
               </div>
             </div>
 
-            <div class="checkout__cta-wrap">
-              @if (!authService.isAuthenticated()) {
-                <ayni-button variant="primary" size="lg" [fullWidth]="true" (clicked)="authService.connectAndAuthenticate()">
-                  Conectar Wallet con SIWE
-                </ayni-button>
-              } @else {
-                <ayni-button 
-                  variant="primary" 
-                  size="lg" 
-                  [fullWidth]="true" 
-                  [loading]="isSubmitting()"
-                  (clicked)="onDepositWithPermit2()"
-                >
-                  <span>Firmar y Bloquear Fondos en Escrow</span>
-                  <span aria-hidden="true">⚡</span>
-                </ayni-button>
-              }
+            <!-- Faucet Callout if 0 balance -->
+            <div class="flex items-center justify-between p-2.5 bg-ayni-canvas rounded-xl mb-4 text-xs gap-2">
+              <span class="text-ayni-muted">¿Necesitas saldo de prueba?</span>
+              <button 
+                type="button" 
+                class="font-bold text-ayni-terracotta hover:underline shrink-0 cursor-pointer"
+                (click)="onClaimFaucet()"
+                [disabled]="isClaimingFaucet()"
+              >
+                {{ isClaimingFaucet() ? 'Reclamando...' : 'Reclamar +1,000 USDT' }}
+              </button>
             </div>
 
-            <p class="checkout__legal-note">
-              Al hacer clic, firmarás la autorización EIP-712. Los fondos quedan asegurados en el contrato <code>AyniEscrow.sol</code> y únicamente tú o el árbitro 2/3 podrán autorizar la liberación o reembolso.
+            <!-- Action Button -->
+            <ayni-button 
+              variant="primary" 
+              size="lg" 
+              [fullWidth]="true" 
+              [loading]="isSubmitting()"
+              (clicked)="onDepositWithPermit2()"
+            >
+              <span class="font-extrabold text-xs sm:text-sm md:text-base text-center leading-tight">Firmar y Bloquear Fondos en Escrow ⚡</span>
+            </ayni-button>
+
+            <!-- Legal / Escrow Disclaimer -->
+            <p class="text-[10px] sm:text-xs text-ayni-muted text-center mt-3 leading-relaxed">
+              Al hacer clic, firmarás la autorización EIP-712. Los fondos quedan asegurados en el contrato <code class="font-mono text-ayni-espresso font-semibold break-all">AyniEscrow.sol</code> y únicamente tú o el árbitro 2/3 podrán autorizar la liberación o reembolso.
             </p>
-          </ayni-card>
+          </div>
         </div>
       </div>
     }

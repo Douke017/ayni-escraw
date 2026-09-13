@@ -1,96 +1,121 @@
-<header class="topbar">
-  <div class="topbar__container">
+<header class="sticky top-0 z-50 w-full bg-ayni-espresso border-b border-ayni-gold/25 shadow-md">
+  <ayni-aguayo-ribbon size="sm" />
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-2 sm:gap-4 relative">
     <!-- Brand / Logo -->
-    <div class="topbar__brand">
-      <a routerLink="/" class="topbar__logo" (click)="closeMenu()">
-        <span class="topbar__logo-icon" aria-hidden="true">⚡</span>
-        <span class="topbar__logo-text">AYNI</span>
-        <span class="topbar__logo-badge">ESCROW</span>
+    <div class="flex items-center shrink-0">
+      <a routerLink="/" class="flex items-center gap-1.5 sm:gap-2 group cursor-pointer" (click)="closeMenu()">
+        <span class="text-xl sm:text-2xl font-black text-ayni-canvas tracking-wider group-hover:text-ayni-gold transition-colors">AYNI</span>
+        <span class="hidden sm:inline-block text-[9px] sm:text-[10px] bg-ayni-terracotta text-white font-extrabold px-1.5 py-0.5 rounded tracking-widest uppercase shadow-sm">MARKETPLACE</span>
       </a>
     </div>
 
     <!-- Desktop Navigation Links -->
-    <nav class="topbar__nav" aria-label="Navegación principal">
+    <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-ayni-canvas/85" aria-label="Navegación principal">
       <a 
         routerLink="/catalog" 
-        routerLinkActive="topbar__link--active" 
-        class="topbar__link"
+        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+        class="hover:text-white transition-colors py-1 cursor-pointer"
       >
-        Catálogo
+        <span>Explorar Catálogo</span>
       </a>
       <a 
         routerLink="/listings/new" 
-        routerLinkActive="topbar__link--active" 
-        class="topbar__link"
+        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+        class="hover:text-white transition-colors py-1 flex items-center gap-1.5 cursor-pointer"
       >
-        Publicar
-        <ayni-badge variant="pol" size="sm">POL Challenge</ayni-badge>
+        <span>Publicar</span>
+        <span class="text-[10px] bg-ayni-gold/20 text-ayni-gold font-bold px-1.5 py-0.5 rounded border border-ayni-gold/40">POL</span>
       </a>
       <a 
         routerLink="/escrow" 
-        routerLinkActive="topbar__link--active" 
-        class="topbar__link"
+        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+        class="hover:text-white transition-colors py-1 cursor-pointer"
       >
-        Mis Órdenes
+        <span>Mis Órdenes</span>
       </a>
       <a 
         routerLink="/chat" 
-        routerLinkActive="topbar__link--active" 
-        class="topbar__link"
+        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+        class="hover:text-white transition-colors py-1 cursor-pointer"
       >
-        Chat & Agente IA
+        <span>Chat & Negociación</span>
       </a>
     </nav>
 
     <!-- Web3 Actions / User Profile -->
-    <div class="topbar__actions">
-      @if (authService.isAuthenticated() || web3Service.isConnected()) {
-        <div class="topbar__wallet-chip">
-          <ayni-badge variant="hsk" size="sm" [pulse]="true">
-            HSK Testnet
-          </ayni-badge>
+    <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      <!-- Faucet Button (Responsive - visible on mobile sm+ and topbar) -->
+      <button 
+        type="button" 
+        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-ayni-gold/20 hover:bg-ayni-gold/30 text-ayni-gold border border-ayni-gold/50 rounded-full text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50 min-h-[36px] cursor-pointer"
+        (click)="onClaimFaucet()" 
+        [disabled]="isClaimingFaucet()"
+        title="Reclamar 1,000 USDT de prueba del contrato mock"
+      >
+        <span class="text-sm">🚰</span>
+        <span>{{ isClaimingFaucet() ? 'Reclamando...' : 'Faucet (1,000 USDT)' }}</span>
+      </button>
 
-          <span class="topbar__balance" (click)="onRefreshBalance()" title="Clic para refrescar saldo">
+      @if (web3Service.isConnected() || authService.isAuthenticated()) {
+        <div class="flex items-center gap-1.5 sm:gap-2 bg-ayni-canvas/10 border border-ayni-gold/30 rounded-full p-1 sm:pl-2 sm:pr-1 text-xs font-semibold relative text-ayni-canvas">
+          <!-- HSK badge only on sm+ -->
+          <span class="hidden sm:inline-flex">
+            <ayni-badge variant="hsk" size="sm" [pulse]="true">
+              HSK
+            </ayni-badge>
+          </span>
+
+          <!-- USDT balance only on md+ -->
+          <span class="font-mono text-xs font-bold text-ayni-canvas hidden md:inline cursor-pointer hover:text-ayni-gold" (click)="onRefreshBalance()" title="Clic para refrescar saldo">
             {{ web3Service.usdtBalance() | usdt }}
           </span>
 
-          <div class="topbar__user-menu">
+          <div class="relative">
             <button 
               type="button" 
-              class="topbar__address-btn"
+              class="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-2.5 bg-ayni-espresso border border-ayni-gold/40 rounded-full shadow-sm text-ayni-canvas hover:text-ayni-gold transition-colors min-h-[30px] sm:min-h-[32px] cursor-pointer max-w-[105px] xs:max-w-[125px] sm:max-w-none"
               (click)="toggleDropdown()"
               aria-expanded="false"
             >
-              <span class="topbar__user-dot"></span>
-              <span>{{ (authService.walletAddress() || web3Service.account()) | truncateAddress }}</span>
-              <span class="topbar__chevron">▼</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span class="font-mono text-[11px] sm:text-xs truncate">
+                {{ (web3Service.account() || authService.walletAddress() || '') | truncateAddress }}
+              </span>
+              <span class="text-[9px] opacity-60 shrink-0">▼</span>
             </button>
 
             @if (isDropdownOpen()) {
-              <div class="topbar__dropdown">
-                <div class="topbar__dropdown-header">
-                  <span class="topbar__dropdown-label">Billetera Conectada</span>
-                  <span class="topbar__dropdown-address">{{ authService.walletAddress() || web3Service.account() }}</span>
+              <div class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-ayni-espresso border border-ayni-gold/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 text-ayni-canvas">
+                <div class="p-2.5 bg-black/30 rounded-xl mb-1 border border-ayni-gold/20">
+                  <span class="text-[10px] uppercase font-bold text-ayni-gold block mb-0.5">Billetera Conectada</span>
+                  <span class="font-mono text-xs text-ayni-canvas font-bold truncate block">{{ web3Service.account() || authService.walletAddress() }}</span>
+                  <span class="text-xs font-bold text-ayni-gold block mt-1">Saldo: {{ web3Service.usdtBalance() | usdt }}</span>
                 </div>
-                <div class="topbar__dropdown-divider"></div>
-                <button type="button" class="topbar__dropdown-item" (click)="onAddUsdtToMetaMask()">
-                  <span>🦊 Importar USDT a MetaMask</span>
+                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onAddUsdtToMetaMask()">
+                  <span>🦊</span>
+                  <span>Importar USDT a MetaMask</span>
                 </button>
-                <button type="button" class="topbar__dropdown-item" (click)="onRequestFaucet()">
-                  <span>💧 Reclamar 1,000 USDT (Faucet)</span>
+                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onClaimFaucet(); closeDropdown()">
+                  <span>🚰</span>
+                  <span>Reclamar Faucet (+1,000 USDT)</span>
                 </button>
-                <button type="button" class="topbar__dropdown-item" (click)="onRefreshBalance()">
-                  <span>🔄 Actualizar Saldo</span>
+                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onRefreshBalance(); closeDropdown()">
+                  <span>🔄</span>
+                  <span>Actualizar Saldo</span>
                 </button>
-                <div class="topbar__dropdown-divider"></div>
-                <a routerLink="/escrow" class="topbar__dropdown-item" (click)="closeDropdown()">
-                  <span>📦 Mis Transacciones Escrow</span>
+                <div class="h-px bg-ayni-gold/20 my-1"></div>
+                <a routerLink="/escrow" class="px-3 py-2 text-xs font-semibold text-ayni-canvas hover:bg-white/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="closeDropdown()">
+                  <span>📦</span>
+                  <span>Mis Transacciones Escrow</span>
                 </a>
-                <a routerLink="/chat" class="topbar__dropdown-item" (click)="closeDropdown()">
-                  <span>💬 Chat Bonds Activos</span>
+                <a routerLink="/chat" class="px-3 py-2 text-xs font-semibold text-ayni-canvas hover:bg-white/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="closeDropdown()">
+                  <span>💬</span>
+                  <span>Chat & Negociación</span>
                 </a>
-                <button type="button" class="topbar__dropdown-item topbar__dropdown-item--danger" (click)="onDisconnect()">
-                  <span>🚪 Desconectar</span>
+                <div class="h-px bg-ayni-gold/20 my-1"></div>
+                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onDisconnect()">
+                  <span>🚪</span>
+                  <span>Desconectar</span>
                 </button>
               </div>
             }
@@ -103,35 +128,81 @@
           [loading]="isConnecting()"
           (clicked)="onConnect()"
         >
-          <span>Conectar Wallet</span>
+          <span class="text-xs font-bold"><span class="xs:hidden">Conectar</span><span class="hidden xs:inline">Conectar Wallet</span></span>
         </ayni-button>
       }
 
       <!-- Mobile Hamburger Button -->
       <button 
         type="button" 
-        class="topbar__toggle" 
+        class="md:hidden flex flex-col items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-ayni-canvas hover:bg-white/10 focus:outline-none transition-colors cursor-pointer shrink-0 border border-ayni-gold/30"
         (click)="toggleMenu()"
-        aria-label="Abrir menú"
+        aria-label="Abrir menú de navegación"
       >
-        <span class="topbar__bar"></span>
-        <span class="topbar__bar"></span>
-        <span class="topbar__bar"></span>
+        <span class="w-4 sm:w-5 h-0.5 bg-ayni-canvas rounded-full transition-transform duration-200" [class.rotate-45]="isMenuOpen()" [class.translate-y-1.5]="isMenuOpen()"></span>
+        <span class="w-4 sm:w-5 h-0.5 bg-ayni-canvas rounded-full my-1 transition-opacity duration-200" [class.opacity-0]="isMenuOpen()"></span>
+        <span class="w-4 sm:w-5 h-0.5 bg-ayni-canvas rounded-full transition-transform duration-200" [class.-rotate-45]="isMenuOpen()" [class.-translate-y-1.5]="isMenuOpen()"></span>
       </button>
     </div>
   </div>
 
-  <!-- Mobile Drawer Menu -->
+  <!-- Faucet Toast Banner -->
+  @if (faucetNotification()) {
+    <div class="fixed top-20 right-4 z-[110] bg-ayni-espresso text-ayni-gold border border-ayni-gold px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-bounce">
+      <span>🎉</span>
+      <span>{{ faucetNotification() }}</span>
+    </div>
+  }
+
+  <!-- Mobile Drawer Menu (Sliding Overlay) -->
   @if (isMenuOpen()) {
-    <div class="topbar__mobile-menu">
-      <nav class="topbar__mobile-nav">
-        <a routerLink="/catalog" class="topbar__mobile-link" (click)="closeMenu()">Catálogo de Hardware</a>
-        <a routerLink="/listings/new" class="topbar__mobile-link" (click)="closeMenu()">Publicar con Proof of Listing</a>
-        <a routerLink="/escrow" class="topbar__mobile-link" (click)="closeMenu()">Mis Órdenes Escrow</a>
-        <a routerLink="/chat" class="topbar__mobile-link" (click)="closeMenu()">Chat & Negociación IA</a>
+    <div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] transition-opacity" (click)="closeMenu()"></div>
+    <div class="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-ayni-espresso border-l border-ayni-gold/30 shadow-2xl z-[101] flex flex-col text-ayni-canvas">
+      <div class="p-4 flex items-center justify-between border-b border-ayni-gold/20">
+        <div class="flex items-center gap-2">
+          <span class="text-xl font-black text-ayni-canvas">AYNI</span>
+          <span class="text-[9px] bg-ayni-terracotta text-white font-extrabold px-1.5 py-0.5 rounded tracking-widest uppercase">MARKETPLACE</span>
+        </div>
+        <button type="button" class="w-9 h-9 rounded-full flex items-center justify-center text-ayni-canvas hover:bg-white/10 font-bold text-lg cursor-pointer" (click)="closeMenu()">✕</button>
+      </div>
+      <ayni-aguayo-ribbon size="xs" />
+
+      <nav class="flex flex-col p-4 gap-1.5 text-sm font-semibold text-ayni-canvas/90 flex-1 overflow-y-auto">
+        <a routerLink="/" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">🏠</span>
+          <span>Inicio</span>
+        </a>
+        <a routerLink="/catalog" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">📦</span>
+          <span>Explorar Catálogo</span>
+        </a>
+        <a routerLink="/listings/new" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">➕</span>
+          <span>Publicar con Proof of Listing</span>
+        </a>
+        <a routerLink="/escrow" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">🤝</span>
+          <span>Mis Órdenes Escrow</span>
+        </a>
+        <a routerLink="/chat" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+          <span class="text-lg">💬</span>
+          <span>Chat & Negociación</span>
+        </a>
       </nav>
-      <div class="topbar__mobile-footer">
-        @if (!authService.isAuthenticated()) {
+
+      <div class="p-4 border-t border-ayni-gold/20 flex flex-col gap-3 bg-black/20">
+        <!-- Faucet in mobile drawer -->
+        <button 
+          type="button" 
+          class="w-full py-3 px-4 bg-gradient-to-r from-ayni-gold to-amber-500 hover:brightness-105 text-ayni-espresso font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 active:scale-98 min-h-[44px] cursor-pointer"
+          (click)="onClaimFaucet()" 
+          [disabled]="isClaimingFaucet()"
+        >
+          <span>🚰</span>
+          <span>{{ isClaimingFaucet() ? 'Reclamando del contrato...' : 'Reclamar Faucet (1,000 USDT)' }}</span>
+        </button>
+
+        @if (!web3Service.isConnected() && !authService.isAuthenticated()) {
           <ayni-button 
             variant="primary" 
             size="md" 
@@ -140,11 +211,17 @@
           >
             Conectar Wallet
           </ayni-button>
+        } @else {
+          <div class="p-3 bg-black/30 rounded-xl border border-ayni-gold/20 flex items-center justify-between">
+            <div class="min-w-0 flex-1 mr-2">
+              <div class="text-[10px] text-ayni-gold uppercase font-bold">Billetera</div>
+              <div class="font-mono text-xs font-bold text-ayni-canvas truncate">{{ (web3Service.account() || authService.walletAddress() || '') | truncateAddress }}</div>
+              <div class="text-xs font-bold text-ayni-gold mt-0.5">Saldo: {{ web3Service.usdtBalance() | usdt }}</div>
+            </div>
+            <button type="button" class="text-xs font-bold text-rose-400 hover:underline py-1 px-2 cursor-pointer shrink-0" (click)="onDisconnect()">Desconectar</button>
+          </div>
         }
       </div>
     </div>
   }
-
-  <!-- Andean Aguayo Ribbon border at the bottom -->
-  <ayni-aguayo-ribbon size="xs" />
 </header>

@@ -1,321 +1,348 @@
-<div class="create-listing">
-  <div class="create-listing__container">
+<!-- SPDX-License-Identifier: MIT -->
+<div class="flex flex-col py-8 sm:py-12 pb-24 bg-ayni-canvas text-ayni-espresso">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full">
     <!-- Header -->
-    <header class="create-listing__header">
-      <span class="create-listing__pre">Registro de Hardware Descentralizado</span>
-      <h1 class="create-listing__title">Publicar Dispositivo en Ayni</h1>
-      <p class="create-listing__subtitle">
-        Proceso de 3 pasos con Proof of Listing (POL), atestación de IA ERC-8004 y cálculo de Salted Commitment.
+    <header class="text-center mb-8 sm:mb-10">
+      <span class="text-xs font-extrabold text-ayni-terracotta uppercase tracking-widest block mb-1">Feria Digital • Registro de Hardware</span>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ayni-espresso tracking-tight mb-2.5 font-serif">Publicar en el Puesto de Ayni</h1>
+      <p class="text-xs sm:text-sm md:text-base text-ayni-muted max-w-xl mx-auto leading-relaxed">
+        Proceso de 3 pasos con Proof of Listing (POL), atestación de IA ERC-8004 y compromiso criptográfico con Salt.
       </p>
     </header>
 
-    <!-- Stepper Navigation -->
-    <div class="create-listing__stepper">
-      <div 
-        class="create-listing__step" 
-        [class.create-listing__step--active]="currentStep() === 1"
-        [class.create-listing__step--completed]="currentStep() > 1"
-      >
-        <span class="create-listing__step-number">1</span>
-        <span class="create-listing__step-name">Especificaciones</span>
+    <!-- Stepper Navigation (Responsive horizontal) -->
+    <div class="flex items-center justify-between max-w-xl mx-auto mb-8 sm:mb-10 px-2">
+      <!-- Step 1 -->
+      <div class="flex items-center gap-2"
+           [class]="currentStep() >= 1 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+              [class]="currentStep() === 1 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 1 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
+          {{ currentStep() > 1 ? '✓' : '1' }}
+        </span>
+        <span class="text-xs sm:text-sm hidden sm:inline">Especificaciones</span>
       </div>
-      <div class="create-listing__step-line"></div>
 
-      <div 
-        class="create-listing__step" 
-        [class.create-listing__step--active]="currentStep() === 2"
-        [class.create-listing__step--completed]="currentStep() > 2"
-      >
-        <span class="create-listing__step-number">2</span>
-        <span class="create-listing__step-name">Proof of Listing (POL)</span>
+      <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
+           [class]="currentStep() > 1 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
+
+      <!-- Step 2 -->
+      <div class="flex items-center gap-2"
+           [class]="currentStep() >= 2 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+              [class]="currentStep() === 2 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : (currentStep() > 2 ? 'bg-ayni-olive text-white' : 'bg-ayni-espresso/10 text-ayni-muted')">
+          {{ currentStep() > 2 ? '✓' : '2' }}
+        </span>
+        <span class="text-xs sm:text-sm hidden sm:inline">POL Challenge</span>
       </div>
-      <div class="create-listing__step-line"></div>
 
-      <div 
-        class="create-listing__step" 
-        [class.create-listing__step--active]="currentStep() === 3"
-      >
-        <span class="create-listing__step-number">3</span>
-        <span class="create-listing__step-name">Pasaporte ERC-721</span>
+      <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-colors"
+           [class]="currentStep() > 2 ? 'bg-ayni-olive' : 'bg-ayni-espresso/15'"></div>
+
+      <!-- Step 3 -->
+      <div class="flex items-center gap-2"
+           [class]="currentStep() === 3 ? 'text-ayni-espresso font-bold' : 'text-ayni-muted'">
+        <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all"
+              [class]="currentStep() === 3 ? 'bg-ayni-terracotta text-white ring-4 ring-ayni-terracotta/20' : 'bg-ayni-espresso/10 text-ayni-muted'">
+          3
+        </span>
+        <span class="text-xs sm:text-sm hidden sm:inline">Pasaporte ERC-721</span>
       </div>
     </div>
 
     <!-- Form Container -->
-    <main class="create-listing__card-wrap">
-      <ayni-card padding="lg">
-        <!-- STEP 1: SPECIFICATIONS -->
-        @if (currentStep() === 1) {
-          <div class="create-listing__form-step">
-            <h2 class="create-listing__step-title">1. Datos Técnicos del Hardware</h2>
-            <p class="create-listing__step-desc">
-              Ingresa los detalles reales del dispositivo. Los agentes de IA contrastarán esta información contra el checklist fotográfico.
-            </p>
-
-            <div class="create-listing__field-group">
-              <label class="create-listing__label" for="categorySelect">Categoría de Hardware</label>
-              <select 
-                id="categorySelect"
-                class="create-listing__input"
-                [ngModel]="category()"
-                (ngModelChange)="category.set($event)"
-              >
-                @for (cat of categories; track cat.key) {
-                  <option [value]="cat.key">{{ cat.icon }} {{ cat.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="create-listing__field-group">
-              <label class="create-listing__label" for="titleInput">Título de la Publicación</label>
-              <input 
-                id="titleInput"
-                type="text" 
-                class="create-listing__input" 
-                placeholder="Ej. iPhone 15 Pro Max 256GB Titanio Natural"
-                [ngModel]="title()"
-                (ngModelChange)="title.set($event)"
-              />
-            </div>
-
-            <div class="create-listing__field-group">
-              <label class="create-listing__label" for="descTextarea">Descripción del Estado Físico</label>
-              <textarea 
-                id="descTextarea"
-                rows="3" 
-                class="create-listing__input" 
-                placeholder="Detalla si tiene marcas de uso, rayones, piezas cambiadas o accesorios incluidos..."
-                [ngModel]="description()"
-                (ngModelChange)="description.set($event)"
-              ></textarea>
-            </div>
-
-            <div class="create-listing__row">
-              <div class="create-listing__field-group">
-                <label class="create-listing__label" for="priceInput">Precio de Venta (USDT)</label>
-                <input 
-                  id="priceInput"
-                  type="number" 
-                  min="1" 
-                  class="create-listing__input" 
-                  [ngModel]="priceUsdt()"
-                  (ngModelChange)="priceUsdt.set($event)"
-                />
-              </div>
-
-              <div class="create-listing__field-group">
-                <label class="create-listing__label" for="conditionInput">Condición Declarada (1 al 10)</label>
-                <input 
-                  id="conditionInput"
-                  type="number" 
-                  min="1" 
-                  max="10" 
-                  class="create-listing__input" 
-                  [ngModel]="declaredCondition()"
-                  (ngModelChange)="declaredCondition.set($event)"
-                />
-              </div>
-            </div>
-
-            <div class="create-listing__row">
-              <div class="create-listing__field-group">
-                <label class="create-listing__label" for="ramInput">Memoria RAM</label>
-                <input 
-                  id="ramInput"
-                  type="text" 
-                  class="create-listing__input" 
-                  placeholder="Ej. 8 GB"
-                  [ngModel]="ram()"
-                  (ngModelChange)="ram.set($event)"
-                />
-              </div>
-
-              <div class="create-listing__field-group">
-                <label class="create-listing__label" for="storageInput">Almacenamiento</label>
-                <input 
-                  id="storageInput"
-                  type="text" 
-                  class="create-listing__input" 
-                  placeholder="Ej. 256 GB NVMe"
-                  [ngModel]="storage()"
-                  (ngModelChange)="storage.set($event)"
-                />
-              </div>
-
-              <div class="create-listing__field-group">
-                <label class="create-listing__label" for="batteryInput">Salud de Batería</label>
-                <input 
-                  id="batteryInput"
-                  type="text" 
-                  class="create-listing__input" 
-                  placeholder="Ej. 92%"
-                  [ngModel]="batteryHealth()"
-                  (ngModelChange)="batteryHealth.set($event)"
-                />
-              </div>
-            </div>
-
-            <div class="create-listing__field-group">
-              <div class="create-listing__label-row">
-                <label class="create-listing__label" for="imeiInput">IMEI o Número de Serie (Privado)</label>
-                <span class="create-listing__badge-tip">🔐 Salted Keccak256</span>
-              </div>
-              <input 
-                id="imeiInput"
-                type="password" 
-                class="create-listing__input" 
-                placeholder="15 dígitos o serial del chasis"
-                [ngModel]="hardwareIdentifier()"
-                (ngModelChange)="hardwareIdentifier.set($event)"
-              />
-              <span class="create-listing__help-text">
-                Nunca se almacenará en texto plano. Será transformado en un hash irreversible con salt antes de tocar la red.
-              </span>
-            </div>
-
-            <div class="create-listing__action-row">
-              <ayni-button variant="primary" size="md" (clicked)="goToStep2()">
-                <span>Continuar a Proof of Listing</span>
-                <span aria-hidden="true">→</span>
-              </ayni-button>
-            </div>
-          </div>
-        }
-
-        <!-- STEP 2: PROOF OF LISTING CHALLENGE -->
-        @if (currentStep() === 2) {
-          <div class="create-listing__form-step">
-            <h2 class="create-listing__step-title">2. Desafío Físico: Proof of Listing (POL)</h2>
-            <p class="create-listing__step-desc">
-              Para garantizar que posees el hardware y evitar imágenes falsas de internet, debes resolver este desafío generado en tiempo real.
-            </p>
-
-            @if (isChallengeLoading()) {
-              <div class="create-listing__challenge-loading">
-                <span class="create-listing__spinner"></span>
-                <p>Generando desafío criptográfico único...</p>
-              </div>
-            } @else {
-              <div class="create-listing__challenge-box">
-                <div class="create-listing__challenge-header">
-                  <span class="create-listing__challenge-tag">CÓDIGO DE DESAFÍO ACTIVO</span>
-                  <span class="create-listing__challenge-code">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</span>
-                </div>
-                <p class="create-listing__challenge-instructions">
-                  ✍️ Escribe el código <strong>{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> en una hoja de papel y tómale una foto junto al dispositivo encendido.
+    <main class="w-full">
+      <div class="bg-ayni-card border border-ayni-espresso/10 rounded-2xl overflow-hidden shadow-md">
+        <ayni-aguayo-ribbon size="md" />
+        <div class="p-5 sm:p-8">
+          <!-- STEP 1: SPECIFICATIONS -->
+          @if (currentStep() === 1) {
+            <div class="flex flex-col gap-5">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">1. Datos Técnicos del Hardware</h2>
+                <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
+                  Ingresa los detalles reales del dispositivo. Los agentes de IA contrastarán esta información contra el checklist fotográfico.
                 </p>
+              </div>
 
-                <div class="create-listing__upload-area">
-                  <label class="create-listing__file-label">
-                    <span class="create-listing__file-icon">📷</span>
-                    <span class="create-listing__file-text">
-                      {{ selectedFileName() ? selectedFileName() : 'Haz clic o arrastra la foto del dispositivo con el código escrito' }}
-                    </span>
-                    <input type="file" accept="image/*" class="create-listing__file-input" (change)="onFileSelected($event)" />
-                  </label>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="categorySelect">Categoría de Hardware</label>
+                <select 
+                  id="categorySelect"
+                  class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta cursor-pointer"
+                  [ngModel]="category()"
+                  (ngModelChange)="category.set($event)"
+                >
+                  @for (cat of categories; track cat.key) {
+                    <option [value]="cat.key">{{ cat.icon }} {{ cat.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="titleInput">Título de la Publicación</label>
+                <input 
+                  id="titleInput"
+                  type="text" 
+                  class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                  placeholder="Ej. iPhone 15 Pro Max 256GB Titanio Natural"
+                  [ngModel]="title()"
+                  (ngModelChange)="title.set($event)"
+                />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="descTextarea">Descripción del Estado Físico</label>
+                <textarea 
+                  id="descTextarea"
+                  rows="3" 
+                  class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70 resize-y"
+                  placeholder="Detalla si tiene marcas de uso, rayones, piezas cambiadas o accesorios incluidos..."
+                  [ngModel]="description()"
+                  (ngModelChange)="description.set($event)"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="priceInput">Precio de Venta (USDT)</label>
+                  <div class="relative flex items-center">
+                    <input 
+                      id="priceInput"
+                      type="number" 
+                      min="1" 
+                      class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta"
+                      [ngModel]="priceUsdt()"
+                      (ngModelChange)="priceUsdt.set($event)"
+                    />
+                    @if (priceUsdt() > 0) {
+                      <span class="absolute right-3 text-xs font-semibold text-ayni-accent-brown">≈ Bs. {{ (priceUsdt() * 6.96).toFixed(0) }}</span>
+                    }
+                  </div>
                 </div>
 
-                @if (isAiAnalyzing()) {
-                  <div class="create-listing__ai-box">
-                    <span class="create-listing__ai-spinner"></span>
-                    <div class="create-listing__ai-text">
-                      <strong>Agente Validador IA analizando imagen...</strong>
-                      <span>Detectando número de desafío, modelo de dispositivo y descartando manipulaciones digitales.</span>
-                    </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="conditionInput">Condición Declarada (1 al 10)</label>
+                  <input 
+                    id="conditionInput"
+                    type="number" 
+                    min="1" 
+                    max="10" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta"
+                    [ngModel]="declaredCondition()"
+                    (ngModelChange)="declaredCondition.set($event)"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="ramInput">Memoria RAM</label>
+                  <input 
+                    id="ramInput"
+                    type="text" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                    placeholder="Ej. 8 GB"
+                    [ngModel]="ram()"
+                    (ngModelChange)="ram.set($event)"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="storageInput">Almacenamiento</label>
+                  <input 
+                    id="storageInput"
+                    type="text" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                    placeholder="Ej. 256 GB NVMe"
+                    [ngModel]="storage()"
+                    (ngModelChange)="storage.set($event)"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="batteryInput">Salud de Batería</label>
+                  <input 
+                    id="batteryInput"
+                    type="text" 
+                    class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                    placeholder="Ej. 92%"
+                    [ngModel]="batteryHealth()"
+                    (ngModelChange)="batteryHealth.set($event)"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs sm:text-sm font-semibold text-ayni-espresso" for="imeiInput">IMEI o Número de Serie (Privado)</label>
+                  <span class="text-[10px] font-bold text-ayni-accent-brown uppercase">🔐 Salted Keccak256</span>
+                </div>
+                <input 
+                  id="imeiInput"
+                  type="password" 
+                  class="w-full bg-ayni-canvas border border-ayni-espresso/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ayni-espresso focus:outline-none focus:border-ayni-terracotta placeholder:text-ayni-muted/70"
+                  placeholder="15 dígitos o serial del chasis"
+                  [ngModel]="hardwareIdentifier()"
+                  (ngModelChange)="hardwareIdentifier.set($event)"
+                />
+                <span class="text-[11px] text-ayni-muted">
+                  Nunca se almacenará en texto plano. Será transformado en un hash irreversible con salt antes de tocar la red.
+                </span>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <ayni-button variant="primary" size="md" (clicked)="goToStep2()" [fullWidth]="false">
+                  <span>Continuar a Proof of Listing</span>
+                  <span aria-hidden="true" class="ml-1">→</span>
+                </ayni-button>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 2: PROOF OF LISTING CHALLENGE -->
+          @if (currentStep() === 2) {
+            <div class="flex flex-col gap-5">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">2. Desafío Físico: Proof of Listing (POL)</h2>
+                <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
+                  Para garantizar que posees el hardware y evitar imágenes falsas de internet, debes resolver este desafío generado en tiempo real.
+                </p>
+              </div>
+
+              @if (isChallengeLoading()) {
+                <div class="flex flex-col items-center justify-center py-12 gap-3 text-ayni-muted">
+                  <div class="w-8 h-8 border-3 border-ayni-espresso/15 border-t-ayni-terracotta rounded-full animate-spin"></div>
+                  <p class="text-xs sm:text-sm">Generando desafío criptográfico único...</p>
+                </div>
+              } @else {
+                <div class="bg-ayni-canvas border border-ayni-espresso/10 rounded-2xl p-5 sm:p-6 flex flex-col gap-4">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-ayni-card p-4 rounded-xl border border-ayni-espresso/10">
+                    <span class="text-xs font-bold text-ayni-muted uppercase tracking-wider">CÓDIGO DE DESAFÍO ACTIVO</span>
+                    <span class="font-mono text-xl sm:text-2xl font-extrabold text-ayni-terracotta tracking-widest">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</span>
                   </div>
-                } @else if (aiVerdict() === 'PASS') {
-                  <div class="create-listing__ai-verdict create-listing__ai-verdict--pass">
-                    <div class="create-listing__ai-verdict-top">
-                      <ayni-badge variant="pass" size="md">DICTAMEN: ERC-8004 PASS</ayni-badge>
-                      <span class="create-listing__ai-time">Atestación verificada</span>
-                    </div>
-                    <p class="create-listing__ai-verdict-desc">
-                      ✓ Código efímero <strong>{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> detectado con 99.4% de certeza en papel físico.<br />
-                      ✓ Características físicas compatibles con <strong>{{ title() }}</strong>.<br />
-                      ✓ Dictamen emitido y listo para mintear en HSK Chain.
-                    </p>
+                  <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted">
+                    ✍️ Escribe el código <strong class="text-ayni-espresso">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> en una hoja de papel y tómale una foto junto al dispositivo encendido.
+                  </p>
+
+                  <div class="border-2 border-dashed border-ayni-espresso/20 rounded-2xl p-6 sm:p-8 text-center hover:border-ayni-terracotta/50 transition-colors bg-ayni-card/50">
+                    <label class="flex flex-col items-center gap-2 cursor-pointer">
+                      <span class="text-4xl select-none">📷</span>
+                      <span class="text-xs sm:text-sm font-semibold text-ayni-espresso max-w-sm">
+                        {{ selectedFileName() ? selectedFileName() : 'Haz clic para seleccionar la foto del dispositivo con el código escrito' }}
+                      </span>
+                      <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
+                    </label>
                   </div>
-                }
-              </div>
-            }
 
-            <div class="create-listing__action-row">
-              <ayni-button variant="secondary" size="md" (clicked)="currentStep.set(1)">
-                <span>← Volver</span>
-              </ayni-button>
-              <ayni-button 
-                variant="primary" 
-                size="md" 
-                [disabled]="aiVerdict() !== 'PASS'"
-                (clicked)="goToStep3()"
-              >
-                <span>Revisar y Publicar</span>
-                <span aria-hidden="true">→</span>
-              </ayni-button>
-            </div>
-          </div>
-        }
+                  @if (isAiAnalyzing()) {
+                    <div class="flex items-center gap-3.5 bg-ayni-gold/10 border border-ayni-gold/30 rounded-xl p-4">
+                      <div class="w-6 h-6 border-2 border-ayni-gold/30 border-t-ayni-gold rounded-full animate-spin shrink-0"></div>
+                      <div class="flex flex-col text-xs sm:text-sm">
+                        <strong class="text-ayni-espresso">Agente Validador IA analizando imagen...</strong>
+                        <span class="text-ayni-muted">Detectando número de desafío, modelo de dispositivo y descartando manipulaciones digitales.</span>
+                      </div>
+                    </div>
+                  } @else if (aiVerdict() === 'PASS') {
+                    <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 flex flex-col gap-2">
+                      <div class="flex items-center justify-between flex-wrap gap-2">
+                        <ayni-badge variant="pass" size="md">DICTAMEN: ERC-8004 PASS</ayni-badge>
+                        <span class="text-xs font-semibold text-emerald-800">Atestación verificada</span>
+                      </div>
+                      <p class="text-xs leading-relaxed text-emerald-900">
+                        ✓ Código efímero <strong class="text-emerald-950">{{ challenge()?.challengeNonce || 'AYNI-8492' }}</strong> detectado con 99.4% de certeza en papel físico.<br />
+                        ✓ Características físicas compatibles con <strong class="text-emerald-950">{{ title() }}</strong>.<br />
+                        ✓ Dictamen emitido y listo para mintear en HSK Chain.
+                      </p>
+                    </div>
+                  }
+                </div>
+              }
 
-        <!-- STEP 3: REVIEW & MINTING -->
-        @if (currentStep() === 3) {
-          <div class="create-listing__form-step">
-            <h2 class="create-listing__step-title">3. Vista Previa del Pasaporte Digital ERC-721</h2>
-            <p class="create-listing__step-desc">
-              Verifica los parámetros antes de acuñar el pasaporte inmutable en HSK Chain y registrar el producto en el catálogo de Ayni.
-            </p>
-
-            <div class="create-listing__review-summary">
-              <div class="create-listing__review-col">
-                <span class="create-listing__review-label">Producto</span>
-                <span class="create-listing__review-val">{{ title() }}</span>
-              </div>
-              <div class="create-listing__review-col">
-                <span class="create-listing__review-label">Categoría</span>
-                <span class="create-listing__review-val">{{ category() }}</span>
-              </div>
-              <div class="create-listing__review-col">
-                <span class="create-listing__review-label">Precio Escrow</span>
-                <span class="create-listing__review-val create-listing__review-val--price">{{ priceUsdt() | usdt }}</span>
+              <div class="flex items-center justify-between pt-2">
+                <ayni-button variant="secondary" size="md" (clicked)="currentStep.set(1)">
+                  <span>← Volver</span>
+                </ayni-button>
+                <ayni-button 
+                  variant="primary" 
+                  size="md" 
+                  [disabled]="aiVerdict() !== 'PASS'"
+                  (clicked)="goToStep3()"
+                >
+                  <span>Revisar y Publicar</span>
+                  <span aria-hidden="true" class="ml-1">→</span>
+                </ayni-button>
               </div>
             </div>
+          }
 
-            <!-- Salted commitment card -->
-            <div class="create-listing__commitment-box">
-              <span class="create-listing__comm-title">🔒 Salted Commitment Criptográfico</span>
-              <div class="create-listing__comm-row">
-                <span class="create-listing__comm-label">Fórmula:</span>
-                <code>keccak256(abi.encodePacked(imei, salt, seller))</code>
+          <!-- STEP 3: REVIEW & MINTING -->
+          @if (currentStep() === 3) {
+            <div class="flex flex-col gap-5">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">3. Vista Previa del Pasaporte Digital ERC-721</h2>
+                <p class="text-xs sm:text-sm text-ayni-muted mt-1 leading-relaxed">
+                  Verifica los parámetros antes de acuñar el pasaporte inmutable en HSK Chain y registrar el producto en el catálogo de Ayni.
+                </p>
               </div>
-              <div class="create-listing__comm-row">
-                <span class="create-listing__comm-label">Commitment Hash:</span>
-                <code class="create-listing__comm-hash">{{ computedProofHash() }}</code>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ayni-canvas p-4 rounded-xl border border-ayni-espresso/10 text-xs sm:text-sm">
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-ayni-muted font-semibold text-[10px] uppercase">Producto</span>
+                  <span class="font-bold text-ayni-espresso truncate">{{ title() }}</span>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-ayni-muted font-semibold text-[10px] uppercase">Categoría</span>
+                  <span class="font-bold text-ayni-espresso">{{ category() }}</span>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-ayni-muted font-semibold text-[10px] uppercase">Precio Escrow</span>
+                  <span class="font-bold text-ayni-espresso">
+                    {{ priceUsdt() | usdt }}
+                    <small class="text-ayni-accent-brown font-normal ml-1">≈ Bs. {{ (priceUsdt() * 6.96).toFixed(0) }}</small>
+                  </span>
+                </div>
               </div>
-              <div class="create-listing__comm-row">
-                <span class="create-listing__comm-label">Salt Efímero:</span>
-                <code class="create-listing__comm-hash">{{ salt() }}</code>
+
+              <!-- Salted commitment card -->
+              <div class="bg-ayni-canvas border border-ayni-gold/35 rounded-xl p-4 sm:p-5 flex flex-col gap-2.5 text-xs">
+                <span class="font-bold text-ayni-espresso text-sm">🔒 Salted Commitment Criptográfico</span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="text-ayni-muted font-semibold sm:w-36 shrink-0">Fórmula:</span>
+                  <code class="font-mono text-ayni-espresso bg-ayni-card px-2 py-0.5 rounded border border-ayni-espresso/10">keccak256(abi.encodePacked(imei, salt, seller))</code>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="text-ayni-muted font-semibold sm:w-36 shrink-0">Commitment Hash:</span>
+                  <code class="font-mono text-ayni-espresso bg-ayni-card px-2 py-0.5 rounded border border-ayni-espresso/10 break-all">{{ computedProofHash() }}</code>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="text-ayni-muted font-semibold sm:w-36 shrink-0">Salt Efímero:</span>
+                  <code class="font-mono text-ayni-espresso bg-ayni-card px-2 py-0.5 rounded border border-ayni-espresso/10 break-all">{{ salt() }}</code>
+                </div>
+              </div>
+
+              <div class="bg-ayni-espresso/5 border border-ayni-espresso/10 p-3.5 rounded-xl text-xs text-ayni-muted leading-relaxed">
+                🛡️ Al publicar, el contrato inteligente <code class="font-mono text-ayni-espresso font-semibold">AyniProductPassport</code> acuñará el token ERC-721 en custodia temporal. No pagarás comisiones hasta que se complete la venta.
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <ayni-button variant="secondary" size="md" (clicked)="currentStep.set(2)" [fullWidth]="false">
+                  <span>← Volver al Desafío</span>
+                </ayni-button>
+                <ayni-button 
+                  variant="primary" 
+                  size="lg" 
+                  [loading]="isSubmitting()"
+                  (clicked)="publishListing()"
+                  [fullWidth]="false"
+                >
+                  <span>Acuñar Pasaporte y Publicar en HSK Chain</span>
+                  <span aria-hidden="true" class="ml-1">⚡</span>
+                </ayni-button>
               </div>
             </div>
-
-            <div class="create-listing__disclaimer">
-              <span>🛡️ Al publicar, el contrato inteligente <code>AyniProductPassport</code> acuñará el token ERC-721 en custodia temporal. No pagarás comisiones hasta que se complete la venta.</span>
-            </div>
-
-            <div class="create-listing__action-row">
-              <ayni-button variant="secondary" size="md" (clicked)="currentStep.set(2)">
-                <span>← Volver al Desafío</span>
-              </ayni-button>
-              <ayni-button 
-                variant="primary" 
-                size="lg" 
-                [loading]="isSubmitting()"
-                (clicked)="publishListing()"
-              >
-                <span>Acuñar Pasaporte y Publicar en HSK Chain</span>
-                <span aria-hidden="true">⚡</span>
-              </ayni-button>
-            </div>
-          </div>
-        }
-      </ayni-card>
+          }
+        </div>
+      </div>
     </main>
   </div>
 </div>

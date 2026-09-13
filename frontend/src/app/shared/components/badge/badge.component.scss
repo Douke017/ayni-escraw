@@ -3,80 +3,80 @@
 .ayni-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 0.35rem;
   border-radius: var(--radius-full);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   vertical-align: middle;
   border: 1px solid transparent;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 
   /* Sizes */
   &--sm {
     padding: 0.2rem 0.5rem;
-    font-size: 0.6875rem;
+    font-size: 0.65rem;
   }
 
   &--md {
-    padding: 0.3rem 0.75rem;
+    padding: 0.3rem 0.65rem;
     font-size: 0.75rem;
   }
 
   &--lg {
-    padding: 0.45rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
   }
 
-  /* Variants */
+  /* Variants with Qatu Andean Palette */
   &--pass {
-    background-color: rgba(16, 185, 129, 0.12);
-    color: #10b981;
-    border-color: rgba(16, 185, 129, 0.28);
+    background-color: #F0F4E8;
+    color: #4E6524;
+    border-color: #D3E0BA;
   }
 
   &--warn {
-    background-color: rgba(217, 119, 6, 0.15);
-    color: var(--aguayo-gold);
-    border-color: rgba(217, 119, 6, 0.35);
+    background-color: #FCF7EC;
+    color: #A36B1E;
+    border-color: #EED6A5;
   }
 
   &--fail {
-    background-color: rgba(225, 29, 72, 0.15);
-    color: var(--aguayo-red);
-    border-color: rgba(225, 29, 72, 0.35);
+    background-color: #FDF0EE;
+    color: #8B3A3A;
+    border-color: #F2C7C1;
   }
 
   &--funded {
-    background-color: rgba(30, 58, 138, 0.15);
-    color: var(--aguayo-indigo);
-    border-color: rgba(30, 58, 138, 0.35);
+    background-color: #EDF2F7;
+    color: #3B5B82;
+    border-color: #C3D5E6;
   }
 
   &--refund {
-    background-color: rgba(107, 33, 168, 0.15);
-    color: #a855f7;
-    border-color: rgba(107, 33, 168, 0.35);
+    background-color: #F7EFE6;
+    color: #7A4E2D;
+    border-color: #E2CBB7;
   }
 
   &--neutral {
-    background-color: rgba(100, 116, 139, 0.12);
-    color: var(--text-secondary);
-    border-color: rgba(100, 116, 139, 0.25);
+    background-color: #EFE4D2;
+    color: #3D2B1F;
+    border-color: #DFCAB0;
   }
 
   &--hsk {
-    background-color: rgba(184, 51, 42, 0.15);
-    color: var(--aguayo-red);
-    border-color: rgba(184, 51, 42, 0.35);
+    background-color: #F0F4E8;
+    color: #556B2F;
+    border-color: #D3E0BA;
   }
 
   &--pol {
-    background-color: rgba(92, 107, 46, 0.15);
-    color: var(--aguayo-olive);
-    border-color: rgba(92, 107, 46, 0.35);
+    background-color: #FBF0EC;
+    color: #C0583A;
+    border-color: #EACEC5;
   }
 
   &__pulse {
@@ -113,3 +113,4 @@
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
+

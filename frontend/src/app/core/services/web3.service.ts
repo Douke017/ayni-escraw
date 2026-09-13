@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import { Injectable, signal, computed } from '@angular/core';
-import { createPublicClient, http, defineChain, parseAbi, formatUnits, keccak256, toHex, encodeFunctionData, type PublicClient, type Address } from 'viem';
+import { createPublicClient, http, defineChain, parseAbi, formatUnits, parseUnits, keccak256, toHex, encodeFunctionData, type PublicClient, type Address } from 'viem';
 import { environment } from '../../../environments/environment';
 
 export const hskTestnet = defineChain({
@@ -84,16 +84,22 @@ export const AYNI_ESCROW_ABI = [
   },
 ] as const;
 
+const FAUCET_ABI = parseAbi([
+  'function faucet(address to, uint256 amount) external',
+  'function balanceOf(address account) view returns (uint256)',
+]);
+
 @Injectable({
   providedIn: 'root',
 })
 export class Web3Service {
   public readonly publicClient: PublicClient;
 
-  // Vanilla Angular 22 Signals
+  // Vanilla Angular Signals
   public readonly account = signal<Address | null>(null);
   public readonly chainId = signal<number | null>(null);
   public readonly isConnecting = signal<boolean>(false);
+  public readonly isClaimingFaucet = signal<boolean>(false);
   public readonly balanceUsdt = signal<string>('0.00');
   public readonly error = signal<string | null>(null);
 
@@ -148,9 +154,113 @@ export class Web3Service {
     // Check if previously connected in localStorage
     const saved = localStorage.getItem('ayni_wallet_address');
     if (saved && saved.startsWith('0x')) {
-      this.account.set(saved as Address);
+      const addr = saved.toLowerCase() as Address;
+      this.account.set(addr);
       this.chainId.set(environment.chainId);
       this.refreshUsdtBalance();
+    }
+
+    // 2. Setup Ethereum provider listeners & auto-detect
+    if (typeof window !== 'undefined') {
+      const eth = (window as unknown as { ethereum?: { 
+        request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+        on?: (event: string, handler: (...args: unknown[]) => void) => void;
+      } })?.ethereum;
+
+      if (eth) {
+        // Auto-detect already connected account without popup
+        eth.request({ method: 'eth_accounts' })
+          .then((res: unknown) => {
+            const accounts = res as string[];
+            if (accounts && accounts.length > 0) {
+              const addr = accounts[0].toLowerCase() as Address;
+              this.account.set(addr);
+              localStorage.setItem('ayni_wallet_address', addr);
+              this.refreshUsdtBalance();
+            }
+          })
+          .catch(() => {});
+
+        // Detect current chainId
+        eth.request({ method: 'eth_chainId' })
+          .then((res: unknown) => {
+            if (typeof res === 'string') {
+              this.chainId.set(parseInt(res, 16));
+            }
+          })
+          .catch(() => {});
+
+        // Listen for accounts change in MetaMask
+        if (eth.on) {
+          eth.on('accountsChanged', (...args: unknown[]) => {
+            const accounts = (args[0] as string[]) || [];
+            if (accounts.length > 0) {
+              const addr = accounts[0].toLowerCase() as Address;
+              this.account.set(addr);
+              localStorage.setItem('ayni_wallet_address', addr);
+              this.refreshUsdtBalance();
+            } else {
+              this.disconnect();
+            }
+          });
+
+          // Listen for chain change
+          eth.on('chainChanged', (...args: unknown[]) => {
+            const chainIdHex = args[0] as string;
+            if (chainIdHex) {
+              this.chainId.set(parseInt(chainIdHex, 16));
+              this.refreshUsdtBalance();
+            }
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Cambia o agrega automáticamente la red HSK Testnet (Chain ID: 133 / 0x85) en MetaMask
+   */
+  public async switchToHskNetwork(): Promise<boolean> {
+    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } })?.ethereum;
+    if (!ethereum) return false;
+
+    const hskChainIdHex = '0x' + Number(environment.chainId).toString(16); // '0x85' (133)
+
+    try {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: hskChainIdHex }],
+      });
+      this.chainId.set(environment.chainId);
+      return true;
+    } catch (switchError: unknown) {
+      const errCode = (switchError as { code?: number })?.code;
+      if (errCode === 4902 || errCode === -32603) {
+        try {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: hskChainIdHex,
+                chainName: environment.chainName || 'HSK Testnet',
+                nativeCurrency: {
+                  name: 'HashKey EcoPoints',
+                  symbol: 'HSK',
+                  decimals: 18,
+                },
+                rpcUrls: [environment.rpcUrl],
+                blockExplorerUrls: [environment.blockExplorerUrl],
+              },
+            ],
+          });
+          this.chainId.set(environment.chainId);
+          return true;
+        } catch (addError) {
+          console.error('Error al registrar la red HSK Testnet en MetaMask:', addError);
+          return false;
+        }
+      }
+      return false;
     }
   }
 
@@ -159,7 +269,7 @@ export class Web3Service {
     this.error.set(null);
 
     try {
-      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } })?.ethereum;
 
       if (!ethereum) {
         throw new Error('Billetera Web3 no encontrada. Por favor instala MetaMask, Rabby u otra extensión compatible con EVM para continuar.');
@@ -175,9 +285,11 @@ export class Web3Service {
 
       const addr = accounts[0].toLowerCase() as Address;
       this.account.set(addr);
-      this.chainId.set(environment.chainId);
-      localStorage.setItem('ayni_wallet_address', addr);
 
+      // Switch to HSK Testnet (Chain ID 133) automatically
+      await this.switchToHskNetwork();
+
+      localStorage.setItem('ayni_wallet_address', addr);
       await this.refreshUsdtBalance();
       return addr;
     } catch (err: unknown) {
@@ -191,8 +303,16 @@ export class Web3Service {
 
   public async refreshUsdtBalance(): Promise<void> {
     const addr = this.account();
+    if (!addr) return;
+
+    // Check locally saved balance first
+    const savedBal = localStorage.getItem(`ayni_balance_${addr}`);
+    if (savedBal && parseFloat(savedBal) > 0) {
+      this.balanceUsdt.set(savedBal);
+    }
+
     const usdtContract = environment.contracts.usdt;
-    if (!addr || !usdtContract || !usdtContract.startsWith('0x')) {
+    if (!usdtContract || !usdtContract.startsWith('0x')) {
       return;
     }
 
@@ -230,10 +350,7 @@ export class Web3Service {
     }
   }
 
-  private isWatchAssetInProgress = false;
   public async addUsdtToMetaMask(): Promise<boolean> {
-    if (this.isWatchAssetInProgress) return false;
-    this.isWatchAssetInProgress = true;
     try {
       const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown }) => Promise<unknown> } }).ethereum;
       if (!ethereum) return false;
@@ -253,19 +370,15 @@ export class Web3Service {
     } catch (err) {
       console.error('Failed to add token to MetaMask', err);
       return false;
-    } finally {
-      this.isWatchAssetInProgress = false;
     }
   }
 
-  private isFaucetInProgress = false;
   public async requestFaucet(amount: number = 1000): Promise<string | null> {
-    if (this.isFaucetInProgress) return null;
     const addr = this.account();
     const usdtContract = environment.contracts.usdt;
     if (!addr || !usdtContract) return null;
 
-    this.isFaucetInProgress = true;
+    this.isClaimingFaucet.set(true);
     try {
       const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
       if (!ethereum) throw new Error('Billetera Web3 no disponible');
@@ -291,7 +404,17 @@ export class Web3Service {
       console.error('Faucet request failed:', err);
       throw err;
     } finally {
-      this.isFaucetInProgress = false;
+      this.isClaimingFaucet.set(false);
+    }
+  }
+
+  public async claimFaucet(amount: number = 1000): Promise<{ success: boolean; message: string }> {
+    try {
+      const tx = await this.requestFaucet(amount);
+      return { success: true, message: `¡${amount.toLocaleString()} USDT solicitados con éxito! Tx: ${tx || 'OK'}` };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al reclamar USDT';
+      return { success: false, message: msg };
     }
   }
 
@@ -419,6 +542,8 @@ export class Web3Service {
     if (!ethereum) {
       throw new Error('Proveedor Web3 no disponible en el navegador.');
     }
+
+    await this.switchToHskNetwork();
 
     const permit2Address = environment.contracts.permit2;
 

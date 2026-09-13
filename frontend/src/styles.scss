@@ -1,7 +1,66 @@
 /* SPDX-License-Identifier: MIT */
-/* Ayni Escrow — Main Global Styles Entry Point */
+/* Ayni Trust Marketplace — Main Global Styles Entry Point */
 
 @use 'tokens';
 @use 'reset';
 @use 'typography';
 @use 'mixins';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile Safe Bottom Navigation Padding */
+.pb-safe {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+
+  @media (min-width: 769px) {
+    padding-bottom: 0;
+  }
+}
+
+/* Base Container */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Warm Qatu scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4A055;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C0583A;
+}
+
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}

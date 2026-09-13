@@ -1,72 +1,71 @@
-<footer class="footer">
-  <ayni-aguayo-pattern variant="detailed" [opacity]="0.12" />
-
-  <div class="footer__container">
-    <div class="footer__grid">
-      <!-- Col 1: Identity & Description -->
-      <div class="footer__col footer__col--brand">
-        <div class="footer__logo">
-          <span class="footer__logo-icon" aria-hidden="true">⚡</span>
-          <span class="footer__logo-text">AYNI</span>
+<!-- SPDX-License-Identifier: MIT -->
+<footer class="relative bg-ayni-canvas border-t-2 border-ayni-espresso/10 text-ayni-espresso overflow-hidden mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 mb-10">
+      <!-- Col 1: Brand & Identity -->
+      <div class="lg:col-span-5 flex flex-col gap-3">
+        <div class="flex flex-col leading-none">
+          <span class="text-2xl font-extrabold tracking-tight text-ayni-espresso font-serif">AYNI</span>
+          <span class="text-[10px] font-bold tracking-widest text-ayni-terracotta uppercase mt-0.5">MARKETPLACE</span>
         </div>
-        <p class="footer__desc">
-          Marketplace descentralizado de hardware y tecnología verificada. Custodia sin intermediarios vía Smart Contracts en HSK Chain, pasaportes digitales ERC-721 y agentes autónomos ERC-8004.
+        <p class="text-xs sm:text-sm leading-relaxed text-ayni-muted max-w-sm">
+          Elevando el comercio andino y la tecnología verificada en Bolivia. Custodia descentralizada vía Smart Contracts en HSK Chain, pasaportes digitales ERC-721 y agentes autónomos ERC-8004.
         </p>
-        <div class="footer__network-badge">
-          <span class="footer__dot"></span>
-          <span>HSK Testnet (ChainId: 133)</span>
+        <div class="inline-flex items-center gap-2 text-xs bg-ayni-espresso/5 border border-ayni-espresso/10 px-3 py-1 rounded-full w-fit mt-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></span>
+          <span class="font-medium text-ayni-espresso">HSK Testnet (ChainId: 133)</span>
         </div>
       </div>
 
       <!-- Col 2: Navigation Links -->
-      <div class="footer__col">
-        <h4 class="footer__title">Plataforma</h4>
-        <ul class="footer__links">
-          <li><a routerLink="/catalog" class="footer__link">Explorar Catálogo</a></li>
-          <li><a routerLink="/listings/new" class="footer__link">Publicar con Proof of Listing</a></li>
-          <li><a routerLink="/escrow" class="footer__link">Escrow y Safe Meet 60s</a></li>
-          <li><a routerLink="/chat" class="footer__link">Intent Bonds (0.30 USDT)</a></li>
+      <div class="lg:col-span-2 flex flex-col gap-3">
+        <h4 class="text-xs font-bold text-ayni-espresso uppercase tracking-wider">Explorar</h4>
+        <ul class="flex flex-col gap-2 text-xs sm:text-sm text-ayni-muted list-none p-0 m-0">
+          <li><a routerLink="/catalog" class="hover:text-ayni-terracotta transition-colors">Catálogo Completo</a></li>
+          <li><a routerLink="/catalog" [queryParams]="{ category: 'Tecnologia' }" class="hover:text-ayni-terracotta transition-colors">Hardware & Tecnología</a></li>
+          <li><a routerLink="/catalog" [queryParams]="{ category: 'Textiles' }" class="hover:text-ayni-terracotta transition-colors">Textiles Tradicionales</a></li>
+          <li><a routerLink="/listings/new" class="hover:text-ayni-terracotta transition-colors">Publicar con POL Challenge</a></li>
         </ul>
       </div>
 
-      <!-- Col 3: Smart Contracts & Web3 -->
-      <div class="footer__col">
-        <h4 class="footer__title">Smart Contracts</h4>
-        <ul class="footer__links">
-          <li><a href="https://testnet.hsk.xyz" target="_blank" rel="noopener noreferrer" class="footer__link">HSK Explorer ↗</a></li>
-          <li><span class="footer__contract-label">AyniEscrow (Permit2):</span> <span class="footer__code">0x71C...4d9</span></li>
-          <li><span class="footer__contract-label">ProductPassport (ERC-721):</span> <span class="footer__code">0x3A2...91e</span></li>
-          <li><span class="footer__contract-label">AgentRegistry (ERC-8004):</span> <span class="footer__code">0x9F4...c12</span></li>
+      <!-- Col 3: Web3 & Escrow -->
+      <div class="lg:col-span-2 flex flex-col gap-3">
+        <h4 class="text-xs font-bold text-ayni-espresso uppercase tracking-wider">Comunidad & Escrow</h4>
+        <ul class="flex flex-col gap-2 text-xs sm:text-sm text-ayni-muted list-none p-0 m-0">
+          <li><a routerLink="/escrow" class="hover:text-ayni-terracotta transition-colors">Escrow & Safe Meet 60s</a></li>
+          <li><a routerLink="/chat" class="hover:text-ayni-terracotta transition-colors">Chat con Intent Bonds (0.30 USDT)</a></li>
+          <li><a href="https://testnet.hsk.xyz" target="_blank" rel="noopener noreferrer" class="hover:text-ayni-terracotta transition-colors">HSK Explorer ↗</a></li>
+          <li><a routerLink="/listings/new" class="hover:text-ayni-terracotta transition-colors">Vender en Ayni</a></li>
         </ul>
       </div>
 
-      <!-- Col 4: Seguridad & Arbitraje -->
-      <div class="footer__col">
-        <h4 class="footer__title">Seguridad Andina</h4>
-        <p class="footer__security-note">
-          Todas las transacciones están blindadas mediante depósito criptográfico no-custodial. Las disputas son arbitradas mediante un esquema 2-de-3 multisig.
+      <!-- Col 4: Seguridad & Criptografía -->
+      <div class="lg:col-span-3 flex flex-col gap-3">
+        <h4 class="text-xs font-bold text-ayni-espresso uppercase tracking-wider">Seguridad Criptográfica</h4>
+        <p class="text-xs leading-relaxed text-ayni-muted">
+          Todas las transacciones están blindadas mediante custodia de Smart Contracts no-custodial y verificación física de IMEI con salted commitments.
         </p>
-        <div class="footer__chips">
-          <span class="footer__chip">🛡️ Non-Custodial</span>
-          <span class="footer__chip">🤝 Multisig 2/3</span>
-          <span class="footer__chip">🔐 Salted Commitments</span>
+        <div class="flex flex-wrap gap-1.5 mt-1">
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-ayni-terracotta/10 border border-ayni-terracotta/20 text-ayni-terracotta">🛡️ Non-Custodial</span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-ayni-terracotta/10 border border-ayni-terracotta/20 text-ayni-terracotta">⚡ Permit2 Single-Sig</span>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-ayni-terracotta/10 border border-ayni-terracotta/20 text-ayni-terracotta">🔐 Salted Commitments</span>
         </div>
       </div>
     </div>
 
-    <!-- Andean Ribbon before copyright -->
-    <div class="footer__ribbon-wrapper">
-      <ayni-aguayo-ribbon size="sm" [rounded]="true" />
-    </div>
+    <div class="h-px bg-ayni-espresso/10 mb-6"></div>
 
-    <div class="footer__bottom">
-      <p class="footer__copyright">
-        &copy; {{ currentYear }} Ayni Trust Marketplace. Todos los derechos reservados bajo licencia MIT.
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-ayni-muted">
+      <p class="order-2 md:order-1">
+        &copy; {{ currentYear }} Ayni Marketplace. Todos los derechos reservados.
       </p>
-      <div class="footer__bottom-links">
-        <a href="#" class="footer__bottom-link">Términos de No-Custodia</a>
-        <a href="#" class="footer__bottom-link">Privacidad & Salted Hashes</a>
-        <a href="#" class="footer__bottom-link">Auditoría Foundry</a>
+      <div class="order-1 md:order-2 w-36">
+        <ayni-aguayo-ribbon size="md"></ayni-aguayo-ribbon>
+      </div>
+      <div class="order-3 flex gap-4">
+        <a href="#" class="hover:text-ayni-terracotta transition-colors">Términos</a>
+        <a href="#" class="hover:text-ayni-terracotta transition-colors">Privacidad</a>
+        <a href="#" class="hover:text-ayni-terracotta transition-colors">Auditoría Foundry</a>
       </div>
     </div>
   </div>

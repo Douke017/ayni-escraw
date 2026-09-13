@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -5,25 +6,24 @@ import { FormsModule } from '@angular/forms';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { HARDWARE_CATEGORIES } from '../../../core/models/category.model';
 import { ProductListing, ValidationVerdict } from '../../../core/models/listing.model';
-import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
+
+import { AguayoRibbonComponent } from '../../../shared/components/aguayo-ribbon/aguayo-ribbon.component';
 
 @Component({
   selector: 'ayni-catalog-list',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
     FormsModule,
-    AguayoRibbonComponent,
-    BadgeComponent,
     ButtonComponent,
-    CardComponent,
     UsdtPipe,
     TruncateAddressPipe,
+    AguayoRibbonComponent,
   ],
   templateUrl: './catalog-list.component.html',
   styleUrl: './catalog-list.component.scss',
