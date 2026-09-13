@@ -40,11 +40,21 @@ public class SubscriptionController : ControllerBase
 
         _dbContext.Subscriptions.Add(subscription);
 
-        // Update user role to Seller if was Buyer
+        // Wallet identity becomes a Seller after the paid Pro subscription is registered.
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.WalletAddress == normalizedAddress);
-        if (user != null && user.Role == "Buyer")
+        if (user == null)
         {
-            user.Role = "Seller";
+            user = new User
+            {
+                WalletAddress = normalizedAddress,
+                Role = UserRole.Seller,
+                CreatedAtUtc = DateTime.UtcNow
+            };
+            _dbContext.Users.Add(user);
+        }
+        else if (user.Role == UserRole.Buyer)
+        {
+            user.Role = UserRole.Seller;
         }
 
         await _dbContext.SaveChangesAsync();

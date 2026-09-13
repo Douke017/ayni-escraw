@@ -99,7 +99,9 @@ def main():
                 "request_hash": result.request_hash,
                 "discrepancies": result.flags,
                 "summary": result.rationale,
-                "timestamp": result.timestamp
+                "timestamp": result.timestamp,
+                "validator_agent_id": result.validator_agent_id,
+                "public_attributes": result.allowed_public_attributes.model_dump()
             }
             print(json.dumps(output))
 

@@ -21,10 +21,19 @@ public class SafeMeetAndEscrowTests : IClassFixture<WebApplicationFactory<Progra
     [Fact]
     public async Task SafeMeet_FullOrderLifecycle_WithAtomicAntiReplayNonce()
     {
+        var sellerAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+
+        await _client.PostAsJsonAsync("/api/subscriptions/purchase", new PurchaseSubscriptionRequest
+        {
+            UserAddress = sellerAddress,
+            TxHash = "0x" + Guid.NewGuid().ToString("N"),
+            AmountUsdt = 6.99m
+        });
+
         // 1. Create a listing first
         var listingPayload = new CreateListingRequest
         {
-            SellerAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            SellerAddress = sellerAddress,
             Title = "MacBook Pro M2 16GB 512GB",
             Description = "En perfecto estado, 1 ciclo de carga",
             Category = "LAPTOP",
@@ -35,7 +44,7 @@ public class SafeMeetAndEscrowTests : IClassFixture<WebApplicationFactory<Progra
             HardwareIdentifier = "C02G1234MD6R"
         };
 
-        var listingRes = await _client.PostAsJsonAsync("/api/catalog", listingPayload);
+        var listingRes = await _client.PostAsJsonAsync("/api/products", listingPayload);
         listingRes.StatusCode.Should().Be(HttpStatusCode.Created);
         var listingDoc = await listingRes.Content.ReadFromJsonAsync<JsonElement>();
         var listingId = Guid.Parse(listingDoc.GetProperty("listing").GetProperty("id").GetString()!);
@@ -45,7 +54,7 @@ public class SafeMeetAndEscrowTests : IClassFixture<WebApplicationFactory<Progra
         {
             ListingId = listingId,
             BuyerAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-            SellerAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            SellerAddress = sellerAddress,
             AmountUsdt = 1200.00m,
             PassportTokenId = 101
         };

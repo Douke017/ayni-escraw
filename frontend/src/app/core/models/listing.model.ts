@@ -32,6 +32,7 @@ export interface ProductListing {
   declaredCondition: number;
   proofHash: string;
   commitmentSalt: string;
+  imageUrls: string[];
   status: ListingStatus;
   technicalAttributesJson: string;
   attestationRequestHash?: string;
@@ -57,6 +58,7 @@ export interface CreateListingPayload {
   declaredCondition: number;
   proofHash: string;
   commitmentSalt: string;
+  imageUrls?: string[];
   hardwareIdentifier?: string;
   checklist?: Record<string, unknown>;
 }

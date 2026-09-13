@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+using System.Text.Json.Serialization;
+
 namespace Ayni.Core.DTOs;
 
 public class SpecExtractionResultDto
@@ -12,10 +14,15 @@ public class SpecExtractionResultDto
 public class AttestationResultDto
 {
     public int Verdict { get; set; } // 0=PASS, 1=WARN, 2=FAIL
+    [JsonPropertyName("request_hash")]
     public string RequestHash { get; set; } = string.Empty;
     public List<string> Discrepancies { get; set; } = new();
     public string Summary { get; set; } = string.Empty;
     public long Timestamp { get; set; }
+    [JsonPropertyName("validator_agent_id")]
+    public int ValidatorAgentId { get; set; } = 42;
+    [JsonPropertyName("public_attributes")]
+    public Dictionary<string, object> PublicAttributes { get; set; } = new();
 }
 
 public class OfferEvaluationResultDto
