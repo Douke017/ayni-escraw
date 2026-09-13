@@ -100,7 +100,7 @@ public class AuthController : ControllerBase
             user = new User
             {
                 WalletAddress = normalizedAddress,
-                Role = "Buyer",
+                Role = UserRole.Buyer,
                 CreatedAtUtc = DateTime.UtcNow,
                 LastLoginAtUtc = DateTime.UtcNow
             };
@@ -123,7 +123,7 @@ public class AuthController : ControllerBase
             {
                 id = user.Id,
                 address = user.WalletAddress,
-                role = user.Role
+                role = user.Role.ToString()
             }
         });
     }
@@ -142,7 +142,7 @@ public class AuthController : ControllerBase
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.WalletAddress),
             new Claim("address", user.WalletAddress),
-            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

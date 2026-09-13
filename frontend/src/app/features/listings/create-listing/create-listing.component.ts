@@ -49,6 +49,8 @@ export class CreateListingComponent implements OnInit {
   public readonly hardwareIdentifier = signal<string>(''); // Private hardware IMEI / Serial
   public readonly selectedFileName = signal<string | null>(null);
 
+  private selectedImage: File | null = null;
+
   // Challenge State
   public readonly challenge = signal<ProofOfListingChallenge | null>(null);
   public readonly salt = signal<string>('');
@@ -117,6 +119,7 @@ export class CreateListingComponent implements OnInit {
   public onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
+      this.selectedImage = input.files[0];
       this.selectedFileName.set(input.files[0].name);
       this.isAiAnalyzing.set(true);
       // Mark file uploaded and validated for physical challenge
@@ -164,7 +167,7 @@ export class CreateListingComponent implements OnInit {
         },
       };
 
-      const res = await this.catalogService.createListing(payload);
+      const res = await this.catalogService.createListing(payload, this.selectedImage ? [this.selectedImage] : []);
       if (!res?.listing?.id) {
         throw new Error('No se recibió el ID de la publicación.');
       }

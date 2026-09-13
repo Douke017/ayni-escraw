@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 using Ayni.Core.Entities;
 
@@ -44,6 +46,17 @@ public class AyniDbContext : DbContext
             entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
             entity.Property(e => e.PriceUsdt).HasPrecision(18, 6);
+            var imageUrlsComparer = new ValueComparer<List<string>>(
+                (left, right) => left != null && right != null && left.SequenceEqual(right),
+                value => value.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+                value => value.ToList());
+
+            entity.Property(e => e.ImageUrls)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>())
+                .HasColumnType("jsonb")
+                .Metadata.SetValueComparer(imageUrlsComparer);
             entity.Property(e => e.TechnicalAttributesJson).HasColumnType("jsonb");
             entity.HasIndex(e => e.SellerAddress);
             entity.HasIndex(e => e.Status);
@@ -67,7 +80,10 @@ public class AyniDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.WalletAddress).HasMaxLength(42).IsRequired();
             entity.HasIndex(e => e.WalletAddress).IsUnique();
-            entity.Property(e => e.Role).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Role)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
         });
 
         // ChatMessage configuration

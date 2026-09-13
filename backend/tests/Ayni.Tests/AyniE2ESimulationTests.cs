@@ -45,7 +45,7 @@ public class AyniE2ESimulationTests : IClassFixture<WebApplicationFactory<Progra
         // =====================================================================
         // STEP 2: Proof of Listing (POL) Ephemeral Challenge
         // =====================================================================
-        var challengeRes = await _client.PostAsJsonAsync("/api/catalog/challenge", new ChallengeRequest
+        var challengeRes = await _client.PostAsJsonAsync("/api/products/challenge", new ChallengeRequest
         {
             SellerAddress = seller
         });
@@ -74,7 +74,7 @@ public class AyniE2ESimulationTests : IClassFixture<WebApplicationFactory<Progra
             HardwareIdentifier = rawImei // Passed for salted hash commitment generation
         };
 
-        var listingRes = await _client.PostAsJsonAsync("/api/catalog", listingPayload);
+        var listingRes = await _client.PostAsJsonAsync("/api/products", listingPayload);
         listingRes.StatusCode.Should().Be(HttpStatusCode.Created);
         var listingDoc = await listingRes.Content.ReadFromJsonAsync<JsonElement>();
         var listingId = Guid.Parse(listingDoc.GetProperty("listing").GetProperty("id").GetString()!);
@@ -164,7 +164,7 @@ public class AyniE2ESimulationTests : IClassFixture<WebApplicationFactory<Progra
         var orderId = Guid.Parse(orderDoc.GetProperty("id").GetString()!);
 
         // Verify listing transitioned to Reserved
-        var listingCheckRes = await _client.GetAsync($"/api/catalog/{listingId}");
+        var listingCheckRes = await _client.GetAsync($"/api/products/{listingId}");
         listingCheckRes.StatusCode.Should().Be(HttpStatusCode.OK);
         var listingCheckDoc = await listingCheckRes.Content.ReadFromJsonAsync<JsonElement>();
         listingCheckDoc.GetProperty("status").GetInt32().Should().Be((int)ListingStatus.Reserved);
@@ -223,7 +223,7 @@ public class AyniE2ESimulationTests : IClassFixture<WebApplicationFactory<Progra
         settledOrder.GetProperty("status").GetInt32().Should().Be((int)OrderStatus.Settled);
 
         // Listing marked Sold
-        var soldListing = await (await _client.GetAsync($"/api/catalog/{listingId}")).Content.ReadFromJsonAsync<JsonElement>();
+        var soldListing = await (await _client.GetAsync($"/api/products/{listingId}")).Content.ReadFromJsonAsync<JsonElement>();
         soldListing.GetProperty("status").GetInt32().Should().Be((int)ListingStatus.Sold);
 
         // =====================================================================

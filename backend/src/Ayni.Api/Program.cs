@@ -91,6 +91,7 @@ builder.Services.AddSingleton<IBlockchainGatewayService, BlockchainGatewayServic
 
 // 5. Python Agent Runner (Zero HTTP Endpoints - Programmatic Process Execution)
 builder.Services.AddSingleton<IPythonAgentRunner, PythonAgentRunnerService>();
+builder.Services.AddSingleton<IVerifyProductEngine, VerifyProductEngine>();
 
 // 6. Real-time - SignalR
 builder.Services.AddSignalR();
@@ -168,6 +169,21 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+
+// Local/dev bootstrap: apply EF migrations against the Docker PostgreSQL instance.
+if (app.Environment.IsDevelopment())
+{
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AyniDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Could not apply PostgreSQL migrations at startup.");
+    }
 }
 
 app.UseCors("AyniFrontendPolicy");
