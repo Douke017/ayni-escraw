@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-50 w-full bg-ayni-espresso border-b border-ayni-gold/25 shadow-md">
+<header class="sticky top-0 z-[60] w-full bg-ayni-espresso border-b border-ayni-gold/25 shadow-md">
   <ayni-aguayo-ribbon size="sm" />
   <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-2 sm:gap-4 relative">
     <!-- Brand / Logo -->
@@ -26,36 +26,19 @@
         <span>Publicar</span>
         <span class="text-[10px] bg-ayni-gold/20 text-ayni-gold font-bold px-1.5 py-0.5 rounded border border-ayni-gold/40">POL</span>
       </a>
-      <a 
-        routerLink="/escrow" 
-        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
-        class="hover:text-white transition-colors py-1 cursor-pointer"
-      >
-        <span>Mis Órdenes</span>
-      </a>
-      <a 
-        routerLink="/chat" 
-        routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
-        class="hover:text-white transition-colors py-1 cursor-pointer"
-      >
-        <span>Chat & Negociación</span>
-      </a>
+      @if (web3Service.isConnected() || authService.isAuthenticated()) {
+        <a 
+          routerLink="/escrow" 
+          routerLinkActive="!text-ayni-gold font-bold relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-ayni-gold after:rounded-full" 
+          class="hover:text-white transition-colors py-1 cursor-pointer"
+        >
+          <span>Mis Órdenes</span>
+        </a>
+      }
     </nav>
 
     <!-- Web3 Actions / User Profile -->
     <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
-      <!-- Faucet Button (Responsive - visible on mobile sm+ and topbar) -->
-      <button 
-        type="button" 
-        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-ayni-gold/20 hover:bg-ayni-gold/30 text-ayni-gold border border-ayni-gold/50 rounded-full text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50 min-h-[36px] cursor-pointer"
-        (click)="onClaimFaucet()" 
-        [disabled]="isClaimingFaucet()"
-        title="Reclamar 1,000 USDT de prueba del contrato mock"
-      >
-        <span class="text-sm">🚰</span>
-        <span>{{ isClaimingFaucet() ? 'Reclamando...' : 'Faucet (1,000 USDT)' }}</span>
-      </button>
-
       @if (web3Service.isConnected() || authService.isAuthenticated()) {
         <!-- Role switcher or KYC verify pill (Desktop) -->
         @if (kycService.canSell()) {
@@ -100,7 +83,7 @@
           </span>
 
           <!-- USDT balance only on md+ -->
-          <span class="font-mono text-xs font-bold text-ayni-canvas hidden md:inline cursor-pointer hover:text-ayni-gold" (click)="onRefreshBalance()" title="Clic para refrescar saldo">
+          <span class="font-mono text-xs font-bold text-ayni-canvas hidden md:inline">
             {{ web3Service.usdtBalance() | usdt }}
           </span>
 
@@ -119,7 +102,7 @@
             </button>
 
             @if (isDropdownOpen()) {
-              <div class="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-ayni-espresso border border-ayni-gold/30 rounded-2xl shadow-2xl p-2.5 z-50 flex flex-col gap-1 text-ayni-canvas">
+              <div class="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-ayni-espresso border border-ayni-gold/30 rounded-2xl shadow-2xl p-2.5 z-[70] flex flex-col gap-1 text-ayni-canvas">
                 <!-- User & KYC Status Section -->
                 <div class="p-2.5 bg-black/40 rounded-xl mb-1 border border-ayni-gold/20">
                   <div class="flex items-center justify-between mb-1">
@@ -166,26 +149,9 @@
                   }
                 </div>
 
-                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onAddUsdtToMetaMask()">
-                  <span>🦊</span>
-                  <span>Importar USDT a MetaMask</span>
-                </button>
-                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onClaimFaucet(); closeDropdown()">
-                  <span>🚰</span>
-                  <span>Reclamar Faucet (+1,000 USDT)</span>
-                </button>
-                <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onRefreshBalance(); closeDropdown()">
-                  <span>🔄</span>
-                  <span>Actualizar Saldo</span>
-                </button>
-                <div class="h-px bg-ayni-gold/20 my-1"></div>
                 <a routerLink="/escrow" class="px-3 py-2 text-xs font-semibold text-ayni-canvas hover:bg-white/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="closeDropdown()">
                   <span>📦</span>
                   <span>Mis Transacciones Escrow</span>
-                </a>
-                <a routerLink="/chat" class="px-3 py-2 text-xs font-semibold text-ayni-canvas hover:bg-white/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="closeDropdown()">
-                  <span>💬</span>
-                  <span>Chat & Negociación</span>
                 </a>
                 <div class="h-px bg-ayni-gold/20 my-1"></div>
                 <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onDisconnect()">
@@ -194,6 +160,7 @@
                 </button>
               </div>
             }
+
           </div>
         </div>
       } @else {
@@ -221,14 +188,6 @@
     </div>
   </div>
 
-  <!-- Faucet Toast Banner -->
-  @if (faucetNotification()) {
-    <div class="fixed top-20 right-4 z-[110] bg-ayni-espresso text-ayni-gold border border-ayni-gold px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-bounce">
-      <span>🎉</span>
-      <span>{{ faucetNotification() }}</span>
-    </div>
-  }
-
   <!-- Mobile Drawer Menu (Sliding Overlay) -->
   @if (isMenuOpen()) {
     <div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] transition-opacity" (click)="closeMenu()"></div>
@@ -255,28 +214,15 @@
           <span class="text-lg">➕</span>
           <span>Publicar con Proof of Listing</span>
         </a>
-        <a routerLink="/escrow" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">🤝</span>
-          <span>Mis Órdenes Escrow</span>
-        </a>
-        <a routerLink="/chat" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
-          <span class="text-lg">💬</span>
-          <span>Chat & Negociación</span>
-        </a>
+        @if (web3Service.isConnected() || authService.isAuthenticated()) {
+          <a routerLink="/escrow" class="px-4 py-3 rounded-xl hover:bg-white/10 flex items-center gap-3 transition min-h-[44px] cursor-pointer" (click)="closeMenu()">
+            <span class="text-lg">🤝</span>
+            <span>Mis Órdenes Escrow</span>
+          </a>
+        }
       </nav>
 
       <div class="p-4 border-t border-ayni-gold/20 flex flex-col gap-3 bg-black/20">
-        <!-- Faucet in mobile drawer -->
-        <button 
-          type="button" 
-          class="w-full py-3 px-4 bg-gradient-to-r from-ayni-gold to-amber-500 hover:brightness-105 text-ayni-espresso font-extrabold rounded-xl shadow-sm flex items-center justify-center gap-2 active:scale-98 min-h-[44px] cursor-pointer"
-          (click)="onClaimFaucet()" 
-          [disabled]="isClaimingFaucet()"
-        >
-          <span>🚰</span>
-          <span>{{ isClaimingFaucet() ? 'Reclamando del contrato...' : 'Reclamar Faucet (1,000 USDT)' }}</span>
-        </button>
-
         @if (!web3Service.isConnected() && !authService.isAuthenticated()) {
           <ayni-button 
             variant="primary" 
