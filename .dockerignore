@@ -1,0 +1,29 @@
+# Version control
+.git
+.gitignore
+
+# .NET artifacts
+**/bin/
+**/obj/
+backend/tests/Ayni.Tests/TestResults/
+
+# Node / Angular artifacts
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+
+# Python artifacts
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/.pytest_cache/
+**/.coverage
+
+# Foundry / Solidity artifacts
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+
+# Misc
+.DS_Store
+*.tmp

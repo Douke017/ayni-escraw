@@ -51,7 +51,7 @@ export class CatalogService {
 
     try {
       const data = await firstValueFrom(
-        this.http.get<ProductListing[]>(`${this.apiUrl}/catalog`, { params })
+        this.http.get<ProductListing[]>(`${this.apiUrl}/products`, { params })
       );
       this.listings.set(data || []);
       return data || [];
@@ -70,7 +70,7 @@ export class CatalogService {
     this.error.set(null);
     try {
       const item = await firstValueFrom(
-        this.http.get<ProductListing>(`${this.apiUrl}/catalog/${id}`)
+        this.http.get<ProductListing>(`${this.apiUrl}/products/${id}`)
       );
       this.selectedListing.set(item || null);
       return item || null;
@@ -86,7 +86,7 @@ export class CatalogService {
 
   public async requestProofChallenge(sellerAddress: string): Promise<ProofOfListingChallenge> {
     return await firstValueFrom(
-      this.http.post<ProofOfListingChallenge>(`${this.apiUrl}/catalog/challenge`, {
+      this.http.post<ProofOfListingChallenge>(`${this.apiUrl}/products/challenge`, {
         sellerAddress,
       })
     );
@@ -96,11 +96,27 @@ export class CatalogService {
     return await this.requestProofChallenge(sellerAddress);
   }
 
-  public async createListing(payload: CreateListingPayload): Promise<{ listing: ProductListing }> {
-    const res = await firstValueFrom(
-      this.http.post<{ listing: ProductListing }>(`${this.apiUrl}/catalog`, payload)
-    );
+  public async createListing(
+    payload: CreateListingPayload,
+    images: File[] = []
+  ): Promise<{ listing: ProductListing }> {
+    let res: { listing: ProductListing };
+    if (images && images.length > 0) {
+      const form = new FormData();
+      form.append('product', JSON.stringify(payload));
+      for (const image of images) {
+        form.append('images', image, image.name);
+      }
+      res = await firstValueFrom(
+        this.http.post<{ listing: ProductListing }>(`${this.apiUrl}/products`, form)
+      );
+    } else {
+      res = await firstValueFrom(
+        this.http.post<{ listing: ProductListing }>(`${this.apiUrl}/products`, payload)
+      );
+    }
     this.listings.update((current) => [res.listing, ...current]);
     return res;
   }
 }
+

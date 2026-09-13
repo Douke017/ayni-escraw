@@ -21,6 +21,7 @@ public class ProductListing
     public int DeclaredCondition { get; set; } = 4; // 1 to 5
     public string ProofHash { get; set; } = string.Empty;
     public string CommitmentSalt { get; set; } = string.Empty;
+    public List<string> ImageUrls { get; set; } = new();
     public ListingStatus Status { get; set; } = ListingStatus.Active;
     
     // JSONB dynamic technical attributes (brand, model, storage, battery, ram, etc.)
