@@ -1,20 +1,23 @@
+// SPDX-License-Identifier: MIT
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ChatBondStatusResponse } from '../models/chat.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatBondService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5000/api';
+  private readonly apiUrl = environment.apiBaseUrl;
 
   // Vanilla Signals
   public readonly bondStatus = signal<ChatBondStatusResponse | null>(null);
   public readonly isRefundEligible = signal<boolean>(false);
   public readonly buyerReplies = signal<number>(0);
   public readonly sellerReplies = signal<number>(0);
+  public readonly error = signal<string | null>(null);
 
   // Computed helper signals
   public readonly buyerRepliesCount = computed(() => this.buyerReplies());
@@ -32,26 +35,12 @@ export class ChatBondService {
       this.isRefundEligible.set(res.isRefundEligible);
       this.buyerReplies.set(res.buyerReplies);
       this.sellerReplies.set(res.sellerReplies);
+      this.error.set(null);
       return res;
-    } catch {
-      // Mock status for development
-      const mock: ChatBondStatusResponse = {
-        orderId,
-        buyerAddress: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
-        sellerAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-        depositAmount: 0.3,
-        buyerReplies: 1,
-        sellerReplies: 1,
-        isRefundEligible: false,
-        status: 'Active',
-        createdAtUtc: new Date().toISOString(),
-        lastActivityAtUtc: new Date().toISOString(),
-      };
-      this.bondStatus.set(mock);
-      this.isRefundEligible.set(mock.isRefundEligible);
-      this.buyerReplies.set(mock.buyerReplies);
-      this.sellerReplies.set(mock.sellerReplies);
-      return mock;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al consultar estado del chat bond';
+      this.error.set(msg);
+      return null;
     }
   }
 
@@ -66,13 +55,11 @@ export class ChatBondService {
       this.isRefundEligible.set(res.isRefundEligible);
       this.buyerReplies.set(res.buyerReplies);
       this.sellerReplies.set(res.sellerReplies);
-    } catch {
-      // Update local signals
-      const b = this.buyerReplies() + 1;
-      const s = this.sellerReplies() + 1;
-      this.buyerReplies.set(b);
-      this.sellerReplies.set(s);
-      this.isRefundEligible.set(b >= 2 && s >= 2);
+      this.error.set(null);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al registrar respuesta en chat bond';
+      this.error.set(msg);
+      throw err;
     }
   }
 
@@ -81,10 +68,12 @@ export class ChatBondService {
       await firstValueFrom(
         this.http.post(`${this.apiUrl}/chatbond/${orderId}/deposit`, { amountUsdt })
       );
+      this.error.set(null);
       return true;
-    } catch {
-      // Mock success for development
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al depositar chat bond';
+      this.error.set(msg);
+      throw err;
     }
   }
 
@@ -94,11 +83,12 @@ export class ChatBondService {
         this.http.post(`${this.apiUrl}/chatbond/${orderId}/claim-refund`, {})
       );
       this.isRefundEligible.set(false);
+      this.error.set(null);
       return true;
-    } catch {
-      // Mock success for development
-      this.isRefundEligible.set(false);
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al solicitar reembolso del chat bond';
+      this.error.set(msg);
+      throw err;
     }
   }
 }

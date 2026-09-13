@@ -32,7 +32,7 @@ export class VideoVerifyComponent implements OnInit {
   protected readonly escrowService = inject(EscrowStateService);
   protected readonly signalR = inject(SignalRService);
 
-  public readonly orderId = signal<string>('order_active_1');
+  public readonly orderId = signal<string>('');
   public readonly isCallActive = signal<boolean>(true);
   public readonly isAudioMuted = signal<boolean>(false);
   public readonly isVideoMuted = signal<boolean>(false);
@@ -97,14 +97,26 @@ export class VideoVerifyComponent implements OnInit {
     this.isVideoMuted.update((v) => !v);
   }
 
-  public onReleaseFunds(): void {
-    this.escrowService.releaseFunds(this.orderId());
-    alert('¡Inspección aprobada! Los fondos se han liberado al vendedor en HSK Chain.');
+  public async onReleaseFunds(): Promise<void> {
+    if (!this.orderId()) return;
+    try {
+      await this.escrowService.releaseFunds(this.orderId());
+      alert('¡Inspección aprobada! Los fondos se han liberado al vendedor en HSK Chain.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al liberar fondos.';
+      alert(msg);
+    }
   }
 
-  public onRaiseDispute(): void {
+  public async onRaiseDispute(): Promise<void> {
+    if (!this.orderId()) return;
     const reason = prompt('Indica el motivo de la discrepancia de hardware:') || 'Discrepancia técnica';
-    this.escrowService.raiseDispute(this.orderId(), reason);
-    alert('Disputa registrada. El árbitro 2-de-3 evaluará la evidencia.');
+    try {
+      await this.escrowService.raiseDispute(this.orderId(), reason);
+      alert('Disputa registrada. El árbitro 2-de-3 evaluará la evidencia.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al abrir disputa.';
+      alert(msg);
+    }
   }
 }

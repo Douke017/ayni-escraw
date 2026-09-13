@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { type Address } from 'viem';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { EscrowStateService } from '../../../core/services/escrow-state.service';
 import { Web3Service } from '../../../core/services/web3.service';
@@ -11,6 +12,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
 import { TruncateAddressPipe } from '../../../shared/pipes/truncate-address.pipe';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ayni-checkout',
@@ -39,6 +41,7 @@ export class CheckoutComponent implements OnInit {
   public readonly isSubmitting = signal<boolean>(false);
   public readonly isSuccess = signal<boolean>(false);
   public readonly createdOrderId = signal<string | null>(null);
+  public readonly errorMessage = signal<string | null>(null);
 
   public ngOnInit(): void {
     const listingId = this.route.snapshot.queryParamMap.get('listingId');
@@ -65,25 +68,61 @@ export class CheckoutComponent implements OnInit {
     if (!item) return;
 
     this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+
     try {
-      // Mock or sign typed data for Permit2
-      const orderId = `order_${Date.now()}`;
-      const permitSignature = '0x1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c';
+      const buyer = (this.authService.walletAddress() || this.web3Service.account()) as Address;
+      const seller = item.sellerAddress as Address;
 
-      await this.escrowService.depositPermit2(orderId, item.priceUsdt, permitSignature);
+      // 1. Create order in Backend / DB
+      const order = await this.escrowService.createOrder(
+        item.id,
+        buyer,
+        seller,
+        item.priceUsdt,
+        42
+      );
 
-      this.createdOrderId.set(orderId);
+      // 2. Sign real EIP-712 Permit2 typed data if Web3 provider and contracts are present
+      let permitSignature = '';
+      if (environment.contracts.usdt && environment.contracts.escrow) {
+        const nonce = BigInt(Date.now());
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+        const onChainIdNum = order.onChainOrderId.startsWith('0x')
+          ? BigInt(order.onChainOrderId)
+          : BigInt(1);
+
+        permitSignature = await this.web3Service.signPermit2Witness({
+          token: environment.contracts.usdt as Address,
+          spender: environment.contracts.escrow as Address,
+          amount: BigInt(Math.round(item.priceUsdt * 1e6)),
+          nonce,
+          deadline,
+          orderId: onChainIdNum,
+          buyer,
+          seller,
+        });
+      }
+
+      // 3. Register deposit with Permit2 signature
+      await this.escrowService.depositPermit2(order.id, item.priceUsdt, permitSignature);
+
+      this.createdOrderId.set(order.id);
       this.isSuccess.set(true);
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error en la firma del depósito Permit2';
+      this.errorMessage.set(msg);
       console.error('Permit2 deposit failed', err);
-      alert('Error en la firma del depósito Permit2. Verifica tu saldo en USDT.');
+      alert(msg);
     } finally {
       this.isSubmitting.set(false);
     }
   }
 
   public goToSafeMeet(): void {
-    const id = this.createdOrderId() || 'order_active_1';
-    this.router.navigate(['/escrow/safe-meet', id]);
+    const id = this.createdOrderId();
+    if (id) {
+      this.router.navigate(['/escrow/safe-meet', id]);
+    }
   }
 }

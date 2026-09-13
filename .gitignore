@@ -57,6 +57,11 @@ skills/**/.cache/
 skills/**/node_modules/
 skills/**/__pycache__/
 skills/**/*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+ai-agents/.venv/
+
 
 # OS and editor files
 .DS_Store

@@ -74,10 +74,10 @@ class Web3AgentClient:
         private_key: Optional[str] = None,
         mock_mode: Optional[bool] = None
     ):
-        self.rpc_url = rpc_url or os.getenv("HSK_RPC_URL", "https://subnets.avax.network/hashkey/testnet/rpc")
+        self.rpc_url = rpc_url or os.getenv("HSK_RPC_URL", "https://testnet.hsk.xyz")
         self.registry_address = registry_address or os.getenv(
-            "AGENT_REGISTRY_ADDRESS",
-            "0x0000000000000000000000000000000000000000"
+            "AYNI_REGISTRY_ADDRESS",
+            os.getenv("AGENT_REGISTRY_ADDRESS", "0x0000000000000000000000000000000000000000")
         )
         self.private_key = private_key or os.getenv("AGENT_PRIVATE_KEY", "")
         
@@ -86,7 +86,7 @@ class Web3AgentClient:
             self.mock_mode = mock_mode
         else:
             self.mock_mode = (
-                os.getenv("WEB3_MOCK_MODE", "true").lower() in ("true", "1", "yes")
+                os.getenv("WEB3_MOCK_MODE", "false").lower() in ("true", "1", "yes")
                 or not self.private_key
             )
 

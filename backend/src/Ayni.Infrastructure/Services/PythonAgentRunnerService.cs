@@ -18,11 +18,50 @@ public class PythonAgentRunnerService : IPythonAgentRunner
     {
         _logger = logger;
         
-        // Configurable paths or defaults
-        _pythonPath = configuration["AiAgents:PythonPath"] 
-            ?? "/home/douke017/Personal/Ayni-Scrow/ai-agents/.venv/bin/python3";
-        _runnerScriptPath = configuration["AiAgents:RunnerScriptPath"] 
-            ?? "/home/douke017/Personal/Ayni-Scrow/ai-agents/runner.py";
+        // Dynamically resolve python path and runner script
+        var configuredPython = Environment.GetEnvironmentVariable("PYTHON_PATH") ?? configuration["AiAgents:PythonPath"];
+        if (!string.IsNullOrWhiteSpace(configuredPython) && File.Exists(configuredPython))
+        {
+            _pythonPath = configuredPython;
+        }
+        else
+        {
+            var current = new DirectoryInfo(Directory.GetCurrentDirectory());
+            string? foundPython = null;
+            while (current != null)
+            {
+                var candidate = Path.Combine(current.FullName, "ai-agents", ".venv", "bin", "python3");
+                if (File.Exists(candidate))
+                {
+                    foundPython = candidate;
+                    break;
+                }
+                current = current.Parent;
+            }
+            _pythonPath = foundPython ?? "python3";
+        }
+
+        var configuredRunner = Environment.GetEnvironmentVariable("AI_AGENTS_RUNNER_PATH") ?? configuration["AiAgents:RunnerScriptPath"];
+        if (!string.IsNullOrWhiteSpace(configuredRunner) && File.Exists(configuredRunner))
+        {
+            _runnerScriptPath = configuredRunner;
+        }
+        else
+        {
+            var current = new DirectoryInfo(Directory.GetCurrentDirectory());
+            string? foundRunner = null;
+            while (current != null)
+            {
+                var candidate = Path.Combine(current.FullName, "ai-agents", "runner.py");
+                if (File.Exists(candidate))
+                {
+                    foundRunner = candidate;
+                    break;
+                }
+                current = current.Parent;
+            }
+            _runnerScriptPath = foundRunner ?? "runner.py";
+        }
     }
 
     private async Task<T?> ExecuteCommandAsync<T>(string command, object payload)

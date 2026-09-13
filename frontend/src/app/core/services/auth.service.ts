@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Web3Service } from './web3.service';
 import { AuthVerifyResponse, SiweNonceResponse, UserSession } from '../models/auth.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ import { AuthVerifyResponse, SiweNonceResponse, UserSession } from '../models/au
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly web3 = inject(Web3Service);
-  private readonly apiUrl = 'http://localhost:5000/api';
+  private readonly apiUrl = environment.apiBaseUrl;
 
   // Vanilla Signals
   public readonly currentUser = signal<UserSession | null>(null);
@@ -74,7 +75,7 @@ export class AuthService {
         `Ayni Trust Marketplace Sign-In\n` +
         `Address: ${address}\n` +
         `Nonce: ${nonceRes.nonce}\n` +
-        `Chain ID: 133\n` +
+        `Chain ID: ${environment.chainId}\n` +
         `Issued At: ${new Date().toISOString()}`;
 
       // 4. Sign message with wallet

@@ -17,17 +17,20 @@ public class EscrowController : ControllerBase
     private readonly AyniDbContext _dbContext;
     private readonly ICacheService _cacheService;
     private readonly IHubContext<EscrowHub, IEscrowClient> _escrowHub;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<EscrowController> _logger;
 
     public EscrowController(
         AyniDbContext dbContext,
         ICacheService cacheService,
         IHubContext<EscrowHub, IEscrowClient> escrowHub,
+        IConfiguration configuration,
         ILogger<EscrowController> logger)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
         _escrowHub = escrowHub;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -39,6 +42,8 @@ public class EscrowController : ControllerBase
             return BadRequest(new { error = "Buyer and seller addresses are required" });
         }
 
+        var defaultArbitrator = _configuration["Web3:ArbitratorAddress"] ?? "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
+
         var order = new Order
         {
             OnChainOrderId = string.IsNullOrWhiteSpace(request.OnChainOrderId)
@@ -48,7 +53,7 @@ public class EscrowController : ControllerBase
             BuyerAddress = request.BuyerAddress.ToLowerInvariant(),
             SellerAddress = request.SellerAddress.ToLowerInvariant(),
             ArbitratorAddress = string.IsNullOrWhiteSpace(request.ArbitratorAddress) 
-                ? "0x0000000000000000000000000000000000000000" 
+                ? defaultArbitrator.ToLowerInvariant() 
                 : request.ArbitratorAddress.ToLowerInvariant(),
             AmountUsdt = request.AmountUsdt,
             PassportTokenId = request.PassportTokenId,
@@ -173,7 +178,7 @@ public class EscrowController : ControllerBase
     }
 
     [HttpPost("orders/{id:guid}/settle")]
-    public async Task<IActionResult> SettleOrder(Guid id)
+    public async Task<IActionResult> SettleOrder(Guid id, [FromBody] SettleOrderRequest? request = null)
     {
         var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
         if (order == null)
@@ -194,10 +199,14 @@ public class EscrowController : ControllerBase
         await _dbContext.SaveChangesAsync();
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var txHash = !string.IsNullOrWhiteSpace(request?.TxHash) ? request.TxHash : string.Empty;
         await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), OrderStatus.Settled, timestamp);
-        await _escrowHub.Clients.Group($"escrow_{order.Id}").SettlementConfirmed(order.Id.ToString(), "0xsettlementtx123");
+        if (!string.IsNullOrWhiteSpace(txHash))
+        {
+            await _escrowHub.Clients.Group($"escrow_{order.Id}").SettlementConfirmed(order.Id.ToString(), txHash);
+        }
 
-        return Ok(new { success = true, status = order.Status.ToString() });
+        return Ok(new { success = true, status = order.Status.ToString(), txHash = txHash });
     }
 
     [HttpPost("orders/{id:guid}/dispute")]
@@ -234,8 +243,12 @@ public class EscrowController : ControllerBase
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), order.Status, timestamp);
+        if (!string.IsNullOrWhiteSpace(request.TxHash))
+        {
+            await _escrowHub.Clients.Group($"escrow_{order.Id}").SettlementConfirmed(order.Id.ToString(), request.TxHash);
+        }
 
-        return Ok(new { success = true, status = order.Status.ToString() });
+        return Ok(new { success = true, status = order.Status.ToString(), txHash = request.TxHash });
     }
 }
 
@@ -248,6 +261,11 @@ public class CreateOrderRequest
     public string? ArbitratorAddress { get; set; }
     public decimal AmountUsdt { get; set; }
     public ulong PassportTokenId { get; set; }
+}
+
+public class SettleOrderRequest
+{
+    public string? TxHash { get; set; }
 }
 
 public class ValidateQrRequest
@@ -264,4 +282,5 @@ public class OpenDisputeRequest
 public class ResolveDisputeRequest
 {
     public bool RefundToBuyer { get; set; } = true;
+    public string? TxHash { get; set; }
 }

@@ -45,7 +45,7 @@ class SpecExtractorService:
                     f"Return strictly valid JSON with keys: brand, model, storage, ram, color, battery_health_percentage, carrier_lock_status."
                 )
                 response = self.client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model=settings.GEMINI_MODEL,
                     contents=prompt
                 )
                 raw_text = response.text.strip()

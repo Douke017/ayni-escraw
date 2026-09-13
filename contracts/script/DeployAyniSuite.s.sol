@@ -7,6 +7,7 @@ import {AyniAgentRegistry} from "../src/AyniAgentRegistry.sol";
 import {AyniEscrow} from "../src/AyniEscrow.sol";
 import {AyniSubscriptionManager} from "../src/AyniSubscriptionManager.sol";
 import {AyniChatBond} from "../src/AyniChatBond.sol";
+import {AyniTestUSDT} from "../src/test/AyniTestUSDT.sol";
 
 contract DeployAyniSuiteScript is Script {
     struct DeploymentAddresses {
@@ -22,15 +23,15 @@ contract DeployAyniSuiteScript is Script {
     }
 
     function run() external {
-        uint256 deployerPrivateKey = vm.envOr(
-            "DEPLOYER_PRIVATE_KEY",
-            uint256(0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80)
-        );
+        uint256 deployerPrivateKey = vm.envOr("DEPLOYER_PRIVATE_KEY", uint256(0));
+        require(deployerPrivateKey != 0, "DEPLOYER_PRIVATE_KEY environment variable is required. Please set it in your .env file.");
+
         DeploymentAddresses memory addrs;
         addrs.deployer = vm.addr(deployerPrivateKey);
-        addrs.usdtToken = vm.envOr("USDT_TOKEN_ADDRESS", address(0x1000000000000000000000000000000000000001));
+
+        address configuredUsdt = vm.envOr("USDT_TOKEN_ADDRESS", address(0));
         addrs.permit2 = vm.envOr("PERMIT2_ADDRESS", address(0x000000000022D473030F116dDEE9F6B43aC78BA3));
-        address aiAgentAddress = vm.envOr("AI_AGENT_ADDRESS", addrs.deployer);
+        address aiAgentAddress = vm.envOr("AGENT_ADDRESS", addrs.deployer);
         address treasury = vm.envOr("TREASURY_ADDRESS", addrs.deployer);
 
         console2.log("--- Starting Ayni Smart Contract Deployment on HSK ---");
@@ -38,6 +39,16 @@ contract DeployAyniSuiteScript is Script {
         console2.log("Chain ID:", block.chainid);
 
         vm.startBroadcast(deployerPrivateKey);
+
+        // 0. Resolve USDT: use configured address or deploy AyniTestUSDT for testnet
+        if (configuredUsdt != address(0)) {
+            addrs.usdtToken = configuredUsdt;
+            console2.log("Using existing USDT token at:", addrs.usdtToken);
+        } else {
+            AyniTestUSDT testUsdt = new AyniTestUSDT(addrs.deployer);
+            addrs.usdtToken = address(testUsdt);
+            console2.log("Deployed new AyniTestUSDT at:", addrs.usdtToken);
+        }
 
         // 1. Deploy AyniProductPassport ERC-721
         AyniProductPassport passport = new AyniProductPassport(addrs.deployer);

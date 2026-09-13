@@ -33,7 +33,7 @@ export class SafeMeetComponent implements OnInit, OnDestroy {
   protected readonly signalR = inject(SignalRService);
   protected readonly authService = inject(AuthService);
 
-  public readonly orderId = signal<string>('order_active_1');
+  public readonly orderId = signal<string>('');
   public readonly activeMode = signal<'seller' | 'buyer'>('seller');
   public readonly manualSecretInput = signal<string>('');
   public readonly isValidating = signal<boolean>(false);
@@ -57,20 +57,26 @@ export class SafeMeetComponent implements OnInit, OnDestroy {
       this.orderId.set(id);
     }
 
-    // Connect to SignalR EscrowHub and join group
-    this.signalR.connectEscrowHub();
-    this.signalR.joinEscrowOrder(this.orderId());
+    if (this.orderId()) {
+      // Connect to SignalR EscrowHub and join group
+      this.signalR.connectEscrowHub();
+      this.signalR.joinEscrowOrder(this.orderId());
 
-    // Initialize QR generation for seller mode
-    this.generateNewQr();
+      // Initialize QR generation for seller mode
+      this.generateNewQr();
+    }
   }
 
   public ngOnDestroy(): void {
-    this.signalR.leaveEscrowOrder(this.orderId());
+    if (this.orderId()) {
+      this.signalR.leaveEscrowOrder(this.orderId());
+    }
   }
 
   public generateNewQr(): void {
-    this.escrowService.generateSafeMeetQr(this.orderId());
+    if (this.orderId()) {
+      this.escrowService.generateSafeMeetQr(this.orderId());
+    }
   }
 
   public setMode(mode: 'seller' | 'buyer'): void {
@@ -79,21 +85,32 @@ export class SafeMeetComponent implements OnInit, OnDestroy {
 
   public async onValidateQr(): Promise<void> {
     const secret = this.manualSecretInput().trim();
-    if (!secret) return;
+    if (!secret || !this.orderId()) return;
+
+    let buyer = this.authService.walletAddress();
+    if (!buyer) {
+      const ok = await this.authService.connectAndAuthenticate();
+      if (!ok) {
+        alert('Debes conectar tu billetera de comprador para validar el código QR.');
+        return;
+      }
+      buyer = this.authService.walletAddress();
+    }
 
     this.isValidating.set(true);
     this.validationMessage.set(null);
 
     try {
-      const res = await this.escrowService.validateSafeMeetQr(this.orderId(), secret);
+      const res = await this.escrowService.validateSafeMeetQr(this.orderId(), secret, buyer!);
       if (res.success) {
         this.handoffConfirmed.set(true);
-        this.validationMessage.set('✓ ¡Código verificado en Redis! Entrega confirmada y fondos liberados.');
+        this.validationMessage.set('✓ ¡Código verificado en Redis! Entrega física confirmada en HSK.');
       } else {
         this.validationMessage.set('⚠️ Código inválido o expirado. Solicita al vendedor generar un nuevo QR.');
       }
-    } catch {
-      this.validationMessage.set('⚠️ Error en la verificación del código.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error en la verificación del código.';
+      this.validationMessage.set(`⚠️ ${msg}`);
     } finally {
       this.isValidating.set(false);
     }

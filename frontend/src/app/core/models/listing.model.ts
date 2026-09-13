@@ -14,6 +14,14 @@ export enum ValidationVerdict {
   FAIL = 2,
 }
 
+export type HardwareCategory = 'SMARTPHONE' | 'LAPTOP' | 'COMPONENT';
+
+export const HARDWARE_CATEGORIES: { key: HardwareCategory; label: string; icon: string }[] = [
+  { key: 'SMARTPHONE', label: 'Smartphones & Tablets', icon: '📱' },
+  { key: 'LAPTOP', label: 'Laptops & Computadoras', icon: '💻' },
+  { key: 'COMPONENT', label: 'Componentes & GPUs', icon: '⚡' },
+];
+
 export interface ProductListing {
   id: string;
   sellerAddress: string;

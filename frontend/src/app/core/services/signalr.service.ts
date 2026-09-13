@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 import { Injectable, signal, computed } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
+import { environment } from '../../../environments/environment';
 
 import { ChatMessage } from '../models/chat.model';
 
@@ -44,7 +45,7 @@ export class SignalRService {
     () => this.isChatConnected() && this.isEscrowConnected()
   );
 
-  public async initHubs(baseUrl: string = 'http://localhost:5000'): Promise<void> {
+  public async initHubs(baseUrl: string = environment.signalrHubUrl): Promise<void> {
     const token = localStorage.getItem('ayni_jwt_token');
     const options: signalR.IHttpConnectionOptions = {
       accessTokenFactory: () => token || '',

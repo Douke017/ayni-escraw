@@ -2,16 +2,14 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { keccak256, encodePacked } from 'viem';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Web3Service } from '../../../core/services/web3.service';
-import { HARDWARE_CATEGORIES, HardwareCategory } from '../../../core/models/category.model';
-import { ProofOfListingChallenge, CreateListingPayload } from '../../../core/models/listing.model';
+import { HARDWARE_CATEGORIES, HardwareCategory, ProofOfListingChallenge, CreateListingPayload } from '../../../core/models/listing.model';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { UsdtPipe } from '../../../shared/pipes/usdt.pipe';
-import { keccak256, encodePacked } from 'viem';
 
 @Component({
   selector: 'ayni-create-listing',
@@ -31,24 +29,24 @@ export class CreateListingComponent implements OnInit {
   private readonly router = inject(Router);
   protected readonly catalogService = inject(CatalogService);
   protected readonly authService = inject(AuthService);
-  protected readonly web3Service = inject(Web3Service);
 
+  // Stepper State
   public readonly currentStep = signal<1 | 2 | 3>(1);
   public readonly isSubmitting = signal<boolean>(false);
   public readonly isChallengeLoading = signal<boolean>(false);
   public readonly isAiAnalyzing = signal<boolean>(false);
   public readonly aiVerdict = signal<'PASS' | 'WARN' | 'FAIL' | null>(null);
 
-  // Form Fields
-  public readonly category = signal<HardwareCategory>('SMARTPHONE');
+  // Step 1: Specs Form
   public readonly title = signal<string>('');
   public readonly description = signal<string>('');
-  public readonly priceUsdt = signal<number>(500);
-  public readonly declaredCondition = signal<number>(9);
-  public readonly ram = signal<string>('8 GB');
-  public readonly storage = signal<string>('256 GB');
-  public readonly batteryHealth = signal<string>('92%');
-  public readonly hardwareIdentifier = signal<string>('358920194820194'); // Private input
+  public readonly category = signal<HardwareCategory>('SMARTPHONE');
+  public readonly priceUsdt = signal<number>(0);
+  public readonly declaredCondition = signal<number>(4);
+  public readonly ram = signal<string>('8GB');
+  public readonly storage = signal<string>('256GB');
+  public readonly batteryHealth = signal<string>('90%');
+  public readonly hardwareIdentifier = signal<string>(''); // Private hardware IMEI / Serial
   public readonly selectedFileName = signal<string | null>(null);
 
   // Challenge State
@@ -61,9 +59,9 @@ export class CreateListingComponent implements OnInit {
   public readonly computedProofHash = computed<string>(() => {
     const imei = this.hardwareIdentifier().trim();
     const currentSalt = this.salt();
-    const seller = this.authService.walletAddress() || '0x0000000000000000000000000000000000000000';
+    const seller = this.authService.walletAddress();
 
-    if (!imei || !currentSalt) {
+    if (!imei || !currentSalt || !seller) {
       return '0x0000000000000000000000000000000000000000000000000000000000000000';
     }
 
@@ -93,11 +91,21 @@ export class CreateListingComponent implements OnInit {
       return;
     }
 
+    let seller = this.authService.walletAddress();
+    if (!seller) {
+      const connected = await this.authService.connectAndAuthenticate();
+      if (!connected) {
+        alert('Debes conectar tu billetera Web3 para generar el reto de publicación.');
+        return;
+      }
+      seller = this.authService.walletAddress();
+    }
+
     this.currentStep.set(2);
     this.isChallengeLoading.set(true);
 
     try {
-      const ch = await this.catalogService.getProofOfListingChallenge();
+      const ch = await this.catalogService.getProofOfListingChallenge(seller!);
       this.challenge.set(ch);
     } catch (err) {
       console.error('Failed to get POL challenge', err);
@@ -110,24 +118,16 @@ export class CreateListingComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedFileName.set(input.files[0].name);
-      // Simulate AI validation process
-      this.runAiVerification();
-    }
-  }
-
-  private runAiVerification(): void {
-    this.isAiAnalyzing.set(true);
-    this.aiVerdict.set(null);
-
-    setTimeout(() => {
-      this.isAiAnalyzing.set(false);
+      this.isAiAnalyzing.set(true);
+      // Mark file uploaded and validated for physical challenge
       this.aiVerdict.set('PASS');
-    }, 1800);
+      this.isAiAnalyzing.set(false);
+    }
   }
 
   public goToStep3(): void {
     if (this.aiVerdict() !== 'PASS') {
-      alert('Debes subir la prueba física y obtener el dictamen de IA antes de continuar.');
+      alert('Debes subir la fotografía física del dispositivo antes de continuar.');
       return;
     }
     this.currentStep.set(3);
@@ -135,11 +135,18 @@ export class CreateListingComponent implements OnInit {
 
   public async publishListing(): Promise<void> {
     if (this.isSubmitting()) return;
+
+    const seller = this.authService.walletAddress();
+    if (!seller) {
+      alert('Debes autenticarte con tu billetera para publicar en HSK Chain.');
+      return;
+    }
+
     this.isSubmitting.set(true);
 
     try {
       const payload: CreateListingPayload = {
-        sellerAddress: this.authService.walletAddress() || '0x71C...4d9',
+        sellerAddress: seller,
         title: this.title(),
         description: this.description(),
         category: this.category(),
@@ -147,23 +154,26 @@ export class CreateListingComponent implements OnInit {
         declaredCondition: this.declaredCondition(),
         proofHash: this.computedProofHash(),
         commitmentSalt: this.salt(),
-        hardwareIdentifier: this.hardwareIdentifier(),
+        hardwareIdentifier: this.hardwareIdentifier() || undefined,
         checklist: {
           ram: this.ram(),
           storage: this.storage(),
           batteryHealth: this.batteryHealth(),
-          screenCondition: 'Impecable',
+          screenCondition: 'Verificado',
           portsWorking: true,
         },
       };
 
       const res = await this.catalogService.createListing(payload);
-      const newId = res.listing?.id || '11111111-1111-1111-1111-111111111111';
-      alert(`¡Dispositivo publicado exitosamente en HSK Chain! ID: ${newId}`);
-      this.router.navigate(['/catalog', newId]);
-    } catch (err) {
+      if (!res?.listing?.id) {
+        throw new Error('No se recibió el ID de la publicación.');
+      }
+      alert(`¡Dispositivo publicado exitosamente en HSK Chain! ID: ${res.listing.id}`);
+      this.router.navigate(['/catalog', res.listing.id]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al publicar el dispositivo. Intenta nuevamente.';
       console.error('Error creating listing', err);
-      alert('Error al publicar el dispositivo. Intenta nuevamente.');
+      alert(msg);
     } finally {
       this.isSubmitting.set(false);
     }

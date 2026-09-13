@@ -4,15 +4,15 @@ services:
     container_name: ayni_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ayni_db
-      POSTGRES_USER: ayni_user
-      POSTGRES_PASSWORD: ayni_secure_pass_2026
+      POSTGRES_DB: ${POSTGRES_DB:-ayni_db}
+      POSTGRES_USER: ${POSTGRES_USER:-ayni_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ayni_secure_pass_2026}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ayni_user -d ayni_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ayni_user} -d ${POSTGRES_DB:-ayni_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -37,8 +37,8 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ayni_minio_admin
-      MINIO_ROOT_PASSWORD: ayni_minio_secret_pass_2026
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-ayni_minio_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-ayni_minio_secret_pass_2026}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -58,10 +58,11 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set local http://minio:9000 ayni_minio_admin ayni_minio_secret_pass_2026;
+      /usr/bin/mc alias set local http://minio:9000 \${MINIO_ACCESS_KEY:-ayni_minio_admin} \${MINIO_SECRET_KEY:-ayni_minio_secret_pass_2026};
       /usr/bin/mc mb --ignore-existing local/ayni-listings-public;
       /usr/bin/mc mb --ignore-existing local/ayni-evidence-private;
       /usr/bin/mc mb --ignore-existing local/ayni-checklists;
+      /usr/bin/mc mb --ignore-existing local/ayni-proof-of-listing;
       /usr/bin/mc anonymous set download local/ayni-listings-public;
       exit 0;
       "

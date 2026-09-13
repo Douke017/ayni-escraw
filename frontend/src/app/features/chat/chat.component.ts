@@ -33,9 +33,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   protected readonly bondService = inject(ChatBondService);
   protected readonly authService = inject(AuthService);
 
-  public readonly orderId = signal<string>('chat_hardware_101');
+  public readonly orderId = signal<string>('');
   public readonly messageInput = signal<string>('');
-  public readonly isBondDeposited = signal<boolean>(true);
+  public readonly isBondDeposited = signal<boolean>(false);
   public readonly isDepositingBond = signal<boolean>(false);
   public readonly isClaimingRefund = signal<boolean>(false);
 
@@ -50,82 +50,70 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.orderId.set(queryOrderId);
     }
 
-    // Connect to SignalR ChatHub
-    this.signalR.connectChatHub();
-    this.signalR.joinChat(this.orderId());
-    this.bondService.fetchBondStatus(this.orderId());
-
-    // Seed mock initial greeting if empty
-    if (this.currentChatMessages().length === 0) {
-      this.seedInitialMessages();
-    }
-  }
-
-  public ngOnDestroy(): void {
-    this.signalR.leaveChat(this.orderId());
-  }
-
-  private seedInitialMessages(): void {
-    const initial = [
-      {
-        id: 'msg_1',
-        orderId: this.orderId(),
-        senderAddress: '0x3A219800000000000000000000000000000091eA',
-        messageText: '¡Hola! Vi que te interesa el dispositivo. El hardware está verificado con PASS y el IMEI está protegido con hash salted.',
-        sentAtUtc: new Date(Date.now() - 300000).toISOString(),
-        isAiAgent: false,
-      },
-      {
-        id: 'msg_2',
-        orderId: this.orderId(),
-        senderAddress: '0x0000000000000000000000000000000000000042',
-        messageText: '🤖 [Ayni Agent]: Verificación de especificaciones completada. Batería al 92% y pantalla original sin reparaciones previas.',
-        sentAtUtc: new Date(Date.now() - 240000).toISOString(),
-        isAiAgent: true,
-      },
-    ];
-
-    this.signalR.chatMessages.set(initial);
-  }
-
-  public async onSendMessage(): Promise<void> {
-    const text = this.messageInput().trim();
-    if (!text) return;
-
-    const sender = this.authService.walletAddress() || '0x71C8000000000000000000000000000000004d9B';
-    await this.signalR.sendMessage(this.orderId(), sender, text);
-    this.messageInput.set('');
-
-    // If less than 2 replies, increment locally for UX feedback
-    const currentStatus = this.bondService.bondStatus();
-    if (currentStatus && currentStatus.buyerReplies < 2) {
-      this.bondService.bondStatus.set({
-        ...currentStatus,
-        buyerReplies: currentStatus.buyerReplies + 1,
-        isRefundEligible: currentStatus.buyerReplies + 1 >= 2 && currentStatus.sellerReplies >= 2,
+    if (this.orderId()) {
+      // Connect to SignalR ChatHub
+      this.signalR.connectChatHub();
+      this.signalR.joinChat(this.orderId());
+      this.bondService.fetchBondStatus(this.orderId()).then((status) => {
+        if (status) {
+          this.isBondDeposited.set(true);
+        }
       });
     }
   }
 
+  public ngOnDestroy(): void {
+    if (this.orderId()) {
+      this.signalR.leaveChat(this.orderId());
+    }
+  }
+
+  public async onSendMessage(): Promise<void> {
+    const text = this.messageInput().trim();
+    if (!text || !this.orderId()) return;
+
+    let sender = this.authService.walletAddress();
+    if (!sender) {
+      const ok = await this.authService.connectAndAuthenticate();
+      if (!ok) {
+        alert('Debes conectar tu billetera para participar en el chat.');
+        return;
+      }
+      sender = this.authService.walletAddress();
+    }
+
+    await this.signalR.sendMessage(this.orderId(), sender!, text);
+    this.messageInput.set('');
+
+    // Fetch updated bond replies
+    await this.bondService.fetchBondStatus(this.orderId());
+  }
+
   public async onDepositBond(): Promise<void> {
+    if (!this.orderId()) return;
     this.isDepositingBond.set(true);
     try {
       await this.bondService.depositBond(this.orderId(), 0.3);
       this.isBondDeposited.set(true);
-    } catch {
-      alert('Error al depositar Intent Bond.');
+      await this.bondService.fetchBondStatus(this.orderId());
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al depositar Intent Bond.';
+      alert(msg);
     } finally {
       this.isDepositingBond.set(false);
     }
   }
 
   public async onClaimRefund(): Promise<void> {
+    if (!this.orderId()) return;
     this.isClaimingRefund.set(true);
     try {
       await this.bondService.claimRefund(this.orderId());
       alert('¡Reembolso de 0.30 USDT devuelto exitosamente a tu billetera!');
-    } catch {
-      alert('Error al solicitar reembolso.');
+      await this.bondService.fetchBondStatus(this.orderId());
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al solicitar reembolso.';
+      alert(msg);
     } finally {
       this.isClaimingRefund.set(false);
     }

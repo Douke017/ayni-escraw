@@ -3,6 +3,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EscrowOrder, OrderStatus, SafeMeetQrResponse, ValidateQrResult } from '../models/order.model';
+import { environment } from '../../../environments/environment';
 
 export enum EscrowUiStatus {
   CREATED = 0,
@@ -19,7 +20,7 @@ export enum EscrowUiStatus {
 })
 export class EscrowStateService {
   private readonly http = inject(HttpClient, { optional: true })!;
-  private readonly apiUrl = 'http://localhost:5000/api';
+  private readonly apiUrl = environment.apiBaseUrl;
 
   // Vanilla Angular 22 Signals
   public readonly currentOrder = signal<EscrowOrder | null>(null);
@@ -52,21 +53,21 @@ export class EscrowStateService {
 
   public updateStatus(newStatus: OrderStatus | EscrowUiStatus): void {
     const statusVal = newStatus as OrderStatus;
-    if (!this.currentOrder()) {
+    if (this.currentOrder()) {
+      this.currentOrder.update((curr) => (curr ? { ...curr, status: statusVal, isDisputed: statusVal === OrderStatus.Disputed } : null));
+    } else {
       this.currentOrder.set({
-        id: 'mock_order',
-        onChainOrderId: '0x0',
-        buyerAddress: '0x0',
-        sellerAddress: '0x0',
-        arbitratorAddress: '0x0',
+        id: '',
+        onChainOrderId: '',
+        buyerAddress: '',
+        sellerAddress: '',
+        arbitratorAddress: '',
         amountUsdt: 0,
         passportTokenId: 0,
         status: statusVal,
         createdAtUtc: new Date().toISOString(),
         isDisputed: statusVal === OrderStatus.Disputed,
       });
-    } else {
-      this.currentOrder.update((curr) => (curr ? { ...curr, status: statusVal } : null));
     }
   }
 
@@ -94,23 +95,10 @@ export class EscrowStateService {
       );
       this.currentOrder.set(order);
       return order;
-    } catch {
-      // Synthetic fallback order for local preview/testing
-      const mockOrder: EscrowOrder = {
-        id: 'ord_' + Math.random().toString(36).substring(2, 9),
-        onChainOrderId: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-        listingId,
-        buyerAddress,
-        sellerAddress,
-        arbitratorAddress: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
-        amountUsdt,
-        passportTokenId,
-        status: OrderStatus.Funded,
-        createdAtUtc: new Date().toISOString(),
-        isDisputed: false,
-      };
-      this.currentOrder.set(mockOrder);
-      return mockOrder;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al crear la orden de custodia';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
@@ -127,17 +115,10 @@ export class EscrowStateService {
       this.safeMeetQr.set(res);
       this.startQrCountdown(res.ttlSeconds);
       return res;
-    } catch {
-      // Mock 60s secret
-      const mockQr: SafeMeetQrResponse = {
-        orderId,
-        nonce: '0x' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-        ttlSeconds: 60,
-        expiresAtUtc: new Date(Date.now() + 60000).toISOString(),
-      };
-      this.safeMeetQr.set(mockQr);
-      this.startQrCountdown(60);
-      return mockQr;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al generar QR Safe Meet';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
@@ -145,41 +126,18 @@ export class EscrowStateService {
 
   public async fetchOrders(): Promise<EscrowOrder[]> {
     this.isLoading.set(true);
+    this.error.set(null);
     try {
       const orders = await firstValueFrom(
         this.http.get<EscrowOrder[]>(`${this.apiUrl}/escrow/orders`)
       );
-      this.orders.set(orders);
-      return orders;
-    } catch {
-      const mockOrders: EscrowOrder[] = [
-        {
-          id: 'ord_demo_1',
-          onChainOrderId: '0x8899aabbccddeeff00112233445566778899aabbccddeeff0011223344556677',
-          buyerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-          sellerAddress: '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc',
-          arbitratorAddress: '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
-          amountUsdt: 520.0,
-          passportTokenId: 42,
-          status: OrderStatus.Funded,
-          createdAtUtc: new Date(Date.now() - 3600000).toISOString(),
-          isDisputed: false,
-        },
-        {
-          id: 'ord_demo_2',
-          onChainOrderId: '0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00',
-          buyerAddress: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-          sellerAddress: '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
-          arbitratorAddress: '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65',
-          amountUsdt: 1250.0,
-          passportTokenId: 43,
-          status: OrderStatus.HandoffConfirmed,
-          createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
-          isDisputed: false,
-        },
-      ];
-      this.orders.set(mockOrders);
-      return mockOrders;
+      this.orders.set(orders || []);
+      return orders || [];
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al consultar órdenes';
+      this.error.set(msg);
+      this.orders.set([]);
+      return [];
     } finally {
       this.isLoading.set(false);
     }
@@ -187,6 +145,7 @@ export class EscrowStateService {
 
   public async depositPermit2(orderId: string, amountUsdt: number, permitSignature: string): Promise<boolean> {
     this.isProcessing.set(true);
+    this.error.set(null);
     try {
       await firstValueFrom(
         this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/deposit-permit2`, {
@@ -196,42 +155,49 @@ export class EscrowStateService {
       );
       this.updateStatus(OrderStatus.Funded);
       return true;
-    } catch {
-      // Mock success for local dev
-      this.updateStatus(OrderStatus.Funded);
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error en el depósito Permit2';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
   }
 
-  public async releaseFunds(orderId: string): Promise<boolean> {
+  public async releaseFunds(orderId: string, txHash?: string): Promise<boolean> {
     this.isProcessing.set(true);
+    this.error.set(null);
     try {
       await firstValueFrom(
-        this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/release`, {})
+        this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/settle`, { txHash: txHash || '' })
       );
       this.updateStatus(OrderStatus.Settled);
       return true;
-    } catch {
-      this.updateStatus(OrderStatus.Settled);
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al liquidar fondos';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
   }
 
-  public async refundBuyer(orderId: string): Promise<boolean> {
+  public async refundBuyer(orderId: string, txHash?: string): Promise<boolean> {
     this.isProcessing.set(true);
+    this.error.set(null);
     try {
       await firstValueFrom(
-        this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/refund`, {})
+        this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/resolve-dispute`, {
+          refundToBuyer: true,
+          txHash: txHash || '',
+        })
       );
       this.updateStatus(OrderStatus.Refunded);
       return true;
-    } catch {
-      this.updateStatus(OrderStatus.Refunded);
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al procesar reembolso';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
@@ -239,15 +205,17 @@ export class EscrowStateService {
 
   public async raiseDispute(orderId: string, reason: string): Promise<boolean> {
     this.isProcessing.set(true);
+    this.error.set(null);
     try {
       await firstValueFrom(
         this.http.post(`${this.apiUrl}/escrow/orders/${orderId}/dispute`, { reason })
       );
       this.updateStatus(OrderStatus.Disputed);
       return true;
-    } catch {
-      this.updateStatus(OrderStatus.Disputed);
-      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al abrir disputa';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }
@@ -256,7 +224,7 @@ export class EscrowStateService {
   public async validateSafeMeetQr(
     orderId: string,
     nonce: string,
-    buyerAddress: string = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+    buyerAddress: string
   ): Promise<ValidateQrResult> {
     this.isProcessing.set(true);
     this.error.set(null);
@@ -275,12 +243,10 @@ export class EscrowStateService {
         if (this.qrTimerInterval) clearInterval(this.qrTimerInterval);
       }
       return res;
-    } catch {
-      // Mock validation success in development mode
-      this.updateStatus(OrderStatus.HandoffConfirmed);
-      this.safeMeetQr.set(null);
-      if (this.qrTimerInterval) clearInterval(this.qrTimerInterval);
-      return { success: true, status: 'Confirmed' };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al validar QR en Redis';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isProcessing.set(false);
     }

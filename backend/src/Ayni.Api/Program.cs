@@ -11,25 +11,67 @@ using Ayni.Core.Interfaces;
 using Ayni.Infrastructure.Data;
 using Ayni.Infrastructure.Services;
 
+// Load .env file from solution root if present
+var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+while (currentDir != null)
+{
+    var envPath = Path.Combine(currentDir.FullName, ".env");
+    if (File.Exists(envPath))
+    {
+        foreach (var line in File.ReadAllLines(envPath))
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith('#') || !trimmed.Contains('='))
+                continue;
+            var parts = trimmed.Split('=', 2);
+            var key = parts[0].Trim();
+            var val = parts[1].Trim().Trim('"', '\'');
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+            {
+                Environment.SetEnvironmentVariable(key, val);
+            }
+        }
+        break;
+    }
+    currentDir = currentDir.Parent;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database - PostgreSQL EF Core
-var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// 1. Database - PostgreSQL EF Core (Resolve from env vars or connection string)
+var pgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
+var pgPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
+var pgDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "ayni_db";
+var pgUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "ayni_user";
+var pgPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "ayni_secure_pass_2026";
+
+var dbConnectionString = !string.IsNullOrWhiteSpace(pgHost)
+    ? $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPass};"
+    : builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? $"Host=localhost;Port=5432;Database={pgDb};Username={pgUser};Password={pgPass};";
+
 builder.Services.AddDbContext<AyniDbContext>(options =>
     options.UseNpgsql(dbConnectionString));
 
 // 2. Cache - Redis
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379,abortConnect=false";
+var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION") 
+    ?? builder.Configuration.GetConnectionString("Redis") 
+    ?? "localhost:6379,abortConnect=false";
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
     ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
 // 3. Storage - MinIO
-var minioEndpoint = builder.Configuration["Minio:Endpoint"] ?? "localhost:9000";
-var minioAccessKey = builder.Configuration["Minio:AccessKey"] ?? "ayni_minio_admin";
-var minioSecretKey = builder.Configuration["Minio:SecretKey"] ?? "ayni_minio_secret_pass_2026";
-var minioWithSsl = builder.Configuration.GetValue<bool>("Minio:WithSSL");
+var minioEndpoint = Environment.GetEnvironmentVariable("MINIO_ENDPOINT") 
+    ?? builder.Configuration["Minio:Endpoint"] ?? "localhost:9000";
+var minioAccessKey = Environment.GetEnvironmentVariable("MINIO_ACCESS_KEY") 
+    ?? builder.Configuration["Minio:AccessKey"] ?? "ayni_minio_admin";
+var minioSecretKey = Environment.GetEnvironmentVariable("MINIO_SECRET_KEY") 
+    ?? builder.Configuration["Minio:SecretKey"] ?? "ayni_minio_secret_pass_2026";
+var minioWithSsl = bool.TryParse(Environment.GetEnvironmentVariable("MINIO_WITH_SSL"), out var ssl) 
+    ? ssl 
+    : builder.Configuration.GetValue<bool>("Minio:WithSSL");
 
 builder.Services.AddSingleton<IMinioClient>(sp =>
 {
@@ -54,9 +96,15 @@ builder.Services.AddSingleton<IPythonAgentRunner, PythonAgentRunnerService>();
 builder.Services.AddSignalR();
 
 // 7. JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "Ayni_Super_Secret_Key_For_Jwt_Token_Authentication_2026_Minimum_32_Bytes_Long!";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "AyniBackend";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AyniFrontend";
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") 
+    ?? builder.Configuration["Jwt:Secret"] 
+    ?? "Ayni_Super_Secret_Key_For_Jwt_Token_Authentication_2026_Minimum_32_Bytes_Long!";
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") 
+    ?? builder.Configuration["Jwt:Issuer"] 
+    ?? "AyniBackend";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") 
+    ?? builder.Configuration["Jwt:Audience"] 
+    ?? "AyniFrontend";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -98,11 +146,14 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 // 9. CORS policy for Angular 18/22 Frontend
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+    ?? ["http://localhost:4200", "http://127.0.0.1:4200"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AyniFrontendPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
