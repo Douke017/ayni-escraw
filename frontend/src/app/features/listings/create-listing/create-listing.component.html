@@ -294,6 +294,45 @@
                   </div>
                 </div>
 
+                <!-- ERC-8004 Cryptographic Attestation Block -->
+                <div class="w-full max-w-lg bg-emerald-900/5 border border-emerald-600/20 rounded-xl p-4 flex flex-col gap-2.5 text-left text-xs">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 font-bold text-emerald-950">
+                      <svg class="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                      <span>Certificación Criptográfica ERC-8004 (HSK Chain)</span>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                      Dictamen: PASS (0)
+                    </span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span class="text-ayni-muted block">Agente Validador:</span>
+                      <span class="font-mono font-bold text-ayni-espresso">Ayni Seller Agent (ID #1)</span>
+                    </div>
+                    <div>
+                      <span class="text-ayni-muted block">Smart Contract:</span>
+                      <span class="font-mono font-bold text-ayni-espresso truncate block" title="0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2">
+                        0x7C98...54b2
+                      </span>
+                    </div>
+                    <div class="sm:col-span-2 bg-white/70 p-2 rounded-lg border border-emerald-500/20">
+                      <span class="text-ayni-muted block text-[10px] uppercase font-bold">Proof Hash (32-Byte Keccak256):</span>
+                      <span class="font-mono text-[11px] font-bold text-emerald-900 break-all select-all">
+                        {{ autoPublishResult()?.agent?.proofHash || autoPublishResult()?.listing?.proofHash }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 p-2 rounded-md flex items-start gap-1.5 mt-1">
+                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    <span>
+                      <strong>Mecánica de Reputación ERC-8004:</strong> Este agente recibirá <strong>+1 punto de reputación</strong> en el contrato cuando el comprador complete el Safe Meet y libere el depósito de AyniEscrow.
+                    </span>
+                  </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md pt-2">
                   <button 
@@ -304,12 +343,12 @@
                     <span class="flex items-center gap-1.5"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span>Ver en el Catálogo</span></span>
                   </button>
                   <a 
-                    [href]="autoPublishResult()?.agent?.hskExplorerTx"
-                    target="_blank"
+                    [href]="autoPublishResult()?.agent?.hskRegistryAddressUrl || 'https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2'"
+                    target="_blank" 
                     rel="noopener noreferrer"
                     class="w-full py-3.5 bg-white border border-ayni-espresso/20 hover:bg-ayni-canvas text-ayni-espresso font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span class="flex items-center gap-1.5"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Ver en HSK Explorer</span></span>
+                    <span class="flex items-center gap-1.5"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Auditar Contrato HSK</span></span>
                     <span>↗</span>
                   </a>
                 </div>

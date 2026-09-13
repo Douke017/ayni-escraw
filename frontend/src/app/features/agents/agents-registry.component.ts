@@ -42,7 +42,7 @@ export class AgentsRegistryComponent implements OnInit {
   public readonly hskExplorerRegistryUrl =
     'https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2';
 
-  public readonly agents: AgentProfile[] = [
+  public readonly agentsList = signal<AgentProfile[]>([
     {
       id: 1,
       name: 'Ayni Seller Agent',
@@ -82,18 +82,31 @@ export class AgentsRegistryComponent implements OnInit {
         'https://testnet-explorer.hskchain.net/address/0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2',
       contractStandard: 'ERC-8004 ValidationRegistry',
     },
-  ];
+  ]);
 
-  public readonly selectedAgent = signal<AgentProfile>(this.agents[0]);
+  public readonly selectedAgent = signal<AgentProfile>(this.agentsList()[0]);
   public readonly selectedAuditJson = signal<string | null>(null);
 
   public readonly recentAudits = computed(() => {
     return this.catalogService.listings();
   });
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
     this.catalogService.fetchListings();
     this.sellerAgentService.getHskInfo();
+
+    try {
+      const rep1 = await this.sellerAgentService.getAgentReputation(1);
+      if (rep1) {
+        this.agentsList.update(list => list.map(a => a.id === 1 ? { ...a, reputation: rep1.reputationScore } : a));
+      }
+      const rep42 = await this.sellerAgentService.getAgentReputation(42);
+      if (rep42) {
+        this.agentsList.update(list => list.map(a => a.id === 42 ? { ...a, reputation: rep42.reputationScore } : a));
+      }
+    } catch (e) {
+      console.warn('Could not fetch agent reputation', e);
+    }
   }
 
   public selectAgent(agent: AgentProfile): void {

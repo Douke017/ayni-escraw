@@ -27,7 +27,11 @@ export interface AutonomousPublishResult {
     agentAddress: string;
     registryAddress: string;
     subscriptionManager: string;
-    hskExplorerTx: string;
+    proofHash?: string;
+    onChainTxHash?: string | null;
+    isLiveOnChain?: boolean;
+    hskExplorerTx?: string;
+    hskRegistryAddressUrl?: string;
   };
 }
 
@@ -53,6 +57,19 @@ export interface HskInfoResult {
   erc8004Standard: string;
 }
 
+export interface AgentReputationResult {
+  agentId: number;
+  agentName: string;
+  reputationScore: number;
+  baselineReputation: number;
+  settledOrdersAwarded: number;
+  disputesPenalized: number;
+  totalListingsValidated: number;
+  registryAddress: string;
+  contractStandard: string;
+  hskRegistryUrl: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -74,6 +91,17 @@ export class SellerAgentService {
       return data;
     } catch (e) {
       console.warn('Failed to fetch HSK info:', e);
+      return null;
+    }
+  }
+
+  public async getAgentReputation(agentId: number): Promise<AgentReputationResult | null> {
+    try {
+      return await firstValueFrom(
+        this.http.get<AgentReputationResult>(`${this.apiUrl}/seller-agent/reputation/${agentId}`)
+      );
+    } catch (e) {
+      console.warn('Failed to fetch agent reputation:', e);
       return null;
     }
   }

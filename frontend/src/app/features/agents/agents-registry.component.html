@@ -67,12 +67,92 @@
       </div>
     </div>
 
+    <!-- ERC-8004 Architecture 3 Pillars Explanation -->
+    <section class="bg-gradient-to-br from-white via-ayni-card to-emerald-50/20 border border-ayni-espresso/10 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+      <div class="flex flex-col gap-2 max-w-3xl">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 font-mono">
+            Estándar ERC-8004 • Separación Soberana On-Chain / Off-Chain
+          </span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-ayni-espresso font-serif">
+          ¿Cómo Funciona el Registro y la Reputación de los Agentes?
+        </h2>
+        <p class="text-xs sm:text-sm text-ayni-muted leading-relaxed">
+          Para garantizar escalabilidad y cero sobrecostos de gas en HSK Chain, la lógica comercial pesada (Gemini Vision, catálogo y chats) vive off-chain. En la Blockchain solo se asientan tres registros criptográficos ultraligeros:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Pillar 1: Identity -->
+        <div class="bg-ayni-canvas/80 border border-ayni-espresso/10 rounded-2xl p-5 flex flex-col justify-between gap-4">
+          <div class="flex flex-col gap-3">
+            <div class="w-10 h-10 rounded-xl bg-ayni-espresso/5 border border-ayni-espresso/10 flex items-center justify-center text-ayni-espresso">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-ayni-terracotta">Pilar 1</span>
+              <h3 class="text-base font-bold text-ayni-espresso">Identity Registry</h3>
+            </div>
+            <p class="text-xs text-ayni-muted leading-relaxed">
+              Registra el nacimiento on-chain del agente. Emite un ID único (<span class="font-mono font-bold text-ayni-espresso">AgentId #1</span>), su dirección de billetera autorizada y el enlace descentralizado (URI) a su manifiesto técnico y restricciones.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-ayni-espresso/10 flex items-center justify-between text-[11px] text-ayni-espresso font-semibold">
+            <span>Frecuencia:</span>
+            <span class="text-ayni-muted">1 sola vez al nacer</span>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Validation -->
+        <div class="bg-ayni-canvas/80 border border-ayni-espresso/10 rounded-2xl p-5 flex flex-col justify-between gap-4">
+          <div class="flex flex-col gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-800">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Pilar 2</span>
+              <h3 class="text-base font-bold text-ayni-espresso">Validation Registry</h3>
+            </div>
+            <p class="text-xs text-ayni-muted leading-relaxed">
+              Atesta la auditoría del hardware. Guarda únicamente 4 campos mínimos: <span class="font-mono text-emerald-900 font-semibold">listingId</span>, <span class="font-mono text-emerald-900 font-semibold">agentId</span>, <span class="font-mono text-emerald-900 font-semibold">dictum (PASS)</span> y el <span class="font-mono text-emerald-900 font-semibold">proofHash (keccak256)</span> del reporte. Fotos y chats jamás tocan la cadena.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-ayni-espresso/10 flex items-center justify-between text-[11px] text-ayni-espresso font-semibold">
+            <span>Consumo de Gas:</span>
+            <span class="text-emerald-800 font-mono">Ultraligero (~45k gas)</span>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Reputation -->
+        <div class="bg-emerald-900/5 border-2 border-emerald-600/30 rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-xs">
+          <div class="flex flex-col gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 15 2 2 4-4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 9 3 3 6-6"/></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Pilar 3</span>
+              <h3 class="text-base font-bold text-ayni-espresso">Reputation Registry</h3>
+            </div>
+            <p class="text-xs text-ayni-muted leading-relaxed">
+              <strong class="text-ayni-espresso">No es un botón de "Like" manipulable.</strong> La reputación solo la otorga el Smart Contract <span class="font-mono text-ayni-espresso font-bold">AyniEscrow.sol</span>: cuando el comprador inspecciona el equipo en Safe Meet y libera fondos, se ejecuta automáticamente <span class="font-mono text-emerald-800 font-bold">recordFeedback(+1)</span>. Si hay disputa y vicio oculto, se penaliza con <span class="font-mono text-red-600 font-bold">-1</span>.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-emerald-600/20 flex items-center justify-between text-[11px] text-ayni-espresso font-semibold">
+            <span>Gobernanza:</span>
+            <span class="text-emerald-800 font-bold">Exclusiva de AyniEscrow.sol</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Registered Agents Grid -->
     <section class="flex flex-col gap-4">
       <h2 class="text-xl sm:text-2xl font-bold text-ayni-espresso font-serif">Agentes Registrados en el Protocolo</h2>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        @for (agent of agents; track agent.id) {
+        @for (agent of agentsList(); track agent.id) {
           <div 
             class="bg-ayni-card border-2 rounded-2xl p-6 flex flex-col gap-4 shadow-sm transition-all"
             [class.border-emerald-500]="agent.id === 1"
