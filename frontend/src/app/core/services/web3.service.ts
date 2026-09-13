@@ -47,8 +47,40 @@ export class Web3Service {
   constructor() {
     this.publicClient = createPublicClient({
       chain: hskTestnet,
-      transport: http(),
+      transport: http(environment.rpcUrl),
     });
+
+    // Setup event listeners for MetaMask
+    if (typeof window !== 'undefined') {
+      const ethereum = (window as unknown as {
+        ethereum?: {
+          on?: (event: string, callback: (...args: unknown[]) => void) => void;
+          request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+        };
+      }).ethereum;
+
+      if (ethereum?.on) {
+        ethereum.on('accountsChanged', (accounts: unknown) => {
+          const accs = accounts as string[];
+          if (accs && accs.length > 0) {
+            const nextAddr = accs[0].toLowerCase() as Address;
+            this.account.set(nextAddr);
+            localStorage.setItem('ayni_wallet_address', nextAddr);
+            this.refreshUsdtBalance();
+          } else {
+            this.account.set(null);
+            this.balanceUsdt.set('0.00');
+            localStorage.removeItem('ayni_wallet_address');
+          }
+        });
+
+        ethereum.on('chainChanged', (chainIdHex: unknown) => {
+          const cid = parseInt(chainIdHex as string, 16);
+          this.chainId.set(cid);
+          this.refreshUsdtBalance();
+        });
+      }
+    }
 
     // Check if previously connected in localStorage
     const saved = localStorage.getItem('ayni_wallet_address');
@@ -110,8 +142,83 @@ export class Web3Service {
       });
       const formatted = formatUnits(balance, 6);
       this.balanceUsdt.set(formatted);
-    } catch {
-      // Keep existing balance if contract query fails
+      console.log(`[Ayni Web3] USDT Balance for ${addr}: ${formatted}`);
+    } catch (err: unknown) {
+      console.warn('[Ayni Web3] Public RPC readContract failed, trying fallback eth_call:', err);
+      try {
+        const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+        if (ethereum) {
+          const cleanAddr = addr.replace(/^0x/, '').padStart(64, '0');
+          const data = `0x70a08231${cleanAddr}`;
+          const res = (await ethereum.request({
+            method: 'eth_call',
+            params: [{ to: usdtContract, data }, 'latest'],
+          })) as string;
+          if (res && res !== '0x') {
+            const raw = BigInt(res);
+            const formatted = formatUnits(raw, 6);
+            this.balanceUsdt.set(formatted);
+            console.log(`[Ayni Web3] Fallback USDT Balance for ${addr}: ${formatted}`);
+          }
+        }
+      } catch (fallbackErr) {
+        console.error('[Ayni Web3] Failed to query USDT balance:', fallbackErr);
+      }
+    }
+  }
+
+  public async addUsdtToMetaMask(): Promise<boolean> {
+    try {
+      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown }) => Promise<unknown> } }).ethereum;
+      if (!ethereum) return false;
+      await ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: environment.contracts.usdt,
+            symbol: 'USDT',
+            decimals: 6,
+            image: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+          },
+        },
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to add token to MetaMask', err);
+      return false;
+    }
+  }
+
+  public async requestFaucet(amount: number = 1000): Promise<string | null> {
+    const addr = this.account();
+    const usdtContract = environment.contracts.usdt;
+    if (!addr || !usdtContract) return null;
+
+    try {
+      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      if (!ethereum) throw new Error('Billetera Web3 no disponible');
+
+      const cleanAddr = addr.replace(/^0x/, '').padStart(64, '0');
+      const amountHex = (BigInt(amount) * 1000000n).toString(16).padStart(64, '0');
+      const data = `0x7b56c2b2${cleanAddr}${amountHex}`;
+
+      const txHash = (await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [
+          {
+            from: addr,
+            to: usdtContract,
+            data: data,
+          },
+        ],
+      })) as string;
+
+      setTimeout(() => this.refreshUsdtBalance(), 4000);
+      return txHash;
+    } catch (err) {
+      console.error('Faucet request failed:', err);
+      throw err;
     }
   }
 

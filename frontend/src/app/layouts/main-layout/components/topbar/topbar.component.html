@@ -44,13 +44,13 @@
 
     <!-- Web3 Actions / User Profile -->
     <div class="topbar__actions">
-      @if (authService.isAuthenticated()) {
+      @if (authService.isAuthenticated() || web3Service.isConnected()) {
         <div class="topbar__wallet-chip">
           <ayni-badge variant="hsk" size="sm" [pulse]="true">
             HSK Testnet
           </ayni-badge>
 
-          <span class="topbar__balance">
+          <span class="topbar__balance" (click)="onRefreshBalance()" title="Clic para refrescar saldo">
             {{ web3Service.usdtBalance() | usdt }}
           </span>
 
@@ -62,7 +62,7 @@
               aria-expanded="false"
             >
               <span class="topbar__user-dot"></span>
-              <span>{{ authService.walletAddress() | truncateAddress }}</span>
+              <span>{{ (authService.walletAddress() || web3Service.account()) | truncateAddress }}</span>
               <span class="topbar__chevron">▼</span>
             </button>
 
@@ -70,8 +70,18 @@
               <div class="topbar__dropdown">
                 <div class="topbar__dropdown-header">
                   <span class="topbar__dropdown-label">Billetera Conectada</span>
-                  <span class="topbar__dropdown-address">{{ authService.walletAddress() }}</span>
+                  <span class="topbar__dropdown-address">{{ authService.walletAddress() || web3Service.account() }}</span>
                 </div>
+                <div class="topbar__dropdown-divider"></div>
+                <button type="button" class="topbar__dropdown-item" (click)="onAddUsdtToMetaMask()">
+                  <span>🦊 Importar USDT a MetaMask</span>
+                </button>
+                <button type="button" class="topbar__dropdown-item" (click)="onRequestFaucet()">
+                  <span>💧 Reclamar 1,000 USDT (Faucet)</span>
+                </button>
+                <button type="button" class="topbar__dropdown-item" (click)="onRefreshBalance()">
+                  <span>🔄 Actualizar Saldo</span>
+                </button>
                 <div class="topbar__dropdown-divider"></div>
                 <a routerLink="/escrow" class="topbar__dropdown-item" (click)="closeDropdown()">
                   <span>📦 Mis Transacciones Escrow</span>
