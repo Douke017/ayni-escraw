@@ -95,8 +95,9 @@ public class UserRolesAndKycIntegrationTests : IClassFixture<WebApplicationFacto
         kycInitRes.StatusCode.Should().Be(HttpStatusCode.OK);
         var kycInit = await kycInitRes.Content.ReadFromJsonAsync<KycSessionResponseDto>();
         kycInit.Should().NotBeNull();
-        kycInit!.SessionId.Should().StartWith("didit_sess_");
-        kycInit.VerificationUrl.Should().Contain(walletAddress);
+        kycInit!.SessionId.Should().NotBeNullOrWhiteSpace();
+        kycInit.VerificationUrl.Should().Contain("didit.me");
+
 
         // 6. Complete KYC verification (Didit simulator / webhook)
         var kycCompleteRes = await _client.PostAsJsonAsync("/api/users/kyc/complete", new CompleteKycRequest

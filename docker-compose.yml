@@ -101,10 +101,14 @@ services:
       ARBITRATOR_ADDRESS: ${ARBITRATOR_ADDRESS:-0x70997970C51812dc3A010C7d01b50e0d17dc79C8}
       PYTHON_PATH: /app/ai-agents/.venv/bin/python3
       AI_AGENTS_RUNNER_PATH: /app/ai-agents/runner.py
+      DIDIT_API_KEY: ${DIDIT_API_KEY:-}
+      DIDIT_WEBHOOK_SECRET: ${DIDIT_WEBHOOK_SECRET:-}
+      DIDIT_CALLBACK_URL: ${DIDIT_CALLBACK_URL:-http://localhost:4200/verify/done}
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5000
     ports:
       - "5000:5000"
+
 
   frontend:
     build:

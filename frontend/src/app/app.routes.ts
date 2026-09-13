@@ -72,9 +72,15 @@ export const routes: Routes = [
           import('./features/chat/chat.component').then((m) => m.ChatComponent),
       },
       {
+        path: 'verify/done',
+        loadComponent: () =>
+          import('./features/verify/verify-done.component').then((m) => m.VerifyDoneComponent),
+      },
+      {
         path: '**',
         redirectTo: '',
       },
+
     ],
   },
 ];

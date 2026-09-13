@@ -92,7 +92,9 @@ builder.Services.AddSingleton<IBlockchainGatewayService, BlockchainGatewayServic
 // 5. Python Agent Runner (Zero HTTP Endpoints - Programmatic Process Execution)
 builder.Services.AddSingleton<IPythonAgentRunner, PythonAgentRunnerService>();
 builder.Services.AddSingleton<IVerifyProductEngine, VerifyProductEngine>();
+builder.Services.AddHttpClient("Didit");
 builder.Services.AddScoped<IKycService, DiditKycService>();
+
 
 // 6. Real-time - SignalR
 builder.Services.AddSignalR();

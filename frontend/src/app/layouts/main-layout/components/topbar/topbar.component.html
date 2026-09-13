@@ -57,6 +57,40 @@
       </button>
 
       @if (web3Service.isConnected() || authService.isAuthenticated()) {
+        <!-- Role switcher or KYC verify pill (Desktop) -->
+        @if (kycService.canSell()) {
+          <div class="hidden lg:inline-flex items-center p-0.5 bg-black/40 border border-ayni-gold/30 rounded-full text-[11px] font-bold">
+            <button
+              type="button"
+              (click)="onSwitchRole('Buyer')"
+              [class.bg-ayni-gold]="kycService.activeRole() === 'Buyer'"
+              [class.text-ayni-espresso]="kycService.activeRole() === 'Buyer'"
+              [class.text-ayni-canvas]="kycService.activeRole() !== 'Buyer'"
+              class="px-2.5 py-0.5 rounded-full transition cursor-pointer">
+              Soy Comprador
+            </button>
+            <button
+              type="button"
+              (click)="onSwitchRole('Seller')"
+              [class.bg-ayni-gold]="kycService.activeRole() === 'Seller'"
+              [class.text-ayni-espresso]="kycService.activeRole() === 'Seller'"
+              [class.text-ayni-canvas]="kycService.activeRole() !== 'Seller'"
+              class="px-2.5 py-0.5 rounded-full transition cursor-pointer flex items-center gap-1">
+              <span>Soy Vendedor</span>
+              <span class="text-[9px] text-emerald-400">✓</span>
+            </button>
+          </div>
+        } @else {
+          <button 
+            type="button" 
+            class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 bg-ayni-terracotta/30 hover:bg-ayni-terracotta/50 text-white border border-ayni-terracotta/60 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
+            (click)="onVerifyKyc()" 
+            title="Completa tu verificación con Didit para vender productos">
+            <span>🛡️</span>
+            <span>Verificar para Vender (KYC)</span>
+          </button>
+        }
+
         <div class="flex items-center gap-1.5 sm:gap-2 bg-ayni-canvas/10 border border-ayni-gold/30 rounded-full p-1 sm:pl-2 sm:pr-1 text-xs font-semibold relative text-ayni-canvas">
           <!-- HSK badge only on sm+ -->
           <span class="hidden sm:inline-flex">
@@ -85,12 +119,53 @@
             </button>
 
             @if (isDropdownOpen()) {
-              <div class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-ayni-espresso border border-ayni-gold/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 text-ayni-canvas">
-                <div class="p-2.5 bg-black/30 rounded-xl mb-1 border border-ayni-gold/20">
-                  <span class="text-[10px] uppercase font-bold text-ayni-gold block mb-0.5">Billetera Conectada</span>
-                  <span class="font-mono text-xs text-ayni-canvas font-bold truncate block">{{ web3Service.account() || authService.walletAddress() }}</span>
+              <div class="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-ayni-espresso border border-ayni-gold/30 rounded-2xl shadow-2xl p-2.5 z-50 flex flex-col gap-1 text-ayni-canvas">
+                <!-- User & KYC Status Section -->
+                <div class="p-2.5 bg-black/40 rounded-xl mb-1 border border-ayni-gold/20">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] uppercase font-bold text-ayni-gold block">Rol: {{ kycService.activeRole() }}</span>
+                    @if (kycService.isApproved()) {
+                      <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/40">✓ KYC Verificado</span>
+                    } @else if (kycService.isPending()) {
+                      <span class="text-[9px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.5 rounded border border-amber-500/40">⏳ En Revisión</span>
+                    } @else {
+                      <span class="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-1.5 py-0.5 rounded border border-rose-500/40">Sin Verificar</span>
+                    }
+                  </div>
+                  <span class="font-mono text-[11px] text-ayni-canvas font-bold truncate block">{{ web3Service.account() || authService.walletAddress() }}</span>
                   <span class="text-xs font-bold text-ayni-gold block mt-1">Saldo: {{ web3Service.usdtBalance() | usdt }}</span>
+
+                  <!-- Dual-role buttons if KYC approved -->
+                  @if (kycService.canSell()) {
+                    <div class="grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-white/10">
+                      <button
+                        type="button"
+                        (click)="onSwitchRole('Buyer')"
+                        [class.bg-ayni-gold]="kycService.activeRole() === 'Buyer'"
+                        [class.text-ayni-espresso]="kycService.activeRole() === 'Buyer'"
+                        class="px-2 py-1.5 bg-white/10 rounded-lg text-[11px] font-bold text-center transition cursor-pointer">
+                        Soy Comprador
+                      </button>
+                      <button
+                        type="button"
+                        (click)="onSwitchRole('Seller')"
+                        [class.bg-ayni-gold]="kycService.activeRole() === 'Seller'"
+                        [class.text-ayni-espresso]="kycService.activeRole() === 'Seller'"
+                        class="px-2 py-1.5 bg-white/10 rounded-lg text-[11px] font-bold text-center transition cursor-pointer">
+                        Soy Vendedor
+                      </button>
+                    </div>
+                  } @else {
+                    <button
+                      type="button"
+                      (click)="onVerifyKyc(); closeDropdown()"
+                      class="w-full mt-2 px-3 py-1.5 bg-ayni-terracotta hover:bg-ayni-terracotta/90 text-white rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md">
+                      <span>🛡️</span>
+                      <span>Verificar Identidad con Didit</span>
+                    </button>
+                  }
                 </div>
+
                 <button type="button" class="w-full text-left px-3 py-2 text-xs font-bold text-ayni-canvas hover:bg-ayni-gold/20 rounded-lg flex items-center gap-2 transition cursor-pointer" (click)="onAddUsdtToMetaMask()">
                   <span>🦊</span>
                   <span>Importar USDT a MetaMask</span>
