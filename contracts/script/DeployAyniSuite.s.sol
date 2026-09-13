@@ -22,8 +22,17 @@ contract DeployAyniSuiteScript is Script {
         uint256 sellerAgentId;
     }
 
+    function _loadPrivateKey(string memory envVar) internal view returns (uint256) {
+        string memory keyStr = vm.envOr(envVar, string(""));
+        if (bytes(keyStr).length == 0) return 0;
+        if (bytes(keyStr).length >= 2 && bytes(keyStr)[0] == "0" && (bytes(keyStr)[1] == "x" || bytes(keyStr)[1] == "X")) {
+            return vm.parseUint(keyStr);
+        }
+        return vm.parseUint(string.concat("0x", keyStr));
+    }
+
     function run() external {
-        uint256 deployerPrivateKey = vm.envOr("DEPLOYER_PRIVATE_KEY", uint256(0));
+        uint256 deployerPrivateKey = _loadPrivateKey("DEPLOYER_PRIVATE_KEY");
         require(deployerPrivateKey != 0, "DEPLOYER_PRIVATE_KEY environment variable is required. Please set it in your .env file.");
 
         DeploymentAddresses memory addrs;
