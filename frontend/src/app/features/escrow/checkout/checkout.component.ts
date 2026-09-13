@@ -75,38 +75,50 @@ export class CheckoutComponent implements OnInit {
       const buyer = (this.authService.walletAddress() || this.web3Service.account()) as Address;
       const seller = item.sellerAddress as Address;
 
-      // 1. Create order in Backend / DB
+      // 1. Balance verification
+      const currentBal = parseFloat(this.web3Service.balanceUsdt());
+      if (currentBal < item.priceUsdt) {
+        throw new Error(`Saldo USDT insuficiente (${currentBal} USDT). Este producto requiere ${item.priceUsdt} USDT. Reclama fondos en el Faucet superior.`);
+      }
+
+      // 2. Determine passportTokenId and generate on-chain bytes32 order ID
+      let passportTokenId = 4;
+      if (seller.toLowerCase() === '0x70997970c51812dc3a010c7d01b50e0d17dc79c8') {
+        passportTokenId = 1;
+      } else if (seller.toLowerCase() === '0x6582dcd2587c6094c0fb3ce986035b1a4157d59a') {
+        passportTokenId = 3;
+      }
+
+      const orderUuid = crypto.randomUUID();
+      const onChainOrderId = this.web3Service.toBytes32(orderUuid);
+
+      // 3. Create order in Backend / DB with the matching onChainOrderId
       const order = await this.escrowService.createOrder(
         item.id,
         buyer,
         seller,
         item.priceUsdt,
-        42
+        passportTokenId,
+        onChainOrderId
       );
 
-      // 2. Sign real EIP-712 Permit2 typed data if Web3 provider and contracts are present
-      let permitSignature = '';
-      if (environment.contracts.usdt && environment.contracts.escrow) {
-        const nonce = BigInt(Date.now());
-        const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
-        const onChainIdNum = order.onChainOrderId.startsWith('0x')
-          ? BigInt(order.onChainOrderId)
-          : BigInt(1);
+      // 4. Real On-Chain Escrow Deposit on HSK Testnet!
+      // Prompts MetaMask to approve USDT and call createOrder + depositDirect, deducting tokens on-chain.
+      const escrowResult = await this.web3Service.createAndDepositEscrow({
+        orderId: order.onChainOrderId || order.id,
+        seller,
+        amountUsdt: item.priceUsdt,
+        passportTokenId,
+        validatedAgentId: 1,
+      });
 
-        permitSignature = await this.web3Service.signPermit2Witness({
-          token: environment.contracts.usdt as Address,
-          spender: environment.contracts.escrow as Address,
-          amount: BigInt(Math.round(item.priceUsdt * 1e6)),
-          nonce,
-          deadline,
-          orderId: onChainIdNum,
-          buyer,
-          seller,
-        });
-      }
-
-      // 3. Register deposit with Permit2 signature
-      await this.escrowService.depositPermit2(order.id, item.priceUsdt, permitSignature);
+      // 5. Register funded status and txHash in backend
+      await this.escrowService.depositPermit2(
+        order.id,
+        item.priceUsdt,
+        'ON_CHAIN_DIRECT_ESCROW',
+        escrowResult.txHash
+      );
 
       this.createdOrderId.set(order.id);
       this.isSuccess.set(true);

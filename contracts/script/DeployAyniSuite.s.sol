@@ -92,7 +92,7 @@ contract DeployAyniSuiteScript is Script {
             addrs.deployer,
             addrs.usdtToken,
             treasury,
-            699 * 1e16
+            6_990_000 // 6.99 USDT (6 decimals)
         );
         addrs.subscriptionManager = address(subscriptionManager);
         console2.log("AyniSubscriptionManager deployed at:", addrs.subscriptionManager);
@@ -102,8 +102,8 @@ contract DeployAyniSuiteScript is Script {
             addrs.deployer,
             addrs.usdtToken,
             treasury,
-            30 * 1e16,
-            15 * 1e16
+            300_000, // 0.30 USDT (6 decimals)
+            150_000  // 0.15 USDT (6 decimals)
         );
         addrs.chatBond = address(chatBond);
         console2.log("AyniChatBond deployed at:", addrs.chatBond);

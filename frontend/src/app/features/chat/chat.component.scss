@@ -47,6 +47,14 @@
     margin-bottom: var(--space-1);
   }
 
+  &__header-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
   &__channel-tag {
     font-size: 0.8125rem;
     color: var(--text-muted);
@@ -68,6 +76,108 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+  }
+
+  /* Deposit Card */
+  &__deposit-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  &__deposit-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  &__deposit-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  &__deposit-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--aguayo-gold);
+    margin: 0 0 4px;
+  }
+
+  &__deposit-sub {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0;
+
+    code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--aguayo-cream);
+    }
+  }
+
+  &__deposit-perks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: rgba(0, 0, 0, 0.25);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--surface-border);
+  }
+
+  &__perk-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+
+  &__perk-check {
+    color: #10b981;
+    font-weight: 800;
+    font-size: 0.875rem;
+  }
+
+  &__deposit-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  &__empty-lock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    gap: var(--space-2);
+  }
+
+  &__empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-2);
+    opacity: 0.85;
+  }
+
+  &__empty-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--aguayo-gold);
+    margin: 0;
+  }
+
+  &__empty-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.5;
   }
 
   /* Bond Card */

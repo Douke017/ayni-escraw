@@ -177,6 +177,31 @@ public class EscrowController : ControllerBase
         return Ok(new { success = true, status = order.Status.ToString() });
     }
 
+    [HttpPost("orders/{id:guid}/deposit-permit2")]
+    public async Task<IActionResult> DepositPermit2(Guid id, [FromBody] DepositPermit2Request request)
+    {
+        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound(new { error = $"Order with ID {id} not found" });
+        }
+
+        order.Status = OrderStatus.Funded;
+        if (!string.IsNullOrWhiteSpace(request.TxHash))
+        {
+            order.SettlementTxHash = request.TxHash;
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await _escrowHub.Clients.Group($"escrow_{order.Id}").OrderStatusChanged(order.Id.ToString(), OrderStatus.Funded, timestamp);
+
+        _logger.LogInformation("Order {OrderId} successfully funded via Permit2. Amount: {Amount} USDT", order.Id, request.AmountUsdt);
+
+        return Ok(new { success = true, status = order.Status.ToString(), orderId = order.Id });
+    }
+
     [HttpPost("orders/{id:guid}/settle")]
     public async Task<IActionResult> SettleOrder(Guid id, [FromBody] SettleOrderRequest? request = null)
     {
@@ -261,6 +286,13 @@ public class CreateOrderRequest
     public string? ArbitratorAddress { get; set; }
     public decimal AmountUsdt { get; set; }
     public ulong PassportTokenId { get; set; }
+}
+
+public class DepositPermit2Request
+{
+    public decimal AmountUsdt { get; set; }
+    public string PermitSignature { get; set; } = string.Empty;
+    public string? TxHash { get; set; }
 }
 
 public class SettleOrderRequest

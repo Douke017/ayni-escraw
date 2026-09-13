@@ -2,11 +2,23 @@
   <div class="chat-page__container">
     <header class="chat-page__header">
       <div class="chat-page__header-left">
-        <span class="chat-page__pre">Canal Seguro P2P • SignalR</span>
-        <h1 class="chat-page__title">Chat de Negociación Directa</h1>
-        <span class="chat-page__channel-tag">Canal: #{{ orderId() }}</span>
+        <span class="chat-page__pre">Canal Seguro P2P • SignalR & Smart Contracts</span>
+        @if (listing()) {
+          <h1 class="chat-page__title">{{ listing()!.title }}</h1>
+          <div class="chat-page__header-meta">
+            <ayni-badge variant="funded" size="sm">{{ listing()!.priceUsdt | usdt }}</ayni-badge>
+            <span class="chat-page__channel-tag">Vendedor: {{ listing()!.sellerAddress | truncateAddress }}</span>
+            <span class="chat-page__channel-tag">• ID: {{ orderId() | truncateAddress }}</span>
+          </div>
+        } @else {
+          <h1 class="chat-page__title">Chat de Negociación Directa</h1>
+          <span class="chat-page__channel-tag">Canal: #{{ orderId() || 'Seleccione una publicación' }}</span>
+        }
       </div>
       <div class="chat-page__header-right">
+        @if (isSeller()) {
+          <ayni-badge variant="neutral" size="sm">Modo Vendedor</ayni-badge>
+        }
         <ayni-badge variant="pass" size="sm" [pulse]="true">
           SignalR Conectado
         </ayni-badge>
@@ -16,60 +28,111 @@
     <div class="chat-page__grid">
       <!-- Main Chat Area -->
       <main class="chat-page__main">
-        <!-- Anti-Spam Intent Bond Status Banner -->
-        <div class="chat-page__bond-banner">
-          <ayni-card sideBarColor="var(--aguayo-gold)" padding="sm">
-            <div class="chat-page__bond-card">
-              <div class="chat-page__bond-info">
-                <div class="chat-page__bond-header">
-                  <span class="chat-page__bond-icon">🛡️</span>
-                  <strong>Intent Bond Anti-Spam (AyniChatBond.sol): 0.30 USDT</strong>
-                </div>
-                <p class="chat-page__bond-sub">
-                  El depósito se desbloquea para reembolso total tras 2 respuestas mutuas serias.
-                </p>
-              </div>
-
-              <!-- Replies Progress -->
-              <div class="chat-page__bond-progress-box">
-                <div class="chat-page__bond-counters">
-                  <span class="chat-page__counter-item">
-                    Tus respuestas: <strong>{{ bondService.buyerRepliesCount() }}/2</strong>
-                  </span>
-                  <span class="chat-page__counter-item">
-                    Vendedor: <strong>{{ bondService.sellerRepliesCount() }}/2</strong>
-                  </span>
-                </div>
-
-                <div class="chat-page__pbar">
-                  <div class="chat-page__pbar-fill" [style.width.%]="bondService.progressPercentage()"></div>
-                </div>
-
-                @if (bondService.isRefundEligible()) {
-                  <div class="chat-page__refund-claim">
-                    <ayni-badge variant="pass" size="sm">✓ Reembolso 100% (0.30 USDT) Habilitado</ayni-badge>
-                    <ayni-button 
-                      variant="primary" 
-                      size="sm" 
-                      [loading]="isClaimingRefund()"
-                      (clicked)="onClaimRefund()"
-                    >
-                      Solicitar Devolución
-                    </ayni-button>
+        <!-- Anti-Spam Intent Bond Deposit Card (when not yet deposited) -->
+        @if (!isBondSatisfied()) {
+          <div class="chat-page__deposit-banner">
+            <ayni-card sideBarColor="var(--aguayo-gold)" padding="md">
+              <div class="chat-page__deposit-card">
+                <div class="chat-page__deposit-header">
+                  <span class="chat-page__deposit-icon">🛡️</span>
+                  <div>
+                    <h3 class="chat-page__deposit-title">Bono de Intención Anti-Spam Requerido: 0.30 USDT</h3>
+                    <p class="chat-page__deposit-sub">
+                      Para habilitar el chat directo con el vendedor, Ayni protege el protocolo mediante un micro-depósito de <strong>0.30 USDT</strong> en el smart contract <code>AyniChatBond.sol</code>.
+                    </p>
                   </div>
-                }
+                </div>
+
+                <div class="chat-page__deposit-perks">
+                  <div class="chat-page__perk-item">
+                    <span class="chat-page__perk-check">✓</span>
+                    <span><strong>100% Reembolsable:</strong> Devuelto en su totalidad a tu wallet al completar 2 respuestas mutuas con el vendedor.</span>
+                  </div>
+                  <div class="chat-page__perk-item">
+                    <span class="chat-page__perk-check">✓</span>
+                    <span><strong>Anti-Sybil & Bots:</strong> Garantiza que los vendedores solo reciban ofertas serias de personas reales.</span>
+                  </div>
+                </div>
+
+                <div class="chat-page__deposit-action">
+                  <ayni-button 
+                    variant="primary" 
+                    size="md" 
+                    [loading]="isDepositingBond()"
+                    (clicked)="onDepositBond()"
+                  >
+                    <span>🔒 Depositar 0.30 USDT y Desbloquear Chat</span>
+                  </ayni-button>
+                </div>
               </div>
-            </div>
-          </ayni-card>
-        </div>
+            </ayni-card>
+          </div>
+        } @else {
+          <!-- Anti-Spam Intent Bond Progress Banner (when deposited) -->
+          <div class="chat-page__bond-banner">
+            <ayni-card sideBarColor="var(--aguayo-gold)" padding="sm">
+              <div class="chat-page__bond-card">
+                <div class="chat-page__bond-info">
+                  <div class="chat-page__bond-header">
+                    <span class="chat-page__bond-icon">🛡️</span>
+                    <strong>Intent Bond Activo (AyniChatBond.sol): 0.30 USDT</strong>
+                  </div>
+                  <p class="chat-page__bond-sub">
+                    El depósito se desbloquea para reembolso total tras 2 respuestas mutuas serias.
+                  </p>
+                </div>
+
+                <!-- Replies Progress -->
+                <div class="chat-page__bond-progress-box">
+                  <div class="chat-page__bond-counters">
+                    <span class="chat-page__counter-item">
+                      Comprador: <strong>{{ bondService.buyerRepliesCount() }}/2</strong>
+                    </span>
+                    <span class="chat-page__counter-item">
+                      Vendedor: <strong>{{ bondService.sellerRepliesCount() }}/2</strong>
+                    </span>
+                  </div>
+
+                  <div class="chat-page__pbar">
+                    <div class="chat-page__pbar-fill" [style.width.%]="bondService.progressPercentage()"></div>
+                  </div>
+
+                  @if (bondService.isRefundEligible()) {
+                    <div class="chat-page__refund-claim">
+                      <ayni-badge variant="pass" size="sm">✓ Reembolso 100% (0.30 USDT) Habilitado</ayni-badge>
+                      <ayni-button 
+                        variant="primary" 
+                        size="sm" 
+                        [loading]="isClaimingRefund()"
+                        (clicked)="onClaimRefund()"
+                      >
+                        Solicitar Devolución
+                      </ayni-button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </ayni-card>
+          </div>
+        }
 
         <!-- Messages Container -->
         <div class="chat-page__messages-box">
           <div class="chat-page__messages-list">
+            @if (!isBondSatisfied() && currentChatMessages().length === 0) {
+              <div class="chat-page__empty-lock">
+                <span class="chat-page__empty-icon">🔒</span>
+                <h4 class="chat-page__empty-title">Canal bloqueado temporalmente</h4>
+                <p class="chat-page__empty-desc">
+                  Deposita el Bono de Intención de 0.30 USDT para iniciar la conversación protegida por Smart Contract.
+                </p>
+              </div>
+            }
+
             @for (msg of currentChatMessages(); track msg.id) {
               <div 
                 class="chat-page__msg" 
-                [class.chat-page__msg--mine]="msg.senderAddress === authService.walletAddress()"
+                [class.chat-page__msg--mine]="msg.senderAddress.toLowerCase() === (authService.walletAddress() || web3Service.account())?.toLowerCase()"
                 [class.chat-page__msg--ai]="msg.isAiAgent"
               >
                 <div class="chat-page__msg-header">
@@ -92,12 +155,13 @@
             <input 
               type="text" 
               class="chat-page__text-input" 
-              placeholder="Escribe tu mensaje para coordinar la entrega o negociar..."
+              [placeholder]="isBondSatisfied() ? 'Escribe tu mensaje para coordinar la entrega o negociar...' : '🔒 Deposita el bono de 0.30 USDT arriba para habilitar el chat...'"
+              [disabled]="!isBondSatisfied()"
               [ngModel]="messageInput()"
               (ngModelChange)="messageInput.set($event)"
               name="chatMessage"
             />
-            <ayni-button variant="primary" size="md" type="submit">
+            <ayni-button variant="primary" size="md" type="submit" [disabled]="!isBondSatisfied() || !messageInput().trim()">
               <span>Enviar</span>
               <span aria-hidden="true">➤</span>
             </ayni-button>

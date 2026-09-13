@@ -135,8 +135,8 @@
     position: absolute;
     bottom: 80px;
     right: var(--space-4);
-    width: 120px;
-    height: 90px;
+    width: 140px;
+    height: 105px;
     background-color: #1a1d2d;
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-md);
@@ -146,7 +146,27 @@
     justify-content: center;
     gap: var(--space-1);
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
     z-index: 2;
+  }
+
+  &__pip-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__pip-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    backdrop-filter: blur(2px);
   }
 
   &__pip-icon {
@@ -156,6 +176,50 @@
   &__pip-label {
     font-size: 0.625rem;
     color: var(--text-muted);
+  }
+
+  &__ended-pane {
+    height: 480px;
+    background: linear-gradient(135deg, rgba(26, 29, 45, 0.95), rgba(15, 17, 26, 0.98));
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    text-align: center;
+
+    @include md {
+      height: 560px;
+    }
+  }
+
+  &__ended-card {
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  &__ended-icon {
+    font-size: 3.5rem;
+  }
+
+  &__ended-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--aguayo-cream);
+  }
+
+  &__ended-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  &__ended-actions {
+    margin-top: var(--space-2);
   }
 
   &__controls {
@@ -311,6 +375,32 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+  }
+
+  &__settle-success {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    text-align: center;
+  }
+
+  &__settle-tx-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #10b981;
+  }
+
+  &__settle-link {
+    font-size: 0.6875rem;
+    color: var(--aguayo-gold);
+    text-decoration: underline;
+    &:hover {
+      color: var(--aguayo-cream);
+    }
   }
 }
 
