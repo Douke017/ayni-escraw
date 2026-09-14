@@ -89,7 +89,7 @@ var redisEnvUrl = Environment.GetEnvironmentVariable("REDIS_URL")
     ?? Environment.GetEnvironmentVariable("REDIS_TLS_URL") 
     ?? Environment.GetEnvironmentVariable("REDIS_CONNECTION");
 
-string redisConnectionString;
+ConfigurationOptions redisOptions;
 if (!string.IsNullOrWhiteSpace(redisEnvUrl))
 {
     if (redisEnvUrl.StartsWith("redis://", StringComparison.OrdinalIgnoreCase) || 
@@ -100,25 +100,39 @@ if (!string.IsNullOrWhiteSpace(redisEnvUrl))
             var uri = new Uri(redisEnvUrl);
             var pass = uri.UserInfo.Contains(':') ? uri.UserInfo.Split(':')[1] : uri.UserInfo;
             var isSsl = redisEnvUrl.StartsWith("rediss://", StringComparison.OrdinalIgnoreCase);
-            redisConnectionString = $"{uri.Host}:{uri.Port},password={pass},ssl={isSsl},abortConnect=false";
+            redisOptions = new ConfigurationOptions
+            {
+                EndPoints = { { uri.Host, uri.Port > 0 ? uri.Port : 6379 } },
+                Password = pass,
+                Ssl = isSsl,
+                AbortOnConnectFail = false
+            };
+            if (isSsl)
+            {
+                redisOptions.CertificateValidation += (sender, cert, chain, errors) => true;
+            }
         }
         catch
         {
-            redisConnectionString = redisEnvUrl;
+            redisOptions = ConfigurationOptions.Parse(redisEnvUrl);
+            redisOptions.AbortOnConnectFail = false;
         }
     }
     else
     {
-        redisConnectionString = redisEnvUrl;
+        redisOptions = ConfigurationOptions.Parse(redisEnvUrl);
+        redisOptions.AbortOnConnectFail = false;
     }
 }
 else
 {
-    redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379,abortConnect=false";
+    var raw = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379,abortConnect=false";
+    redisOptions = ConfigurationOptions.Parse(raw);
+    redisOptions.AbortOnConnectFail = false;
 }
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
-    ConnectionMultiplexer.Connect(redisConnectionString));
+    ConnectionMultiplexer.Connect(redisOptions));
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
 // 3. Storage - MinIO
@@ -233,51 +247,48 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// Local/dev bootstrap: apply EF migrations against the Docker PostgreSQL instance.
-if (app.Environment.IsDevelopment())
+// Bootstrap: apply EF migrations against PostgreSQL instance.
+try
 {
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AyniDbContext>();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AyniDbContext>();
 
-        // Safe baseline check for pre-existing Docker PostgreSQL schemas:
-        // If tables were created prior to EF migrations, record initial migrations in __EFMigrationsHistory
-        // so Migrate() seamlessly executes pending incremental migrations without "relation already exists" errors.
-        var conn = db.Database.GetDbConnection();
-        conn.Open();
-        using (var cmd = conn.CreateCommand())
-        {
-            cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
-                    ""MigrationId"" character varying(150) NOT NULL,
-                    ""ProductVersion"" character varying(32) NOT NULL,
-                    CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
-                );
-                DO $$
-                BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ProductListings') THEN
-                        IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913050100_InitialCreate') THEN
-                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
-                            VALUES ('20260913050100_InitialCreate', '9.0.2');
-                        END IF;
-                        IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913053056_UserRoleEnum') THEN
-                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
-                            VALUES ('20260913053056_UserRoleEnum', '9.0.2');
-                        END IF;
+    // Safe baseline check for pre-existing Docker PostgreSQL schemas:
+    // If tables were created prior to EF migrations, record initial migrations in __EFMigrationsHistory
+    // so Migrate() seamlessly executes pending incremental migrations without "relation already exists" errors.
+    var conn = db.Database.GetDbConnection();
+    conn.Open();
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = @"
+            CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                ""MigrationId"" character varying(150) NOT NULL,
+                ""ProductVersion"" character varying(32) NOT NULL,
+                CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
+            );
+            DO $$
+            BEGIN
+                IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ProductListings') THEN
+                    IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913050100_InitialCreate') THEN
+                        INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                        VALUES ('20260913050100_InitialCreate', '9.0.2');
                     END IF;
-                END $$;
-            ";
-            cmd.ExecuteNonQuery();
-        }
+                    IF NOT EXISTS (SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260913053056_UserRoleEnum') THEN
+                        INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                        VALUES ('20260913053056_UserRoleEnum', '9.0.2');
+                    END IF;
+                END IF;
+            END $$;
+        ";
+        cmd.ExecuteNonQuery();
+    }
 
-        db.Database.Migrate();
-        app.Logger.LogInformation("PostgreSQL database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogWarning(ex, "Could not apply PostgreSQL migrations at startup.");
-    }
+    db.Database.Migrate();
+    app.Logger.LogInformation("PostgreSQL database migrations applied successfully.");
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Could not apply PostgreSQL migrations at startup.");
 }
 
 app.UseCors("AyniFrontendPolicy");
