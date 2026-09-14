@@ -36,7 +36,7 @@ graph TD
 
 ---
 
-## 🚀 Inicio Rápido con Docker Compose (Recomendado)
+## 🚀 Inicio Rápido con Docker Compose
 
 Todo el ecosistema (PostgreSQL, Redis, MinIO, Backend API y Frontend) se encuentra 100% containerizado y configurado para desplegarse con un único comando en cualquier máquina sin instalaciones locales.
 

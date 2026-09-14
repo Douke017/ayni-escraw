@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 import { Injectable, signal, computed } from '@angular/core';
 import { createPublicClient, http, defineChain, parseAbi, formatUnits, parseUnits, keccak256, toHex, encodeFunctionData, type PublicClient, type Address } from 'viem';
+import { createAppKit, type AppKit } from '@reown/appkit';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { defineChain as defineAppKitChain } from '@reown/appkit/networks';
 import { environment } from '../../../environments/environment';
 
 export const hskTestnet = defineChain({
@@ -12,6 +15,30 @@ export const hskTestnet = defineChain({
   },
   blockExplorers: {
     default: { name: 'HSK Explorer', url: environment.blockExplorerUrl },
+  },
+  testnet: true,
+});
+
+export const hskAppKitNetwork = defineAppKitChain({
+  id: environment.chainId,
+  caipNetworkId: `eip155:${environment.chainId}`,
+  chainNamespace: 'eip155',
+  name: environment.chainName || 'HashKey Chain Testnet',
+  nativeCurrency: {
+    name: 'HashKey EcoPoints',
+    symbol: 'HSK',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [environment.rpcUrl],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'HSK Explorer',
+      url: environment.blockExplorerUrl,
+    },
   },
   testnet: true,
 });
@@ -89,11 +116,19 @@ const FAUCET_ABI = parseAbi([
   'function balanceOf(address account) view returns (uint256)',
 ]);
 
+export interface Eip1193Provider {
+  request: (args: { method: string; params?: unknown[] | Record<string, unknown> | any }) => Promise<unknown>;
+  on?: (event: string, callback: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, callback: (...args: unknown[]) => void) => void;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class Web3Service {
   public readonly publicClient: PublicClient;
+  public appKit?: AppKit;
+  public wagmiAdapter?: WagmiAdapter;
 
   // Vanilla Angular Signals
   public readonly account = signal<Address | null>(null);
@@ -119,40 +154,8 @@ export class Web3Service {
       transport: http(environment.rpcUrl),
     });
 
-    // Setup event listeners for MetaMask
-    if (typeof window !== 'undefined') {
-      const ethereum = (window as unknown as {
-        ethereum?: {
-          on?: (event: string, callback: (...args: unknown[]) => void) => void;
-          request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-        };
-      }).ethereum;
-
-      if (ethereum?.on) {
-        ethereum.on('accountsChanged', (accounts: unknown) => {
-          const accs = accounts as string[];
-          if (accs && accs.length > 0) {
-            const nextAddr = accs[0].toLowerCase() as Address;
-            this.account.set(nextAddr);
-            localStorage.setItem('ayni_wallet_address', nextAddr);
-            this.refreshUsdtBalance();
-          } else {
-            this.account.set(null);
-            this.balanceUsdt.set('0.00');
-            localStorage.removeItem('ayni_wallet_address');
-          }
-        });
-
-        ethereum.on('chainChanged', (chainIdHex: unknown) => {
-          const cid = parseInt(chainIdHex as string, 16);
-          this.chainId.set(cid);
-          this.refreshUsdtBalance();
-        });
-      }
-    }
-
     // Check if previously connected in localStorage
-    const saved = localStorage.getItem('ayni_wallet_address');
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('ayni_wallet_address') : null;
     if (saved && saved.startsWith('0x')) {
       const addr = saved.toLowerCase() as Address;
       this.account.set(addr);
@@ -160,28 +163,90 @@ export class Web3Service {
       this.refreshUsdtBalance();
     }
 
-    // 2. Setup Ethereum provider listeners & auto-detect
-    if (typeof window !== 'undefined') {
-      const eth = (window as unknown as { ethereum?: { 
-        request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-        on?: (event: string, handler: (...args: unknown[]) => void) => void;
-      } })?.ethereum;
+    // Initialize Reown AppKit & WalletConnect multi-wallet provider (browser only, skip in vitest test runner)
+    const isTestEnv = typeof window !== 'undefined' && ((window as unknown as { __vitest_worker__?: unknown }).__vitest_worker__ !== undefined || (window as unknown as { vitest?: unknown }).vitest !== undefined);
+    if (typeof window !== 'undefined' && !isTestEnv) {
+      try {
+        const projectId = environment.reownProjectId || 'b56e18d47c72ab683b10814fe9495694';
 
-      if (eth) {
-        // Auto-detect already connected account without popup
-        eth.request({ method: 'eth_accounts' })
-          .then((res: unknown) => {
-            const accounts = res as string[];
-            if (accounts && accounts.length > 0) {
-              const addr = accounts[0].toLowerCase() as Address;
-              this.account.set(addr);
-              localStorage.setItem('ayni_wallet_address', addr);
+        this.wagmiAdapter = new WagmiAdapter({
+          projectId,
+          networks: [hskAppKitNetwork],
+        });
+
+        this.appKit = createAppKit({
+          adapters: [this.wagmiAdapter],
+          networks: [hskAppKitNetwork],
+          defaultNetwork: hskAppKitNetwork,
+          projectId,
+          metadata: {
+            name: 'Ayni Trust Marketplace',
+            description: 'Mercado P2P Descentralizado con Custodia Inteligente y Pasaportes ERC-721',
+            url: window.location.origin,
+            icons: [`${window.location.origin}/favicon.ico`],
+          },
+          themeMode: 'light',
+          themeVariables: {
+            '--w3m-accent': '#c2593f',
+            '--w3m-border-radius-master': '12px',
+            '--w3m-color-mix': '#0f172a',
+            '--w3m-color-mix-strength': 10,
+          },
+          features: {
+            analytics: false,
+            email: false,
+            socials: [],
+            swaps: false,
+            onramp: false,
+          },
+        });
+
+        // Subscribe to Reown AppKit account state changes
+        this.appKit.subscribeAccount((accountState) => {
+          if (accountState.isConnected && accountState.address) {
+            const nextAddr = accountState.address.toLowerCase() as Address;
+            if (this.account() !== nextAddr) {
+              this.account.set(nextAddr);
+              localStorage.setItem('ayni_wallet_address', nextAddr);
               this.refreshUsdtBalance();
             }
-          })
-          .catch(() => {});
+          } else if (accountState.status === 'disconnected') {
+            if (this.account() !== null) {
+              this.account.set(null);
+              this.balanceUsdt.set('0.00');
+              localStorage.removeItem('ayni_wallet_address');
+            }
+          }
+        });
 
-        // Detect current chainId
+        // Subscribe to network state changes
+        this.appKit.subscribeNetwork((netState) => {
+          if (netState.chainId) {
+            this.chainId.set(Number(netState.chainId));
+            this.refreshUsdtBalance();
+          }
+        });
+      } catch (err) {
+        console.warn('[Ayni Web3] Failed to initialize Reown AppKit:', err);
+      }
+
+      // Injected window.ethereum fallback listeners (MetaMask extension, mobile browser)
+      const eth = (window as unknown as { ethereum?: Eip1193Provider })?.ethereum;
+      if (eth) {
+        if (!this.account()) {
+          eth.request({ method: 'eth_accounts' })
+            .then((res: unknown) => {
+              const accounts = res as string[];
+              if (accounts && accounts.length > 0) {
+                const addr = accounts[0].toLowerCase() as Address;
+                this.account.set(addr);
+                localStorage.setItem('ayni_wallet_address', addr);
+                this.refreshUsdtBalance();
+              }
+            })
+            .catch(() => {});
+        }
+
         eth.request({ method: 'eth_chainId' })
           .then((res: unknown) => {
             if (typeof res === 'string') {
@@ -190,7 +255,6 @@ export class Web3Service {
           })
           .catch(() => {});
 
-        // Listen for accounts change in MetaMask
         if (eth.on) {
           eth.on('accountsChanged', (...args: unknown[]) => {
             const accounts = (args[0] as string[]) || [];
@@ -204,7 +268,6 @@ export class Web3Service {
             }
           });
 
-          // Listen for chain change
           eth.on('chainChanged', (...args: unknown[]) => {
             const chainIdHex = args[0] as string;
             if (chainIdHex) {
@@ -218,16 +281,70 @@ export class Web3Service {
   }
 
   /**
-   * Cambia o agrega automáticamente la red HSK Testnet (Chain ID: 133 / 0x85) en MetaMask
+   * Obtiene el proveedor EIP-1193 activo, ya sea el proveedor conectado de Reown AppKit
+   * (WalletConnect para móviles, Coinbase, etc.) o window.ethereum inyectado.
+   */
+  public getProvider(): Eip1193Provider | null {
+    if (this.appKit) {
+      try {
+        const p = this.appKit.getWalletProvider();
+        if (p && typeof (p as Record<string, unknown>)['request'] === 'function') {
+          return p as unknown as Eip1193Provider;
+        }
+      } catch (e) {
+        console.warn('[Ayni Web3] Error retrieving AppKit wallet provider:', e);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      const eth = (window as unknown as { ethereum?: Eip1193Provider })?.ethereum;
+      if (eth && typeof eth.request === 'function') {
+        return eth;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Abre el modal de Reown AppKit para gestionar la cuenta (ver balance, copiar dirección, desconectar)
+   */
+  public async openAccountModal(): Promise<void> {
+    if (this.appKit) {
+      await this.appKit.open({ view: 'Account' });
+    }
+  }
+
+  /**
+   * Abre el selector de redes de Reown AppKit
+   */
+  public async openNetworksModal(): Promise<void> {
+    if (this.appKit) {
+      await this.appKit.open({ view: 'Networks' });
+    }
+  }
+
+  /**
+   * Cambia o agrega automáticamente la red HSK Testnet (Chain ID: 133 / 0x85)
    */
   public async switchToHskNetwork(): Promise<boolean> {
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } })?.ethereum;
-    if (!ethereum) return false;
+    if (this.appKit) {
+      try {
+        await this.appKit.switchNetwork(hskAppKitNetwork);
+        this.chainId.set(environment.chainId);
+        return true;
+      } catch (switchErr) {
+        console.warn('[Ayni Web3] AppKit switchNetwork fallback to provider:', switchErr);
+      }
+    }
+
+    const provider = this.getProvider();
+    if (!provider) return false;
 
     const hskChainIdHex = '0x' + Number(environment.chainId).toString(16); // '0x85' (133)
 
     try {
-      await ethereum.request({
+      await provider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: hskChainIdHex }],
       });
@@ -237,7 +354,7 @@ export class Web3Service {
       const errCode = (switchError as { code?: number })?.code;
       if (errCode === 4902 || errCode === -32603) {
         try {
-          await ethereum.request({
+          await provider.request({
             method: 'wallet_addEthereumChain',
             params: [
               {
@@ -256,7 +373,7 @@ export class Web3Service {
           this.chainId.set(environment.chainId);
           return true;
         } catch (addError) {
-          console.error('Error al registrar la red HSK Testnet en MetaMask:', addError);
+          console.error('Error al registrar la red HSK Testnet:', addError);
           return false;
         }
       }
@@ -264,18 +381,49 @@ export class Web3Service {
     }
   }
 
+  /**
+   * Conecta con cualquier billetera compatible (MetaMask, Trust Wallet, Coinbase, Rainbow, WalletConnect móvil, etc.)
+   * abriendo el kit interactivo de Reown AppKit.
+   */
   public async connectWallet(): Promise<Address | null> {
     this.isConnecting.set(true);
     this.error.set(null);
 
     try {
-      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } })?.ethereum;
+      if (this.appKit) {
+        await this.appKit.open({ view: 'Connect' });
 
-      if (!ethereum) {
-        throw new Error('Billetera Web3 no encontrada. Por favor instala MetaMask, Rabby u otra extensión compatible con EVM para continuar.');
+        return await new Promise<Address | null>((resolve) => {
+          if (this.account()) {
+            resolve(this.account());
+            return;
+          }
+
+          const unsubAcc = this.appKit!.subscribeAccount((state) => {
+            if (state.isConnected && state.address) {
+              unsubAcc();
+              resolve(state.address.toLowerCase() as Address);
+            }
+          });
+
+          const unsubState = this.appKit!.subscribeState((state) => {
+            if (!state.open) {
+              setTimeout(() => {
+                unsubAcc();
+                unsubState();
+                resolve(this.account());
+              }, 300);
+            }
+          });
+        });
       }
 
-      const accounts = (await ethereum.request({
+      const provider = this.getProvider();
+      if (!provider) {
+        throw new Error('Billetera Web3 no encontrada. Por favor abre la aplicación desde tu billetera móvil o instala una compatible.');
+      }
+
+      const accounts = (await provider.request({
         method: 'eth_requestAccounts',
       })) as string[];
 
@@ -286,7 +434,6 @@ export class Web3Service {
       const addr = accounts[0].toLowerCase() as Address;
       this.account.set(addr);
 
-      // Switch to HSK Testnet (Chain ID 133) automatically
       await this.switchToHskNetwork();
 
       localStorage.setItem('ayni_wallet_address', addr);
@@ -329,11 +476,11 @@ export class Web3Service {
     } catch (err: unknown) {
       console.warn('[Ayni Web3] Public RPC readContract failed, trying fallback eth_call:', err);
       try {
-        const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-        if (ethereum) {
+        const provider = this.getProvider();
+        if (provider) {
           const cleanAddr = addr.replace(/^0x/, '').padStart(64, '0');
           const data = `0x70a08231${cleanAddr}`;
-          const res = (await ethereum.request({
+          const res = (await provider.request({
             method: 'eth_call',
             params: [{ to: usdtContract, data }, 'latest'],
           })) as string;
@@ -352,9 +499,9 @@ export class Web3Service {
 
   public async addUsdtToMetaMask(): Promise<boolean> {
     try {
-      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown }) => Promise<unknown> } }).ethereum;
-      if (!ethereum) return false;
-      await ethereum.request({
+      const provider = this.getProvider();
+      if (!provider) return false;
+      await provider.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
@@ -368,7 +515,7 @@ export class Web3Service {
       });
       return true;
     } catch (err) {
-      console.error('Failed to add token to MetaMask', err);
+      console.error('Failed to add token to wallet', err);
       return false;
     }
   }
@@ -380,14 +527,14 @@ export class Web3Service {
 
     this.isClaimingFaucet.set(true);
     try {
-      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-      if (!ethereum) throw new Error('Billetera Web3 no disponible');
+      const provider = this.getProvider();
+      if (!provider) throw new Error('Billetera Web3 no disponible');
 
       const cleanAddr = addr.replace(/^0x/, '').padStart(64, '0');
       const amountHex = (BigInt(amount) * 1000000n).toString(16).padStart(64, '0');
       const data = `0x7b56c2b2${cleanAddr}${amountHex}`;
 
-      const txHash = (await ethereum.request({
+      const txHash = (await provider.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -424,14 +571,13 @@ export class Web3Service {
       throw new Error('No hay billetera conectada para firmar.');
     }
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-
-    if (!ethereum) {
+    const provider = this.getProvider();
+    if (!provider) {
       throw new Error('Proveedor Web3 no disponible en el navegador.');
     }
 
     try {
-      const sig = (await ethereum.request({
+      const sig = (await provider.request({
         method: 'personal_sign',
         params: [message, addr],
       })) as string;
@@ -462,15 +608,15 @@ export class Web3Service {
       }
 
       console.log(`[Ayni Web3] Requesting USDT approval for spender ${spender}: required ${requiredAmount}, current ${currentAllowance}`);
-      const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-      if (!ethereum) throw new Error('Billetera Web3 no disponible.');
+      const provider = this.getProvider();
+      if (!provider) throw new Error('Billetera Web3 no disponible.');
 
       const cleanSpender = spender.replace(/^0x/, '').padStart(64, '0');
       // Unlimited approve (2^256 - 1) for seamless user experience
       const maxUint256Hex = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
       const data = `0x095ea7b3${cleanSpender}${maxUint256Hex}`;
 
-      const txHash = (await ethereum.request({
+      const txHash = (await provider.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -497,8 +643,8 @@ export class Web3Service {
       throw new Error('Billetera o contrato de ChatBond no disponible.');
     }
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!ethereum) throw new Error('Billetera Web3 no disponible.');
+    const provider = this.getProvider();
+    if (!provider) throw new Error('Billetera Web3 no disponible.');
 
     // 32-byte chatId computed from orderId
     const chatIdHex = keccak256(toHex(orderId)).replace(/^0x/, '');
@@ -507,7 +653,7 @@ export class Web3Service {
     const data = `0x9114ad66${chatIdHex}${cleanSeller}`;
 
     console.log(`[Ayni Web3] Depositing 0.30 USDT chat bond on-chain to ${chatBondContract}`);
-    const txHash = (await ethereum.request({
+    const txHash = (await provider.request({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -538,8 +684,8 @@ export class Web3Service {
       throw new Error('No hay billetera conectada para firmar Permit2.');
     }
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!ethereum) {
+    const provider = this.getProvider();
+    if (!provider) {
       throw new Error('Proveedor Web3 no disponible en el navegador.');
     }
 
@@ -597,7 +743,7 @@ export class Web3Service {
 
     console.log('[Ayni Web3] Requesting Permit2 EIP-712 signature for:', addr, typedData);
 
-    const signature = (await ethereum.request({
+    const signature = (await provider.request({
       method: 'eth_signTypedData_v4',
       params: [addr, JSON.stringify(typedData)],
     })) as string;
@@ -667,8 +813,8 @@ export class Web3Service {
       throw new Error('Billetera o contratos de Escrow/USDT no disponibles.');
     }
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!ethereum) throw new Error('Billetera Web3 no disponible.');
+    const provider = this.getProvider();
+    if (!provider) throw new Error('Billetera Web3 no disponible.');
 
     const onChainOrderId = this.toBytes32(params.orderId);
     const amountUnits = BigInt(Math.round(params.amountUsdt * 1e6));
@@ -699,7 +845,7 @@ export class Web3Service {
         args: [onChainOrderId, params.seller, arbitrator, passportTokenId, amountUnits, validatedAgentId],
       });
 
-      const createTxHash = (await ethereum.request({
+      const createTxHash = (await provider.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -722,7 +868,7 @@ export class Web3Service {
       args: [onChainOrderId],
     });
 
-    const depositTxHash = (await ethereum.request({
+    const depositTxHash = (await provider.request({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -745,8 +891,8 @@ export class Web3Service {
     const escrowContract = environment.contracts.escrow as Address;
     if (!addr || !escrowContract) throw new Error('Billetera o contrato de custodia no disponible.');
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!ethereum) throw new Error('Billetera Web3 no disponible.');
+    const provider = this.getProvider();
+    if (!provider) throw new Error('Billetera Web3 no disponible.');
 
     const onChainOrderId = this.toBytes32(orderId);
     const existing = await this.getOrderOnChain(onChainOrderId);
@@ -762,7 +908,7 @@ export class Web3Service {
     });
 
     console.log(`[Ayni Web3] Confirming handoff on-chain for ${onChainOrderId}...`);
-    const txHash = (await ethereum.request({
+    const txHash = (await provider.request({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -783,8 +929,8 @@ export class Web3Service {
     const escrowContract = environment.contracts.escrow as Address;
     if (!addr || !escrowContract) throw new Error('Billetera o contrato de custodia no disponible.');
 
-    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!ethereum) throw new Error('Billetera Web3 no disponible.');
+    const provider = this.getProvider();
+    if (!provider) throw new Error('Billetera Web3 no disponible.');
 
     const onChainOrderId = this.toBytes32(orderId);
     const existing = await this.getOrderOnChain(onChainOrderId);
@@ -802,7 +948,7 @@ export class Web3Service {
       args: [onChainOrderId],
     });
 
-    const txHash = (await ethereum.request({
+    const txHash = (await provider.request({
       method: 'eth_sendTransaction',
       params: [
         {
@@ -825,11 +971,21 @@ export class Web3Service {
     this.error.set(null);
   }
 
-  public disconnect(): void {
+  public async disconnect(): Promise<void> {
     this.account.set(null);
     this.chainId.set(null);
+    this.balanceUsdt.set('0.00');
     this.error.set(null);
     localStorage.removeItem('ayni_wallet_address');
     localStorage.removeItem('ayni_jwt_token');
+    localStorage.removeItem('ayni_user_session');
+
+    if (this.appKit) {
+      try {
+        await this.appKit.disconnect();
+      } catch (err) {
+        console.warn('[Ayni Web3] Reown AppKit disconnect error:', err);
+      }
+    }
   }
 }

@@ -159,6 +159,113 @@ public class DiditKycService : IKycService
             };
         }
 
+        // If user has a pending Didit session, attempt an active decision sync
+        if (!user.IsKycVerified && !string.IsNullOrEmpty(user.KycSessionId))
+        {
+            return await SyncSessionDecisionAsync(normalized);
+        }
+
+        return new KycStatusResponseDto
+        {
+            WalletAddress = user.WalletAddress,
+            IsKycVerified = user.IsKycVerified,
+            KycStatus = user.KycStatus,
+            SessionId = user.KycSessionId,
+            CompletedAtUtc = user.KycCompletedAtUtc,
+            CanSell = user.CanSell,
+            CanBuy = user.CanBuy
+        };
+    }
+
+    public async Task<KycStatusResponseDto> SyncSessionDecisionAsync(string walletAddress)
+    {
+        var normalized = walletAddress.ToLowerInvariant();
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.WalletAddress == normalized);
+
+        if (user == null)
+        {
+            return new KycStatusResponseDto
+            {
+                WalletAddress = normalized,
+                IsKycVerified = false,
+                KycStatus = KycStatus.None,
+                CanSell = false,
+                CanBuy = true
+            };
+        }
+
+        if (user.IsKycVerified)
+        {
+            return new KycStatusResponseDto
+            {
+                WalletAddress = user.WalletAddress,
+                IsKycVerified = true,
+                KycStatus = KycStatus.Approved,
+                SessionId = user.KycSessionId,
+                CompletedAtUtc = user.KycCompletedAtUtc,
+                CanSell = user.CanSell,
+                CanBuy = user.CanBuy
+            };
+        }
+
+        if (!string.IsNullOrEmpty(user.KycSessionId))
+        {
+            var apiKey = Environment.GetEnvironmentVariable("DIDIT_API_KEY") ?? _configuration["Didit:ApiKey"];
+            var baseUrl = _configuration["Didit:BaseUrl"] ?? DefaultBaseUrl;
+
+            if (!string.IsNullOrWhiteSpace(apiKey) && apiKey != "dummy_key")
+            {
+                try
+                {
+                    var client = _httpClientFactory.CreateClient("Didit");
+                    client.DefaultRequestHeaders.Clear();
+                    client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var decisionEndpoint = $"{baseUrl.TrimEnd('/')}/session/{user.KycSessionId}/decision/";
+                    var response = await client.GetAsync(decisionEndpoint);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseBody = await response.Content.ReadAsStringAsync();
+                        using var jsonDoc = JsonDocument.Parse(responseBody);
+                        var root = jsonDoc.RootElement;
+                        var diditStatus = root.TryGetProperty("status", out var stProp) ? stProp.GetString() : null;
+
+                        _logger.LogInformation("Didit decision query for session {SessionId} returned '{Status}'", user.KycSessionId, diditStatus);
+
+                        if (diditStatus == "Approved")
+                        {
+                            user.IsKycVerified = true;
+                            user.KycStatus = KycStatus.Approved;
+                            user.KycCompletedAtUtc = DateTime.UtcNow;
+                            await _dbContext.SaveChangesAsync();
+                            _logger.LogInformation("Didit KYC verified via active decision sync for user {Wallet}", normalized);
+                        }
+                        else if (diditStatus == "Declined")
+                        {
+                            user.IsKycVerified = false;
+                            user.KycStatus = KycStatus.Rejected;
+                            await _dbContext.SaveChangesAsync();
+                        }
+                        else if (diditStatus == "In Review" || diditStatus == "Resubmitted")
+                        {
+                            user.KycStatus = KycStatus.Pending;
+                            await _dbContext.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Didit decision endpoint returned HTTP {StatusCode} for session {SessionId}", response.StatusCode, user.KycSessionId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to query Didit decision for session {SessionId}", user.KycSessionId);
+                }
+            }
+        }
+
         return new KycStatusResponseDto
         {
             WalletAddress = user.WalletAddress,

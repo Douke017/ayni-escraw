@@ -87,6 +87,11 @@ export class TopbarComponent implements OnInit {
     this.closeDropdown();
   }
 
+  public onOpenAccountModal(): void {
+    this.web3Service.openAccountModal();
+    this.closeDropdown();
+  }
+
   public onDisconnect(): void {
     this.authService.disconnect();
     this.closeDropdown();

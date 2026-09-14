@@ -36,7 +36,26 @@
             "stylePreprocessorOptions": {
               "includePaths": ["src/styles"]
             },
-            "allowedCommonJsDependencies": ["qrcode"]
+            "allowedCommonJsDependencies": [
+              "qrcode",
+              "@safe-global/safe-apps-provider",
+              "@safe-global/safe-apps-sdk",
+              "@safe-global/safe-gateway-typescript-sdk",
+              "events",
+              "dayjs",
+              "dayjs/locale/en.js",
+              "dayjs/plugin/relativeTime.js",
+              "dayjs/plugin/updateLocale.js",
+              "buffer",
+              "@walletconnect/time",
+              "@walletconnect/window-getters",
+              "@walletconnect/window-metadata",
+              "blakejs",
+              "cross-fetch",
+              "@walletconnect/environment",
+              "@noble/hashes/sha3",
+              "ws"
+            ]
           },
           "configurations": {
             "production": {

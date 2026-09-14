@@ -61,7 +61,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 ai-agents/.venv/
-
+.coverage
+.coverage.*
+*.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # OS and editor files
 .DS_Store
@@ -69,6 +75,10 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
 
 # Foundry
 contracts/out/

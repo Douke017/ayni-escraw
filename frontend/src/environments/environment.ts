@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
+const isBrowser = typeof window !== 'undefined';
+const isDevServer = isBrowser && (window.location.port === '4200' || (window.location.hostname === 'localhost' && window.location.port !== '5000' && window.location.port !== ''));
+
 export const environment = {
-  production: false,
-  apiBaseUrl: 'http://localhost:5000/api',
-  signalrHubUrl: 'http://localhost:5000',
-  minioStorageUrl: 'http://localhost:9000',
+  production: true,
+  apiBaseUrl: isDevServer ? 'http://localhost:5000/api' : (isBrowser ? `${window.location.origin}/api` : '/api'),
+  signalrHubUrl: isDevServer ? 'http://localhost:5000' : (isBrowser ? window.location.origin : ''),
+  minioStorageUrl: isDevServer ? 'http://localhost:9000' : (isBrowser ? window.location.origin : ''),
   chainId: 133,
   chainName: 'HSK Testnet',
   rpcUrl: 'https://testnet.hsk.xyz',
   blockExplorerUrl: 'https://testnet-explorer.hskchain.net',
+  reownProjectId: 'b56e18d47c72ab683b10814fe9495694',
   contracts: {
     usdt: '0x69F391d998e9AbA14Cc9FA702be9Cf7b1D03d7f0',
     permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',

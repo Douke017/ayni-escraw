@@ -77,7 +77,7 @@ export class KycService {
 
     try {
       const status = await firstValueFrom(
-        this.http.get<KycStatusResponse>(`${this.apiUrl}/users/kyc/status`, {
+        this.http.get<KycStatusResponse>(`${this.apiUrl}/users/kyc/status?walletAddress=${wallet}`, {
           headers: this.getAuthHeaders(),
         })
       );
@@ -104,13 +104,48 @@ export class KycService {
     }
   }
 
-  public async initiateVerification(callbackUrl?: string): Promise<KycSessionResponse> {
+  public async syncKycStatus(walletAddress?: string): Promise<KycStatusResponse | null> {
     this.isLoading.set(true);
     this.error.set(null);
+    const wallet = walletAddress || this.auth.walletAddress();
+
+    try {
+      const res = await firstValueFrom(
+        this.http.post<KycStatusResponse>(
+          `${this.apiUrl}/users/kyc/sync`,
+          { walletAddress: wallet },
+          { headers: this.getAuthHeaders() }
+        )
+      );
+
+      this.kycStatus.set(res.kycStatus);
+      this.isKycVerified.set(res.isKycVerified);
+      this.canSell.set(res.canSell);
+      this.canBuy.set(res.canBuy);
+      if (res.sessionId) this.sessionId.set(res.sessionId);
+
+      if (res.isKycVerified && this.activeRole() !== 'Seller') {
+        await this.switchRole('Seller');
+      }
+
+      return res;
+    } catch (err: unknown) {
+      console.warn('Could not sync Didit KYC status:', err);
+      return null;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  public async initiateVerification(callbackUrl?: string, walletAddress?: string): Promise<KycSessionResponse> {
+    this.isLoading.set(true);
+    this.error.set(null);
+    const wallet = walletAddress || this.auth.walletAddress();
 
     try {
       const defaultCallback = `${window.location.origin}/verify/done`;
       const payload = {
+        walletAddress: wallet,
         callbackUrl: callbackUrl || defaultCallback,
       };
 
@@ -126,7 +161,7 @@ export class KycService {
 
       return res;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al iniciar la verificación de identidad';
+      const msg = err instanceof Error ? err.message : 'Error al iniciar la verificación de identidad con Didit';
       this.error.set(msg);
       throw err;
     } finally {
@@ -137,8 +172,8 @@ export class KycService {
   public async startVerificationFlow(callbackUrl?: string): Promise<string> {
     const session = await this.initiateVerification(callbackUrl);
     if (session?.verificationUrl) {
-      // Open Didit hosted verification in a new browser tab or popup
-      window.open(session.verificationUrl, '_blank', 'noopener,noreferrer');
+      // Direct browser navigation to Didit hosted verification
+      window.location.href = session.verificationUrl;
       return session.verificationUrl;
     }
     throw new Error('No se recibió la URL de verificación de Didit.');
@@ -188,7 +223,7 @@ export class KycService {
     try {
       const payload = {
         walletAddress: wallet,
-        verificationId: verificationId || `didit_sim_${Date.now()}`,
+        verificationId: verificationId,
       };
 
       const res = await firstValueFrom(
@@ -197,7 +232,7 @@ export class KycService {
         })
       );
 
-      this.kycStatus.set(res.kycStatus || 'Approved');
+      this.kycStatus.set(res.kycStatus);
       this.isKycVerified.set(res.isKycVerified);
       this.canSell.set(res.canSell);
       if (res.isKycVerified) {
@@ -205,18 +240,9 @@ export class KycService {
       }
       return res;
     } catch (err: unknown) {
-      // Local fallback / sandbox simulation mode:
-      this.kycStatus.set('Approved');
-      this.isKycVerified.set(true);
-      this.canSell.set(true);
-      this.activeRole.set('Seller');
-      return {
-        walletAddress: wallet || '0x6582dcd2587c6094c0fb3ce986035b1a4157d59a',
-        isKycVerified: true,
-        kycStatus: 'Approved',
-        canSell: true,
-        canBuy: true,
-      };
+      const msg = err instanceof Error ? err.message : 'Error al verificar identidad';
+      this.error.set(msg);
+      throw err;
     } finally {
       this.isLoading.set(false);
     }

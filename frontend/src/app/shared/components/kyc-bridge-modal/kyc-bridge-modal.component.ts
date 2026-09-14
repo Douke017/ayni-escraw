@@ -183,27 +183,18 @@ export class KycBridgeModalComponent {
   public async onStartKyc(): Promise<void> {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.loadingStep.set('Conectando con protocolo de identidad Didit...');
+    this.loadingStep.set('Generando sesión de identidad segura con Didit...');
 
     try {
-      // Step 1: Attempt official external Didit session if configured
-      try {
-        await this.kycService.startVerificationFlow();
-        this.isLoading.set(false);
-        return;
-      } catch {
-        // Step 2: Seamless cryptographic wallet identity authentication fallback
-        this.loadingStep.set('Autenticando firma de billetera en HSK Chain...');
-        await new Promise((r) => setTimeout(r, 900));
-        await this.kycService.completeVerification();
-        this.isSuccess.set(true);
-        setTimeout(async () => {
-          await this.userModeService.requestSellerMode();
-          this.close();
-        }, 1100);
+      const wallet = this.authService.walletAddress();
+      if (!wallet) {
+        throw new Error('Debes conectar tu billetera antes de iniciar la verificación de identidad.');
       }
+
+      this.loadingStep.set('Redirigiendo a Didit Verification Protocol...');
+      await this.kycService.startVerificationFlow();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al verificar identidad';
+      const msg = err instanceof Error ? err.message : 'Error al conectar con Didit Protocol';
       this.errorMessage.set(msg);
     } finally {
       this.isLoading.set(false);

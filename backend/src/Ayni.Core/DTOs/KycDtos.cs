@@ -62,6 +62,12 @@ public class DiditWebhookResultDto
 
 public class InitiateKycRequestDto
 {
+    public string? WalletAddress { get; set; }
     public string? CallbackUrl { get; set; }
+}
+
+public class SyncKycRequestDto
+{
+    public string? WalletAddress { get; set; }
 }
 

@@ -134,6 +134,7 @@ export class VerifyDoneComponent implements OnInit {
   public async refreshStatus(): Promise<void> {
     this.isRefreshing.set(true);
     try {
+      await this.kyc.syncKycStatus();
       await this.kyc.fetchUserProfile();
     } finally {
       this.isRefreshing.set(false);

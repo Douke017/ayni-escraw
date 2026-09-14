@@ -38,6 +38,16 @@ describe('Vanilla Angular 22 Signals Services', () => {
       expect(web3Service.account()).toBeNull();
       expect(web3Service.isConnected()).toBe(false);
     });
+
+    it('should configure Reown AppKit HSK network correctly', () => {
+      expect(web3Service).toBeDefined();
+      expect(web3Service.getProvider()).toBeNull();
+    });
+
+    it('should safely execute openAccountModal and openNetworksModal without error when appKit is not initialized', async () => {
+      await expect(web3Service.openAccountModal()).resolves.toBeUndefined();
+      await expect(web3Service.openNetworksModal()).resolves.toBeUndefined();
+    });
   });
 
   describe('SignalRService Signals', () => {

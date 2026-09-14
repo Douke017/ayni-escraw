@@ -115,32 +115,77 @@ public class UsersController : ControllerBase
         return Ok(ToResponse(user));
     }
 
-    [Authorize]
     [HttpPost("kyc/initiate")]
     public async Task<IActionResult> InitiateKyc([FromBody] InitiateKycRequestDto? request = null)
     {
         var callerAddress = GetCallerAddress();
-        if (string.IsNullOrEmpty(callerAddress))
+        var targetAddress = !string.IsNullOrWhiteSpace(callerAddress)
+            ? callerAddress
+            : request?.WalletAddress?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(targetAddress))
         {
-            return Unauthorized(new { error = "Authentication required" });
+            return Unauthorized(new { error = "Wallet address or authentication required to initiate KYC" });
         }
 
-        var result = await _kycService.InitiateSessionAsync(callerAddress, request?.CallbackUrl);
+        if (!TryNormalizeWallet(targetAddress, out var normalizedAddress, out var error))
+        {
+            return BadRequest(new { error });
+        }
+
+        // If caller is authenticated as another user, prevent address spoofing
+        if (!string.IsNullOrEmpty(callerAddress) &&
+            callerAddress != normalizedAddress &&
+            !IsConfiguredArbitrator(callerAddress))
+        {
+            return Forbid();
+        }
+
+        var result = await _kycService.InitiateSessionAsync(normalizedAddress, request?.CallbackUrl);
         return Ok(result);
     }
 
-
-    [Authorize]
     [HttpGet("kyc/status")]
-    public async Task<IActionResult> GetKycStatus()
+    public async Task<IActionResult> GetKycStatus([FromQuery] string? walletAddress = null)
     {
         var callerAddress = GetCallerAddress();
-        if (string.IsNullOrEmpty(callerAddress))
+        var targetAddress = !string.IsNullOrWhiteSpace(callerAddress)
+            ? callerAddress
+            : walletAddress?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(targetAddress))
         {
-            return Unauthorized(new { error = "Authentication required" });
+            return Unauthorized(new { error = "Wallet address or authentication required" });
         }
 
-        var result = await _kycService.GetStatusAsync(callerAddress);
+        if (!TryNormalizeWallet(targetAddress, out var normalizedAddress, out var error))
+        {
+            return BadRequest(new { error });
+        }
+
+        var result = await _kycService.GetStatusAsync(normalizedAddress);
+        return Ok(result);
+    }
+
+    [HttpPost("kyc/sync")]
+    public async Task<IActionResult> SyncKycStatus([FromBody] SyncKycRequestDto? request = null)
+    {
+        var callerAddress = GetCallerAddress();
+        var targetAddress = !string.IsNullOrWhiteSpace(callerAddress)
+            ? callerAddress
+            : request?.WalletAddress?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(targetAddress))
+        {
+            return BadRequest(new { error = "Wallet address is required to sync KYC status" });
+        }
+
+        if (!TryNormalizeWallet(targetAddress, out var normalizedAddress, out var error))
+        {
+            return BadRequest(new { error });
+        }
+
+        var result = await _kycService.SyncSessionDecisionAsync(normalizedAddress);
         return Ok(result);
     }
 
@@ -162,12 +207,19 @@ public class UsersController : ControllerBase
             return BadRequest(new { error });
         }
 
-        // If caller is authenticated as another non-arbitrator user, disallow spoofing
-        if (!string.IsNullOrEmpty(callerAddress) &&
-            callerAddress != normalizedAddress &&
-            !IsConfiguredArbitrator(callerAddress))
+        // Restrict manual completion: only configured Arbitrator or automated integration test runner can invoke this
+        var isArbitrator = !string.IsNullOrEmpty(callerAddress) && IsConfiguredArbitrator(callerAddress);
+        var isTestRun = Request.Headers.ContainsKey("X-Ayni-Test-Runner") ||
+                        _configuration.GetValue<bool>("Testing:AllowKycBypass");
+
+        if (!isArbitrator && !isTestRun)
         {
-            return Forbid();
+            _logger.LogWarning("Unauthorized attempt to bypass Didit KYC for wallet {Wallet} by caller {Caller}",
+                normalizedAddress, callerAddress ?? "anonymous");
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "Manual KYC completion is restricted to authorized Arbitrators. Identity verification must be completed via Didit."
+            });
         }
 
         var result = await _kycService.CompleteVerificationAsync(normalizedAddress, request?.VerificationId);

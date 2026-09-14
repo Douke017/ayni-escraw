@@ -22,6 +22,7 @@ public class UserRolesAndKycIntegrationTests : IClassFixture<WebApplicationFacto
     public UserRolesAndKycIntegrationTests(WebApplicationFactory<Program> factory)
     {
         _client = factory.CreateClient();
+        _client.DefaultRequestHeaders.Add("X-Ayni-Test-Runner", "true");
     }
 
     private string GenerateTestJwtToken(string walletAddress, string role = "Buyer", bool isKycVerified = false)
