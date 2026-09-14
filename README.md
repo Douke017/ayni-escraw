@@ -1,10 +1,10 @@
-# Ayni Trust Marketplace 🛡️📦
+# Ayni Trust Marketplace
 
 Marketplace descentralizado P2P para compra y venta de hardware de alta gama y electrónicos garantizados mediante Smart Contracts de Escrow en **HSK Chain**, pasaportes digitales NFT (ERC-721), verificación automatizada por Agentes de IA (ERC-8004), bono de intención de chat anti-spam (0.30 USDT) y protocolo físico **Safe Meet QR** con entrega presencial libre de fraudes.
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## Arquitectura del Sistema
 
 ```mermaid
 graph TD
@@ -36,7 +36,7 @@ graph TD
 
 ---
 
-## 🚀 Inicio Rápido con Docker Compose
+## Inicio con Docker Compose
 
 Todo el ecosistema (PostgreSQL, Redis, MinIO, Backend API y Frontend) se encuentra 100% containerizado y configurado para desplegarse con un único comando en cualquier máquina sin instalaciones locales.
 
@@ -74,7 +74,7 @@ docker compose up --build -d
 
 ---
 
-## 👥 Modelo de Usuarios, Roles y KYC
+## Modelo de Usuarios, Roles y KYC
 
 El marketplace implementa una gobernanza de roles clara y segura:
 
@@ -92,7 +92,7 @@ El marketplace implementa una gobernanza de roles clara y segura:
 
 ---
 
-## 🛡️ Endpoints Principales del Backend
+## Endpoints Principales del Backend
 
 ### Autenticación y Usuarios (`/api/auth` y `/api/users`)
 - `GET /api/auth/nonce?address=0x...`: Solicita nonce criptográfico para SIWE (EIP-4361).
@@ -128,7 +128,7 @@ El marketplace implementa una gobernanza de roles clara y segura:
 
 ---
 
-## 💻 Desarrollo Local (Sin Docker para Backend/Frontend)
+## Desarrollo Local
 
 Si prefieres ejecutar los servicios en tu máquina local para depurar con tu IDE:
 
@@ -154,7 +154,7 @@ Abrir `http://localhost:4200` en el navegador.
 
 ---
 
-## 🧪 Ejecución de Pruebas
+## Ejecución de Pruebas
 
 ### Pruebas del Backend (24 tests unitarios y de integración)
 ```bash
@@ -175,7 +175,7 @@ npm run build
 
 ---
 
-## 🌐 Configuración Web3 (HSK Testnet)
+## Configuración Web3 (HSK Testnet)
 
 | Parámetro | Valor |
 |---|---|
@@ -191,9 +191,3 @@ npm run build
 | **AyniAgentRegistry** | `0x7C9842A474Ad2da1a74FDe2D448fAcf393be54b2` |
 | **AyniChatBond** | `0x6023E014c95f080A5ebA00723e610C3bdbf0dC81` |
 | **AyniSubscriptionManager** | `0xBa8FD902f65DeF3153CbD609842CAfe3FD058c78` |
-
----
-
-## 📄 Licencia
-
-Este proyecto está licenciado bajo los términos de la licencia [MIT](LICENSE).
